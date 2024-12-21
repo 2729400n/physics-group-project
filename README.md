@@ -36,3 +36,5 @@ need a way to form good polynomial curve fit does not depend on the x parameter 
 
 new_xs = np.array([x,y for i in X,y])  will be a flat array containing x,y as psuedo scalars thenpassing it as an x parameter to curve fit we 
 can interpolate for polynomial shifts
+# physics-group-project
+The Repo for Physics Group Project
