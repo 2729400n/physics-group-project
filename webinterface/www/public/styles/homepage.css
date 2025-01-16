@@ -1,0 +1,47 @@
+body > * {
+  clear: both;
+  display: block;
+  background-color: hsla(255, 56, 128, 220);
+}
+nav  li::marker{
+  content: none;
+}
+
+#pi-value {
+  background-color: grey;
+}
+
+
+nav ul >li { 
+  float:left;
+  clear: right;
+  display: inline;
+  margin: 10px;
+  padding:5px;
+  align-items: start;
+  background-color: aqua;
+}
+
+nav>ul,nav>ol {
+  clear: both;
+  display: inline;
+  align-items: start;
+}
+
+#root_drawer{
+  /* height: 100px;
+  width: 100%; */
+  background-color: red;
+}
+
+.box{
+  border: 5px solid black;
+}
+
+.modal{
+  background-color: grey;
+}
+
+/* #cheatBox > *{
+  
+} */

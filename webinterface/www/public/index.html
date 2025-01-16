@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en-US">
+
+<head>
+    <title>Buffon</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--meta properties -->
+    <meta name="description" content=" Your site description." />
+    <!--complete list of meta tags at - https://gist.github.com/lancejpollard/1978404 -->
+    <title>Buffon's Needle</title>
+    <script src="./scripts/buffon.mjs"></script>
+    <script src="./scripts/utils.mjs"></script>
+
+    <link href="./styles/homepage.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body onload="viewDidLoad();">
+    <header>
+        <nav>
+            <ul>
+                <li>Home</li>
+                <li>About</li>
+            </ul>
+        </nav>
+    </header>
+    <article>
+        <h1>Buffon's needle Experiment</h1>
+        <section>
+            <section id="settings" class="modal box">
+                <label for="needleLength"> NeedleLength</label>
+                <input type="number" id="needleLength" placeholder="0" name="needleLength">
+                <label for="needleLength"> NeedleWidth</label>
+                <input type="number" id="spacingwidth" placeholder="0" name="spacingwidth">
+
+                <label for="needleLength"> Iterations</label>
+                <input type="number" id="iters" placeholder="0" name="iters">
+
+
+                <input type="text" id="id" name="id" hidden>
+                <button type="button" onclick="updateParams(this);">Update Settings</button>
+                <button onclick="cheatOpen(this);" > Allow Cheats</button>
+                <section id="cheatBox" hidden >
+                    <label for="probability">probability</label>
+                    <input name="probability" id="probability" data-used='false' type="number">
+                </section>
+            </section>
+            
+        </section>
+        <section>
+            <label for="pi-value">PI = </label>
+            <input type="number" id="pi-value" name="pi-value" readonly contenteditable="false" title="The value of pi"
+                placeholder="">
+
+            <button type="button" id="needle-throw-button" onclick="throwNeedle()">Throw needle!</button>
+        </section>
+
+        <div id="root_drawer" name="root_drawer">
+        </div>
+
+    </article>
+
+
+
+
+</body>
+
+</html>
