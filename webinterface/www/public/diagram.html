@@ -1,0 +1,31 @@
+<html>
+    <head></head>
+    <body>
+        <canvas width="400" height="400" id="diagram"></canvas>
+        <script>
+            const canvas = document.getElementsByTagName('canvas')[0];
+            
+            function drawCircle() {
+                let ctx=canvas.getContext('2d')
+                ctx.fillStyle='#000000'
+                ctx.fillRect(0,0,canvas.width,canvas.height)
+                ctx.beginPath();
+                ctx.moveTo(300,200);
+                ctx.arc(200,200,100,0,2*Math.PI);
+                ctx.lineWidth=2;
+                // ctx.closePath();
+                ctx.strokeStyle='#ff0000'
+                ctx.stroke();
+
+                let data = ctx.getImageData(0,0,canvas.width,canvas.height,{colorSpace:'srgb'});
+                return data;
+                
+            }
+            let circle=(drawCircle());
+            console.log(circle)
+            console.log(circle.height)
+            console.log(circle.width)
+        </script>
+
+    </body>
+</html>
