@@ -3,12 +3,15 @@ The Repo for Physics Group Project
 
 
 # Prequisites 
-To  join the guthu repo first you will need some form of authentication.
+To  join the guthub repo first you will need some form of authentication.
 
 First open settings:
 ![Settings](settings.png)
 
 Then settt security keys using \(ssh-keygen  preferable\)
+
+If more help is required open an issue or email me.
+Also checkout the access_test branch.
 
 ## Aim
 
@@ -19,4 +22,4 @@ Solve analytically for the given differential form
 
 
 ### Task 2
-
+Work on numerical solution
