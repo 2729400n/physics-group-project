@@ -13,10 +13,13 @@ $$\cfrac{\partial^{2}\phi}{\partial x^{2}}+\cfrac{\partial^{2}\phi}{\partial y^{
 
 We first rid ourselves of the higher dimesional terms as they are not necassary for what we are doing so *\*poof\** . |$\cfrac{\partial^{2}\phi}{\partial x^{2}}+\cfrac{\partial^{2}\phi}{\partial y^{2}} = 0$ | Gone like the wind that helps now we can solve this by using a cheap approxiamtion much like we do with accelaration. we get 
 
-$$ \cfrac{\phi_{i+1\text{, }j}-2 \phi_{i\text{, }j}+\phi_{i-1\text{, }j}}{\partial x^{2}}+ \cfrac{\phi_{i\text{, }j+1}-2\phi_{i\text{, }j}+\phi_{i\text{, }j-1}}{\partial x^{2}} = 0$$
+$$ \cfrac{\phi_{i+1\text{, }j}-2 \phi_{i\text{, }j}+\phi_{i-1\text{, }j}}{\partial x^{2}}+ \cfrac{\phi_{i\text{, }j+1}-2\phi_{i\text{, }j}+\phi_{i\text{, }j-1}}{\partial y^{2}} = 0$$
 
+$$ \cfrac{\phi_{i+1\text{, }j} + \phi_{i-1\text{, }j}}{\partial x^{2}} + \cfrac{\phi_{i\text{, }j+1} + \phi_{i\text{, }j-1}}{\partial y^{2}} = -2 \cdot(\cfrac{\phi_{i\text{, }j}}{\partial x^{2}}+ \cfrac{\phi_{i\text{, }j}}{\partial y^{2}})$$
 
-$$ \cfrac{\phi_{i+1\text{, }j} + \phi_{i-1\text{, }j}}{\partial x^{2}} + \cfrac{\phi_{i\text{, }j+1} + \phi_{i\text{, }j-1}}{\partial x^{2}} = -2 \cdot(\cfrac{\phi_{i\text{, }j}}{})$$
+we can play the trick of $dx=dy$ now get
+
+$$ \cfrac{\phi_{i+1\text{, }j} + \phi_{i-1\text{, }j}}{\partial x^{2}} + \cfrac{\phi_{i\text{, }j+1} + \phi_{i\text{, }j-1}}{\partial x^{2}} = -2 \cdot(\cfrac{\phi_{i\text{, }j}}{\partial x^{2}}+ \cfrac{\phi_{i\text{, }j}}{\partial x^{2}})$$
 
 Now the trick we make the assumption that all imediate again pixels are correct (basically they dont change). If the nearby pixels don't change then we can move our current point through time to attain a more sutaible measurment. this means we move everything though time we denote this as a superscript after the variable e.g. There are constraint swe place mathematically they are $\phi^{n+\epsilon}_{i+k,j+l} =\phi^{n}_{i+k,j+l} $ for this we need epsilon to only equal one but this is  our assumption such that epsilon is in the set of integers. 
 
