@@ -17,7 +17,7 @@ doNothing  = lambda x:x
 defualtResolutions = {'1080i':'Nice Try!☺'}
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',resoultion:'str|tuple[int,int]|np.ndarray[int,int]',fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing):
+def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1)):
     """Solves the Laplace equation using a finite difference scheme.
 
     Args:
@@ -30,13 +30,64 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',resoultion:'str
         A NumPy array representing the electric potential at all grid points.
     """
     # wow Gemini Docstrings kinda magic and good. Also rotationless solver
-    w_x_h = np.array(size,np.float64)
-    preception = np.array(resoultion,np.float64)
+    w_x_h = np.array(size,int)
+    preception = np.array(resoultion,int)
     pixel_w_X_h = w_x_h/preception
-
+    print(pixel_w_X_h)
     # Three frames to allow rotation/Cyling and comparisons
     # TODO: Check if it works with 2 Frames saved will make it less memory  expensive
-    Frames  = np.zeros((3,*pixel_w_X_h))
+    Frames  = np.zeros((2,int(pixel_w_X_h[1]),int(pixel_w_X_h[0])))
+    Frames[0] = startingshape(Frames[0])
 
-    
+    i = 0
+    while True:
+        ForwardHSpace_A2f = Frames[i%2, 1:-1, 2:]
+        BackwardHSpace_A2f = Frames[i%2, 1:-1, :-2]
+        ForwardVSpace_A2f = Frames[i%2, 2:, 1:-1]
+        BackwardVSpace_A2f = Frames[i%2, :-2, 1:-1]
 
+        Frames[(i+1)%2, 1:-1, 1:-1] = 0.25*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f+BackwardVSpace_A2f)
+        Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2])
+        i= (i+1)%2
+        if np.max(np.abs((Frames[0]-Frames[1]))) < 1e-6:
+            break
+    return Frames[i]
+
+
+
+        
+def endToEndLine(Grid:np.ndarray):
+    height,width=Grid.shape
+    Grid[:,(0,-1)]=1.0
+    midx = width//2
+    startx=midx-width//8
+    endx=midx+width//8
+
+    midy = height//2
+    starty=midy-height//8
+    endy=midy+width//8
+    Grid[starty:endy,startx:endx]=-1.0
+    return Grid
+
+def BoxinBox(Grid:np.ndarray):
+    height,width=Grid.shape
+    Grid[:,(0,-1)]=Grid[(0,-1),:]=1.0
+    return Grid
+
+potential = laplace_ode_solver((200,100),endToEndLine,endToEndLine)
+
+plt.imshow(potential, cmap='viridis')
+plt.colorbar(label='Electric Potential')
+plt.title('Electric Potential Distribution')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.show()
+
+potential = laplace_ode_solver((200,200),BoxinBox,BoxinBox)
+
+plt.imshow(potential, cmap='viridis')
+plt.colorbar(label='Electric Potential')
+plt.title('Electric Potential Distribution')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.show()
