@@ -13,6 +13,7 @@ Welcome to the test branch add your Student id mnumebr to the team Members secti
 
 * Analytical Solutions to 1 and 2
 * Numerical solutions to 1 and 2
+* Suff
 
 
 
