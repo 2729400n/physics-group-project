@@ -31,38 +31,6 @@ def solve_laplace_equation(grid_size, condition_enforcer:'function'):
 
     return potential
 
-def solve_laplace_equation_cirlce(grid_size, condition_enforcer:'function'):
-    """Solves the Laplace equation using a finite difference scheme.
-        Only for Cirlces at the moment it makes the assumption that we have a circle
-        The resolution of the differnce in the circle is such that we have dx=dy. 
-        Such that 
-    Args:
-        grid_size: A tuple (x_size, y_size) specifying the grid dimensions.
-        boundary_conditions: A NumPy array representing the boundary conditions.
-
-    Returns:
-        A NumPy array representing the electric potential at all grid points.
-    """
-
-    x_size, y_size = grid_size
-    potential = np.zeros((x_size, y_size))
-    potential = condition_enforcer(potential)
-
-    #Iterate until convergence
-    while True: 
-        potential_new = np.copy(potential)
-        max_diff = 0
-
-        potential_new[1:-1, 1:-1] = 0.25 * (potential[:-2, 1:-1] + potential[2:, 1:-1] + potential[1:-1, :-2] + potential[1:-1, 2:])
-        potential_new = condition_enforcer(potential_new)
-        max_diff = np.max(np.abs(potential_new - potential))
-
-        potential = potential_new 
-
-        if max_diff < 1e-6:
-            break
-
-    return potential
 
 # Example usage
 grid_size = (50, 50)
