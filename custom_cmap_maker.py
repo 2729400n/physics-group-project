@@ -34,7 +34,9 @@ if __name__ == '__main__':
     print('Custom Colormap has been generated and stored in custom_cmap.dat')
 
 colors = loadCMap()
-print(colors)
+
 
 if __name__ != '__main__':
     rollerCoaster = mcolors.ListedColormap(colors,name='mapper',N=len(colors))
+else:
+    print(colors)
