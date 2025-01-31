@@ -17,6 +17,9 @@ doNothing  = lambda x:x
 
 defualtResolutions = {'1080i':'Nice Try!☺'}
 
+
+
+
 # We gonna solve this in a suitably fashion guys ☺
 def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1)):
     # TODO: Fix docstrings adding more detail to params
@@ -61,14 +64,17 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
         # TODO: Make the change relative easier to tell the precentage change
         if np.max(diff) < 1e-23 and i>1:
             break
-    # TODO: Tranform into a vector field 
-    return Ys,Xs,Frames[i%2]
+    retvals = (Ys,Xs,Frames[i%2])
+    # TODO: Tranform into a vector field
+    
+    return retvals
 
 
 
 def makeGeometry2(val=1.0,r=1.0,cx=0.5,cy=0.5):
     
     def endToEndLine(Grid:np.ndarray):
+        Grid[(0,-1), 1:-1] = 0.25*(Grid[(0,-1), 2:]+Grid[(0,-1), :-2]+Grid[(-1,-2), 1:-1]+Grid[(1,0), 1:-1])
         height,width=Grid.shape
         Grid[:,:2]=val
         midx = width//2
