@@ -1,6 +1,6 @@
 # Description: This script generates a custom colormap for the heatmap
 import binascii,zlib,gzip
-import matplotlib.colors as mcolors
+import matplotlib.colors as mcolors, numpy as np
 def makeCustomCmap():
     colors = []
     for i in range(256):
@@ -16,16 +16,16 @@ def makeCustomCmap():
     return colors
 
 def storeCMap():
-    cmap = '\n'.join(makeCustomCmap()).encode()
-    cmap=gzip.compress(cmap)
+    cmap = makeCustomCmap()
     with open('custom_cmap.dat','wb') as file:
-        file.write(cmap)
-        file.close()
+        np.savez_compressed(file,cmap=cmap)
+    
 
 def loadCMap():
+    print('Loading')
     with open('custom_cmap.dat','rb') as file:
-        cmap = gzip.decompress(file.read())
-    return cmap.decode().split('\n')
+        cmap = np.load(file,allow_pickle=True).get('cmap',[])
+    return cmap
 
 
 
