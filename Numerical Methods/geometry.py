@@ -16,11 +16,10 @@ def circleQuadrant(cx,cy,r,dx,dy,val=1.0,fill=False,clear=False,Grid=None):
 
     # Threshold to create a binary image (0 or 1)
     pixelated_circle = np.where(circle_mask > 0.5, 1, 0)
-    grid[int(cy-r//dx):(4*int(r//dx))//2+int(r//dx),(4*int(r//dy))//2-int(r//dy):(4*int(r//dy))//2+int(r//dy)] = pixelated_circle
-    return grid
-
-circ=circleQuadrant(50,50,50,1,1,fill=True)
     
-plt.imshow(circ, cmap='gray')
-plt.title('Pixelated Circle with Anti-aliasing')
-plt.show()
+    return pixelated_circle
+
+def implant_circle(cx,cy,r,dx,dy,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
+    circle = circleQuadrant(cx,cy,r,dx,dy,val,fill,clear)
+    index = np.array([0,0])
+    Grid[index]= circle
