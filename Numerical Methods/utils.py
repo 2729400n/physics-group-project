@@ -62,12 +62,16 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
         i= (i+1)
         
         # TODO: Make the change relative easier to tell the precentage change
-        if np.max(diff) < 1e-23 and i>1:
+        if np.max(diff) < 1e-6 and i>1:
             break
     retvals = (Ys,Xs,Frames[i%2])
     # TODO: Tranform into a vector field
     
     return retvals
+
+def findUandV(grid:np.ndarray[np.ndarray[np.float64]]):
+    E_field = np.zeros([*grid.shape,2],np.float64)
+    
 
 
 
@@ -120,7 +124,7 @@ plt.show()
 print(potential)
 
 # Example 2: Box in Box
-ys, xs, potential = laplace_ode_solver((200, 200), BoxinBox, BoxinBox)
+ys, xs, potential = laplace_ode_solver((200, 200), doNothing, BoxinBox)
 Xs, Ys = np.meshgrid(xs, ys)
 u, v = np.gradient(potential*400, xs[1]-xs[0], ys[1]-ys[0])  # Correct gradient calculation
 
