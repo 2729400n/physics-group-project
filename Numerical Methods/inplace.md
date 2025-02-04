@@ -58,3 +58,6 @@ although as you may guess it can be done you see circles all the time.
 > Us : 🤝 Profit
 
 I hope that helps
+
+
+This problem can also be solved by solving a system on equations.
