@@ -71,7 +71,10 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
 
 def findUandV(grid:np.ndarray[np.ndarray[np.float64]]):
     E_field = np.zeros([*grid.shape,2],np.float64)
-    
+    E_field[:,:-1,0] = grid[:,1:] - grid[:,:-1]
+    E_field[:-1,:,1] = grid[1:,:] - grid[:-1,:]
+    return E_field
+
 
 
 
@@ -108,32 +111,20 @@ def BoxinBox(Grid:np.ndarray,r=1):
 
 # Example 1: End-to-End Line
 ys, xs, potential = laplace_ode_solver((200, 100), endToEndLine_, endToEndLine_)
-Xs, Ys = np.meshgrid(xs, ys)
+Xs, Ys = np.meshgrid(xs[::5], ys[::5])
 u, v = np.gradient(potential, xs[1]-xs[0], ys[1]-ys[0])  # Correct gradient calculation
 
+graph=-findUandV(potential)[::5,::5]*25
 
+# print(graph[:,:,0], graph[:,:,1],sep='\r\n===\r\n===\r\n')
 plt.figure(figsize=(18, 18),dpi=320)  # Adjust figure size for better visualization
-plt.imshow(potential, cmap=rollerCoaster, origin='lower')  # Set origin for consistency
-# plt.quiver(Xs, Ys, u, v, color='w', scale=10, scale_units='xy') # Adjust scale and color
+plt.imshow(potential, cmap='PiYG', origin='lower')  # Set origin for consistency
 plt.colorbar(label='Electric Potential')
+plt.quiver(Xs, Ys, graph[:,:,0], graph[:,:,1], color='b', scale=0.1, scale_units='xy') # Adjust scale and color
+
 plt.title('Electric Potential Distribution (End-to-End)')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.savefig(fname='BoxInBox.png')
 plt.show()
 print(potential)
-
-# Example 2: Box in Box
-ys, xs, potential = laplace_ode_solver((200, 200), doNothing, BoxinBox)
-Xs, Ys = np.meshgrid(xs, ys)
-u, v = np.gradient(potential*400, xs[1]-xs[0], ys[1]-ys[0])  # Correct gradient calculation
-
-plt.figure(figsize=(18, 18),dpi=320)  # Adjust figure size
-plt.imshow(potential, cmap='viridis')  # Set origin
-# plt.quiver(Xs, Ys, u, v, scale=20, scale_units='xy',alpha=0.5) # Adjust scale and color
-plt.colorbar(label='Electric Potential')
-plt.title('Electric Potential Distribution (Box in Box)')
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.savefig(fname='BoxInBox.png')
-plt.show()
