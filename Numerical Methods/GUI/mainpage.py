@@ -10,16 +10,16 @@ import tkinter.ttk as ttk
 import tkinter.scrolledtext as tksrolltxt
 
 
-class NumericalDisplay(tk.Widget):
+class NumericalDisplay(tk.Tk,tk.Wm):
 
-    def _on_submit(self, event):
-        pass
+    def decorateWindow(self):
+        self.wm_geometry('640x480+0+0')
+        self.title('Eletrostatic Project')
     
     def __init__(self, master=None, *args,**kw):
-        tk.Widget.__init__(self, master, 'numericaldisplay',*args, **kw)
-        self.bind('<Configure>', self._on_configure)
+        
+        tk.Tk.__init__(self, None, 'numericaldisplay',*args, **kw)
+        self.decorateWindow()
 
-root = tk.Tk()
-tk.StringVar(root.master, value='Numerical Solver')
-tk.Label(root.master, text='Numerical Solver').pack()
+root = NumericalDisplay()
 root.mainloop()
