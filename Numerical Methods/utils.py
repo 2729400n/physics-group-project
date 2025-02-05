@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt, matplotlib.colors as mcolors, matplotlib.colorb
 import sys,os
 import matplotlib.cm as cm
 from custom_cmap_maker import rollerCoaster
+import geometry
 
 # we will be using 64bit floating point representation
 # Stay clear of recursion if possible it a bad game to play unless you have 
@@ -13,7 +14,7 @@ from custom_cmap_maker import rollerCoaster
 
 
 # Some easy to remember utils for readability 
-doNothing  = lambda x:x
+doNothing  = lambda x,*args,**kwargs:x
 
 defualtResolutions = {'1080i':'Nice Try!☺'}
 
@@ -45,7 +46,7 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
     Ys = np.arange(0,w_x_h[1]+resoultion[1],resoultion[1])
     # Frames  = np.zeros((2,int(pixel_w_X_h[1]),int(pixel_w_X_h[0])))
     Frames  = np.zeros((2,Ys.shape[0],Xs.shape[0]))
-    Frames[0] = startingshape(Frames[0])
+    Frames[0],overlay = startingshape(Frames[0],retoverlay=True)
     print(Xs.shape[0],Ys.shape[0])
     i = 0
     # TODO: possibly remove while loop, its too messy.
@@ -56,7 +57,7 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
         BackwardVSpace_A2f = Frames[i%2, :-2, 1:-1]
 
         Frames[(i+1)%2, 1:-1, 1:-1] = 0.25*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f+BackwardVSpace_A2f)
-        Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2])
+        Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2],overlay=overlay)
         indexes=Frames[i%2]!=0
         diff = (np.abs((Frames[0][indexes]-Frames[1][indexes]))/Frames[i%2][indexes])
         i= (i+1)
@@ -78,9 +79,9 @@ def findUandV(grid:np.ndarray[np.ndarray[np.float64]]):
 
 
 
-def makeGeometry2(val=1.0,r=1.0,cx=0.5,cy=0.5):
-    
-    def endToEndLine(Grid:np.ndarray):
+def makeGeometry2(val=1.0,r=35,cx=50,cy=100,relative=False):
+    Gridder = None
+    def endToEndLine(Grid:np.ndarray,overlay=None,retoverlay=False):
         Grid[(0,-1), 1:-1] = 0.25*(Grid[(0,-1), 2:]+Grid[(0,-1), :-2]+Grid[(-1,-2), 1:-1]+Grid[(1,0), 1:-1])
         height,width=Grid.shape
         Grid[:,:2]=val
@@ -95,10 +96,26 @@ def makeGeometry2(val=1.0,r=1.0,cx=0.5,cy=0.5):
         startx=midx-width//8
         endx=midx+width//8
 
-        midy = height//2
-        starty=midy-height//8
-        endy=midy+width//8
-        Grid[starty:endy,startx:endx]=0.0
+        if overlay is None:
+            overlay = geometry.circle(cx,cy,r,fill=True,clear=True,Grid=(*Grid.shape,))
+        debug = False
+        Grid = overlay*Grid
+
+        if debug:
+            plt.imshow(overlay, cmap='gray')
+            plt.title('Pixelated Circle with Anti-aliasing')
+            plt.show(block=True)
+            pass
+            plt.imshow(Grid, cmap='gray')
+            plt.title('Pixelated Circle with Anti-aliasing')
+            plt.show(block=True)
+            pass
+        # midy = height//2
+        # starty=midy-height//8
+        # endy=midy+width//8
+        # Grid[starty:endy,startx:endx]=0.0
+        if retoverlay:
+            return Grid,overlay
         return Grid
     return endToEndLine
 
@@ -126,5 +143,4 @@ plt.title('Electric Potential Distribution (End-to-End)')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.savefig(fname='BoxInBox.png')
-plt.show()
-print(potential)
+plt.show(block=True)
