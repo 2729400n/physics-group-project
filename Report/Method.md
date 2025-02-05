@@ -9,12 +9,13 @@ When creating a numerical solver there a few things to consider. Does your probl
 The pragmatic choice was using a finite difference scheme and solving by relaxation. To solve by relaxation you allow the system to evolve through some metric and compute the absolute difference between states only stopping when that difference is lower than a certain threshold. The stability of this method is affected by how quickly we propogate changes and how low we have our thershold.
 
 ### Fast Propogation and instability
+
 If changes are propogated to quic=kly it can degrade the stability of theg iven scheme
 
 ### Picking a good threshold
 
 To pick a good thershold you would look through operations and spot key operation thatmay break for very small differences
-    
+
 Our Problem is  given as:
 
 $$\begin{aligned}
