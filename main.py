@@ -1,4 +1,2 @@
-import Numerical_Methods.GUI.gui_window_main as mainWin
-
-mainWin.testProd()
+# TODO : add code to open user interface at main window unless webserver interface requested
 
