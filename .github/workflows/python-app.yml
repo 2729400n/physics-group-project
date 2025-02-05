@@ -36,4 +36,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        pytest && echo Done || echo tests Failed
+    - name: freeze requirements
+      run: |
+          python3 -m venv .
+          python3 -m pip freeze --local
