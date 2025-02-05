@@ -16,10 +16,13 @@ class NumericalDisplay(tk.Tk,tk.Wm):
         self.wm_geometry('640x480+0+0')
         self.title('Eletrostatic Project')
     
+    def populateWindow(self)
+    
     def __init__(self, master=None, *args,**kw):
         
         tk.Tk.__init__(self, None, 'numericaldisplay',*args, **kw)
         self.decorateWindow()
 
-root = NumericalDisplay()
-root.mainloop()
+if __name__=='__main__':
+    root = NumericalDisplay()
+    root.mainloop()
