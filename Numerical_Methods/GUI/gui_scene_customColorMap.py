@@ -79,7 +79,9 @@ class CMapper(tk.Frame):
             elif(self.ftype=='file_single'):
                 self.file[self.current_sel]
         print(args)
-root = tk.Tk()
-frame = CMapper(master=root)
-frame2 = tk.Frame()
-root.mainloop()
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    frame = CMapper(master=root)
+    frame2 = tk.Frame()
+    root.mainloop()

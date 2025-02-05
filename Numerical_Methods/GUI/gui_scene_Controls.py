@@ -57,12 +57,14 @@ class ControlPanel(tk.Frame):
         self.shape=tk.Radiobutton(
             self,command="Shape"
         )
-class SetFieldPage(tk.Frame):
+class scene_SetFieldPage(tk.Frame):
     def __init__(self,*args,**kwargs):
         super().__init__(args,kwargs)
     def setup(self):
         self.controlPanel= ControlPanel(self,)
         self.fieldPanel=ShapeDisplay(self)
     pass
-shaper = ShapeDisplay()
-tk.mainloop()
+
+if __name__ == '__main__':
+    shaper = ShapeDisplay()
+    tk.mainloop()
