@@ -2,8 +2,15 @@
 
 ## Problem
 
-To solve electro-static boundary Problems which result in ODES. These Odes can be tedious to solve and may even be impossible to solve analytically. This leads us to methods that can approximate such as numerical methods.
+Electro-static problems have always been difficult infact they to
+
+Solve electro-static boundary problem to acquire steady state solutions.
 
 ## Aims
 
-To 
+* Solve electrosattic problems using ODES.
+* Solve some problems analytically.
+* Solve problems numerically.
+* Show it is **_much_** easier solve numerically
+* Show that **_not all_** problems can be solved analytially
+* Show thos problems can be solved numerically
