@@ -1,0 +1,3 @@
+*.dat
+**/__pycache__/
+*.png
