@@ -37,7 +37,8 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
     return pixelated_circle
 
 
-# deal with essy overlays
+# deal with ea
+# sy overlays
 def identityOverlay(Grid:np.ndarray):
     return np.full_like(Grid,1)
 
