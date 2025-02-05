@@ -20,25 +20,29 @@ class NumericalDisplay(tk.Tk,tk.Wm):
     def populateWindow(self):
         pass
     
-    def __init__(self, master=None, *args,**kw):
+    def __init__(self, master=None, baseName = None, className = "Tk", useTk = True, sync = False, use = None,**kw):
         
-        tk.Tk.__init__(self, None, 'numericaldisplay',*args, **kw)
+        tk.Tk.__init__(self, None, baseName or 'numericaldisplay',className=className,useTk=useTk,sync=sync,use=use,**kw)
         self.decorateWindow()
+        self.populateWindow()
+        self.update()
 
-class DefaultNumericalDisplay(tk.Tk,tk.Wm):
+class DefaultNumericalDisplay(NumericalDisplay):
     def __init__(self, screenName = None, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
     def populateWindow(self):
         from . import scenes
         self.mbar = MenuBar(self,scenes)
-        self.mbar.grid(in_=self,column=0,row=0,sticky=True,ipadx=4)
+        self.mbar.grid(in_=self,column=0,row=0,sticky='w',ipadx=4)
         self.mbar.grid_columnconfigure(0,weight=1)
         tk.Frame(self,height=480,width=self.winfo_width()-2,padx=2,pady=2)
         
             
 def testProd():
-    root = NumericalDisplay()
+    import sys
+    root = DefaultNumericalDisplay()
+    print(root.mbar,file=sys.stderr)
     root.mainloop()
 
 if __name__=='__main__':
