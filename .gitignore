@@ -1,3 +1,5 @@
 *.dat
 **/__pycache__/
 *.png
+requirments.txt
+requirements.txt
