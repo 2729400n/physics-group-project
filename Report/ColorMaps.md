@@ -1,5 +1,5 @@
 # ColourMaps
 
-## What has been done
+## Why are colour maps important
 
-A python script has been made 
+Color maps and 
