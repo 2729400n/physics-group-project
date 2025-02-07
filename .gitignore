@@ -46,3 +46,5 @@ pyvenv.cfg
 settings.png
 image.png
 .vscode/settings.json
+*.sqlite3
+*.db
