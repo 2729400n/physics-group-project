@@ -55,7 +55,7 @@ ROOT_URLCONF = 'phys_web_iface.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['plot_viewer/static/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
