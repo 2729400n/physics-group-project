@@ -1,6 +1,7 @@
 *.dat
 **/__pycache__/
 *.png
+.vscode
 requirments.txt
 requirements.txt
-**/.vscode/**
+.vscode/settings.json
