@@ -1,19 +1,14 @@
-import numpy as np
 from ...geometry import circle
+import numpy as np
 
-def geometryFactory(val=1.0,r=35,cx=50,cy=100,relative=False):
+
+def geometryFactory(val=1.0,r1=35,r2=50,cx=50,cy=100,relative=False):
     Gridder = None
     def endToEndLine(Grid:np.ndarray,overlay=None,retoverlay=False):
-        Grid[(0,-1), 1:-1] = 0.25*(Grid[(0,-1), 2:]+Grid[(0,-1), :-2]+Grid[(-1,-2), 1:-1]+Grid[(1,0), 1:-1])
-        Grid[:,:2]=val
+        width,height = Grid.shape
+        circ1 = circle(width//2, height//2, r,1,1,fill=True,clear=False,Grid=Grid)
+        circ2 = circle(width//2, height//2, 50,1,1,fill=True,clear=True,Grid=Grid)
+        Grid = circ2+circ1
 
-        Grid[:,-2:]=-val
-
-        if overlay is None:
-            overlay = circle(cx,cy,r,fill=True,clear=True,Grid=(*Grid.shape,))
-        debug = False
-        Grid = overlay*Grid
-        if retoverlay:
-            return Grid,overlay
         return Grid
     return endToEndLine
