@@ -10,5 +10,30 @@
     "python.testing.unittestEnabled": true,
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
-    "python-envs.pythonProjects": []
+    "python-envs.pythonProjects": [],
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "source": "Git Bash"
+        },"Physics Term": {
+            "path": [
+                "${env:windir}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+                 
+            ],
+            "args": ["-ExecutionPolicy", "ByPass", "-NoExit", "-Command", "& \"${env:userprofile}\\anaconda3\\shell\\condabin\\conda-hook.ps1\" ; conda activate phys_proj"],
+            "icon": "account"
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "Physics Term"
 }
