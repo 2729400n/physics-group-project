@@ -1,4 +1,3 @@
-import matplotlib.artist,matplotlib.patches,matplotlib.path,matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -41,7 +40,12 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
 def identityOverlay(Grid:np.ndarray):
     return np.full_like(Grid,1)
 
+
+def rectangle(x0,y0,x1,y1,theta=0,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None)->np.ndarray:
+    grid_x, grid_y = np.mgrid[y0:y1, x0:x1]
+
 if __name__ == '__main__':
+    import matplotlib.artist,matplotlib.patches,matplotlib.path,matplotlib.pyplot as plt
     grid = np.zeros((200,200))
     grid[:,:]=1
     circ=circle(50,50,50,1,1,fill=False,clear=True,Grid=grid)
