@@ -8,4 +8,4 @@ def didItWorkAsIntended():
     opt = dialog.go()
     return opt
 
-didItWorkAsIntended()
+

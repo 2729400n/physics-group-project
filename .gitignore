@@ -3,3 +3,4 @@
 *.png
 requirments.txt
 requirements.txt
+**/.vscode/**
