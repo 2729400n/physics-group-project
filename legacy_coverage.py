@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
 import matplotlib.pyplot as plt
-from Numerical_Methods.custom_cmap_maker import makeCustomCmap, loadCMap
-from Numerical_Methods.utils import laplace_ode_solver, makeGeometry2, BoxinBox, doNothing
-from Numerical_Methods.quickSpread import solve_laplace_equation, create_pixelated_circle
+from Numerical_Methods.utils.custom_cmap_maker import makeCustomCmap, loadCMap
+from Numerical_Methods.legacy.utils import laplace_ode_solver, makeGeometry2, BoxinBox, doNothing
+from Numerical_Methods.legacy.quickSpread import solve_laplace_equation, create_pixelated_circle
 
 class TestCustomCmapMaker(unittest.TestCase):
 
