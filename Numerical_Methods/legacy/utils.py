@@ -4,8 +4,8 @@ import scipy.optimize as optimist
 import matplotlib.pyplot as plt, matplotlib.colors as mcolors, matplotlib.colorbar as mcolorbar
 import sys,os
 import matplotlib.cm as cm
-from .custom_cmap_maker import rollerCoaster
-from . import geometry
+from ..custom_cmap_maker import rollerCoaster
+from .. import geometry
 
 # we will be using 64bit floating point representation
 # Stay clear of recursion if possible it a bad game to play unless you have 

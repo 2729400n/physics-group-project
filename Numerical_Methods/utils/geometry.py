@@ -37,9 +37,9 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
 
 def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
     # First solve for a qudrant the apply rotations
-    operations = [[lambda w,x,y,z:(np.abs(w-y)<=z)and(np.abs(w-y)<=z)]*2,[lambda w,x,y,z:np.logical_and(x<=w,w<=y),lambda w,x,y,z:(np.logical_or(x>w,w>y))]]
+    operations = [[lambda w,x,y,z:np.logical_or(np.abs(w-x)<=z,np.abs(w-y)<=z)]*2,[lambda w,x,y,z:np.logical_and(x<=w,w<=y),lambda w,x,y,z:(np.logical_or(x>w,w>y))]]
 
-    
+    grid_class=type(grid)
     
     if type(Grid) == tuple:
         Grid = np.full(Grid,1)
@@ -58,7 +58,8 @@ def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'
 
     # mul mask
     if Grid is not  None:
-        return Grid*pixelated_annulus
+        if(grid_class!=tuple):
+            return Grid*pixelated_annulus
     
     return pixelated_annulus
 
@@ -74,7 +75,7 @@ if __name__ == '__main__':
     import matplotlib.artist,matplotlib.patches,matplotlib.path,matplotlib.pyplot as plt
     grid = np.zeros((200,200))
     grid[:,:]=1
-    circ=annulus(100,100,50,100,2,fill=True,clear=True,Grid=grid)
+    circ=annulus(100,100,50,100,2,fill=False,clear=False,Grid=grid)
         
     plt.imshow(circ, cmap='gray')
     plt.colorbar()
