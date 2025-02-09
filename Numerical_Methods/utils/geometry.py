@@ -10,7 +10,7 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
     # r2 = np.array([r,0])
     # theta = np.linspace(0,np.pi/4,1000)
     # =======
-    
+    grid_class=type(Grid)
     # if all we want is a  circle
     x = 2*int(r//dx)+5
     y=2*int(r//dy)+5
@@ -31,7 +31,8 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
 
     # mul mask
     if Grid is not  None:
-        return Grid*pixelated_circle
+        if(grid_class!=tuple):
+            return Grid*pixelated_circle
     
     return pixelated_circle
 
@@ -39,7 +40,7 @@ def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'
     # First solve for a qudrant the apply rotations
     operations = [[lambda w,x,y,z:np.logical_or(np.abs(w-x)<=z,np.abs(w-y)<=z)]*2,[lambda w,x,y,z:np.logical_and(x<=w,w<=y),lambda w,x,y,z:(np.logical_or(x>w,w>y))]]
 
-    grid_class=type(grid)
+    grid_class=type(Grid)
     
     if type(Grid) == tuple:
         Grid = np.full(Grid,1)

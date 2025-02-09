@@ -9,9 +9,12 @@ class Test_Geometries:
         grid = np.zeros((200,200))
         grid[:,:]=1
         circ=geometry.annulus(100,100,50,100,2,fill=False,clear=False,Grid=grid)
-            
+        
+        fig=plt.figure()
         plt.imshow(circ, cmap='gray')
         plt.colorbar()
         plt.title('Pixelated Circle with Anti-aliasing')
-        plt.show(block=True)
+        plt.show(block=False)
+        
         assert(check_user_approval.didItWorkAsIntended()==0)
+        plt.close()

@@ -11,7 +11,7 @@ import tkinter.scrolledtext as tksrolltxt
 
 from .menubar import MenuBar
 
-class NumericalDisplay(tk.Tk,tk.Wm):
+class NumericalDisplay(tk.Tk):
 
     def decorateWindow(self):
         self.wm_geometry('640x480+0+0')
@@ -22,7 +22,7 @@ class NumericalDisplay(tk.Tk,tk.Wm):
     
     def __init__(self, master=None, baseName = None, className = "Tk", useTk = True, sync = False, use = None,**kw):
         
-        tk.Tk.__init__(self, None, baseName or 'numericaldisplay',className=className,useTk=useTk,sync=sync,use=use,**kw)
+        tk.Tk.__init__(self, None, baseName,className=className,useTk=useTk,sync=sync,use=use,**kw)
         self.decorateWindow()
         self.populateWindow()
         self.update()
