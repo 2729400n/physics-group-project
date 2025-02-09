@@ -1,4 +1,4 @@
-import Numerical_Methods.Solver.utils
+import Numerical_Methods
 
 class TestSolver:
     def test_solver(self):
