@@ -35,7 +35,7 @@ class DefaultNumericalDisplay(NumericalDisplay):
         from . import scenes
         self.mbar = MenuBar(self,scenes)
         self.mbar.grid(in_=self,column=0,row=0,sticky='w',ipadx=4)
-        self.mbar.grid_columnconfigure(0,weight=1)
+        self.mbar.grid_columnconfigure(-1,weight=1)
         tk.Frame(self,height=480,width=self.winfo_width()-2,padx=2,pady=2)
         
             
