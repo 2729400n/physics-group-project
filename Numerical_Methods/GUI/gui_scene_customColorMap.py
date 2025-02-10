@@ -28,10 +28,10 @@ class CMapper(tk.Frame):
 
     def getAvailableCMaps(self):
         print('Available CMaps')
-        if(pth.isdir('../cmaps')):
+        if(pth.isdir('./cmaps')):
             print('Loading Available CMaps')
             self.ftype = 'dir'
-            self.loc = '../cmaps'
+            self.loc = './cmaps'
             return os.listdir('../cmaps')
         elif(pth.isfile(pth.join(pth.dirname(__file__),'../custom_cmap.dat'))):
             print('Loading Available CMaps')
