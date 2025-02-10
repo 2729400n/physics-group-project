@@ -5,8 +5,8 @@ import tkinter.colorchooser
 
 
 class FigureBase(tk.Widget):
-    def  __init__(self):
-        tk.PhotoImage('::tk::images::img',file=r'c:\Users\Kevnn\GroupProject\physics-group-project\BoxInBox.png')
+    def  __init__(self,name,imgfile:'StrOrBytesPath'):
+        tk.PhotoImage(name=name, file=imgfile)
         
         
         
