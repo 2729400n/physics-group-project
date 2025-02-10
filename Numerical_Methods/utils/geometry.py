@@ -1,6 +1,8 @@
 import numpy as np
 
 
+# TODO Fix all Circular constraints : The cirlce seems to have an r value that is 1 greater than expected
+
 def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
     # First solve for a qudrant the apply rotations
     operations = [[lambda x,y,z:np.abs(x-y)<=z]*2,[lambda x,y,z:x<=y,lambda x,y,z:x>=y]]
@@ -22,6 +24,10 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
         # print(x,y)
 
     grid_x, grid_y = np.mgrid[:y, :x]
+    
+    # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius 
+    # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
+     
     circle_mask = operations[bool(fill)][bool(clear)]((grid_x-cx)**2 + (grid_y-cy)**2 , r**2,100)
     # Apply anti-aliasing using Gaussian blur
     # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
@@ -38,6 +44,7 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
 
 def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
     # First solve for a qudrant the apply rotations
+    # TODO Add Finer Control: Could someone add finer controls to allow for control over the inner and outer values of the annulus 
     operations = [[lambda w,x,y,z:np.logical_or(np.abs(w-x)<=z,np.abs(w-y)<=z)]*2,[lambda w,x,y,z:np.logical_and(x<=w,w<=y),lambda w,x,y,z:(np.logical_or(x>w,w>y))]]
 
     grid_class=type(Grid)
@@ -63,6 +70,28 @@ def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'
             return Grid*pixelated_annulus
     
     return pixelated_annulus
+
+def rectangle(x,y,w,h,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
+    operations = []
+    if type(Grid) == tuple:
+        Grid = np.full(Grid,1)
+    if Grid is not None:
+        y,x = Grid.shape
+        # print(x,y)
+    grid_x, grid_y = np.mgrid[:y, :x]
+    annulus_mask = operations[bool(fill)][bool(clear)]( ((grid_x-cx)**2 + (grid_y-cy)**2 ), r1**2, r2**2,100 )
+    # Apply anti-aliasing using Gaussian blur
+    # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
+    vals = (1,0) 
+    # Threshold to create a binary image (0 or 1)
+    pixelated_annulus = np.where(annulus_mask == True, *vals)
+
+    # mul mask
+    if Grid is not  None:
+        if(grid_class!=tuple):
+            return Grid*pixelated_annulus
+    
+    return pixelated_annulus 
 
 # deal with essy overlays
 def identityOverlay(Grid:np.ndarray):
