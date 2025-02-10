@@ -11,6 +11,3 @@ def slugify(text:str=None,max_width:int=32):
     for i in range(min(len(text),max_width)):
         out+=text[i] if text[i].isalnum() or (text[i]=='-') else '_'
     return out
-
-
-print(slugify())
