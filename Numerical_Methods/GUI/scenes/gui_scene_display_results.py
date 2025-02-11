@@ -19,8 +19,10 @@ class ResultsScene(tk.LabelFrame):
         self.config(width=width,height=height)
     def display(self):
         self.pack()
-root  =tk.Tk()
-root.wm_geometry('640x480')
-frame = tk.LabelFrame(root,text='SomeLabel',height=480,width=640)
-frame.pack()
-root.mainloop()
+        
+if __name__=='main':
+    root  =tk.Tk()
+    root.wm_geometry('640x480')
+    frame = tk.LabelFrame(root,text='SomeLabel',height=480,width=640)
+    frame.pack()
+    root.mainloop()

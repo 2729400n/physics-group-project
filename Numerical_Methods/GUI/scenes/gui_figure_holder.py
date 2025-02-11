@@ -11,15 +11,15 @@ class FigureBase(tk.Frame):
         super().__init__(fig,master)
         
         
+if __name__ == '__main__':
+    root = tk.Tk()
+    fig=figures.Figure()
+    figBase=FigureBase(root,fig)
 
-root = tk.Tk()
-fig=figures.Figure()
-figBase=FigureBase(root,fig)
-
-[[axes]]=fig.subplots(1,1,squeeze=False)
-axes.plot(xs:=np.arange(0,10,0.1),np.sin(xs))
-figBase.get_tk_widget().pack()
-root.mainloop()
+    [[axes]]=fig.subplots(1,1,squeeze=False)
+    axes.plot(xs:=np.arange(0,10,0.1),np.sin(xs))
+    figBase.get_tk_widget().pack()
+    root.mainloop()
 # root=tk.Tk()
 # img=tk.PhotoImage('::tk::images::img',file='c:\\Users\\Kevnn\\GroupProject\\physics-group-project\\BoxInBox.png',master=root)
 # xdownsize = int(img.width()//640)

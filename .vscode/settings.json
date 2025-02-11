@@ -45,6 +45,7 @@
     ],
     "autopep8.importStrategy": "fromEnvironment",
     "terminal.integrated.env.windows": {
+
         "PYTHONDONTWRITEBYTECODE":"1"
     }
 }
