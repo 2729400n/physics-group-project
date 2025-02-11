@@ -28,7 +28,7 @@ def circle(cx:float,cy:float,r:float,dx:float=1,dy:float=1,val:float=1.0,fill:bo
     circle_mask = operations[bool(fill)][bool(clear)]((grid_x-cx)**2 + (grid_y-cy)**2 , r**2, r)
     # Apply anti-aliasing using Gaussian blur
     # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
-    vals = (1,0) 
+    vals = val
     # Threshold to create a binary image (0 or 1)
     pixelated_circle = np.where(circle_mask == True, *vals)
 

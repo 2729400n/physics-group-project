@@ -7,7 +7,6 @@ def toBytes(x:str):
 def argumentToTypeFactory(extras = None):
     if extras == None:
         extras = {bool:bool,int:int,float:float,list:list}
-        
     def arguments(annot=None,val=None):
         nonlocal extras
         if val is None and annot is None:
@@ -17,14 +16,19 @@ def argumentToTypeFactory(extras = None):
                 return bytes
             else: 
                 return str
+        type = extras.get(annot)
+        if(type is None):
+            extras.get(val)
+        if type is None:
+            return str
+        return type
         
     return arguments
 
-def getArgsToType():
-    func_info = inspect.getfullargspec(print)
-    arg_types = {i:argumentToTypeFactory(func_info.annotations.get(i),func_info.kwonlydefaults.get(i)) for i in [*func_info.args,*func_info.kwonlyargs]}
-    print(arg_types)
-    print()
-    return 
+defaultArgsToTypes = argumentToTypeFactory()
 
-getArgsToType()
+def getArgsToType(func:'function',argumetMapper = defaultArgsToTypes):
+    func_info = inspect.getfullargspec(func)
+    arg_types = {i:argumetMapper(func_info.annotations.get(i),(func_info.kwonlydefaults or {}).get(i)) for i in [*func_info.args,*func_info.kwonlyargs]}
+    
+    return arg_types

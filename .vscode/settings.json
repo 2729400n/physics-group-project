@@ -43,5 +43,8 @@
     "autopep8.interpreter": [
         "C:\\Users\\Kevnn\\anaconda3\\envs\\phys_proj\\python.exe"
     ],
-    "autopep8.importStrategy": "fromEnvironment"
+    "autopep8.importStrategy": "fromEnvironment",
+    "terminal.integrated.env.windows": {
+        "PYTHONDONTWRITEBYTECODE":"1"
+    }
 }
