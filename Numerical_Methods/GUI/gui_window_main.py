@@ -34,11 +34,16 @@ class DefaultNumericalDisplay(NumericalDisplay):
     def setupMenuBar(self):
         self.winfo_toplevel().option_add('*tearOff', False)
         self.mbar = tk.Menu(self)
+        
+        # A File Menu
         self.file_menu = tk.Menu(self.mbar,name='file_menu')
-        self.edit_menu = tk.Menu(self.mbar,name='edit_menu')
         self.mbar.add_cascade(menu=self.file_menu,label='File')
+        self.mbar.add_separator()
+        
+        self.edit_menu = tk.Menu(self.mbar,name='edit_menu')
         self.mbar.add_cascade(menu=self.edit_menu,label='Edit')
         self['menu'] = self.mbar
+        
     def populateWindow(self):
         self.setupMenuBar()
         
