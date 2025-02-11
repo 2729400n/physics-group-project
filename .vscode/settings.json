@@ -35,5 +35,13 @@
             "icon": "account"
         }
     },
-    "terminal.integrated.defaultProfile.windows": "Physics Term"
+    "terminal.integrated.defaultProfile.windows": "Physics Term",
+    "black-formatter.importStrategy": "fromEnvironment",
+    "black-formatter.interpreter": [
+        "C:\\Users\\Kevnn\\anaconda3\\envs\\phys_proj\\python.exe"
+    ],
+    "autopep8.interpreter": [
+        "C:\\Users\\Kevnn\\anaconda3\\envs\\phys_proj\\python.exe"
+    ],
+    "autopep8.importStrategy": "fromEnvironment"
 }
