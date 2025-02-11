@@ -99,7 +99,7 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
         i= (i+1)
         
         # TODO: Make the change relative easier to tell the precentage change
-        if np.max(diff) < 1e-6 and i>1:
+        if np.max(diff) < 1e-2 and i>1:
             break
     retvals = (Ys,Xs,Frames[i%2])
     # TODO: Tranform into a vector field
@@ -118,38 +118,24 @@ def findUandV(grid:np.ndarray[np.ndarray[np.float64]]):
 def makeGeometry2(val=1.0,r=35,cx=50,cy=150,relative=False):
     Gridder = None
     def endToEndLine(Grid:np.ndarray,overlay=None,retoverlay=False):
-        Grid[(0,-1), 1:-1] = 0.25*(Grid[(0,-1), 2:]+Grid[(0,-1), :-2]+Grid[(-1,-2), 1:-1]+Grid[(1,0), 1:-1])
-        height,width=Grid.shape
+        
+        nonlocal Gridder
+        
         Grid[:,:2]=val
-        midx = width//2
-        startx=midx-width//8
-        endx=midx+width//8
-
-
-        height,width=Grid.shape
         Grid[:,-2:]=-val
-        midx = width//2
-        startx=midx-width//8
-        endx=midx+width//8
+        
+        Grid[(0,-1), 1:-1] = 0.25*(Grid[(0,-1), 2:]+Grid[(0,-1), :-2]+Grid[(-1,-2), 1:-1]+Grid[(1,0), 1:-1])
+        
+        
 
         if overlay is None:
-            overlay = circle(cx,cy,r,fill=True,clear=True,Grid=(*Grid.shape,))
-        debug = False
+            if Gridder is None:
+                Gridder = overlay = circle(cx,cy,r,fill=True,clear=True,Grid=(*Grid.shape,))
+            else:
+                overlay = Gridder
+            
         Grid = overlay*Grid
-
-        if debug:
-            plt.imshow(overlay, cmap='gray')
-            plt.title('Pixelated Circle with Anti-aliasing')
-            plt.show(block=True)
-            pass
-            plt.imshow(Grid, cmap='gray')
-            plt.title('Pixelated Circle with Anti-aliasing')
-            plt.show(block=True)
-            pass
-        # midy = height//2
-        # starty=midy-height//8
-        # endy=midy+width//8
-        # Grid[starty:endy,startx:endx]=0.0
+        
         if retoverlay:
             return Grid,overlay
         return Grid

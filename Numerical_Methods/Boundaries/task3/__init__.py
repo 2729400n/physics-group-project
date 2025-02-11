@@ -1,1 +1,1 @@
-from . import boundary
+from .boundary import highSpeedFactory as Boundary

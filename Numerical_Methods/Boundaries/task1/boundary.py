@@ -6,7 +6,7 @@ import numpy as np
 def geometryFactory(val=1.0,r1=35,r2=50,cx=50,cy=100,relative=False):
     # A simple cacher 
     Gridder = None
-    def AnnulusField(Grid:np.ndarray,overlay=None,retoverlay=False):
+    def AnnulusField(Grid:np.ndarray,overlay:bool=None,retoverlay:bool=False):
         nonlocal Gridder
         if Gridder is None:
             width,height = Grid.shape

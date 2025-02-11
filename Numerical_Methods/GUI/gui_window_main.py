@@ -32,9 +32,11 @@ class DefaultNumericalDisplay(NumericalDisplay):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
     def populateWindow(self):
-        self.winfo_toplevel().option_add('*tearOff', fa)
+        self.winfo_toplevel().option_add('*tearOff', False)
         self.mbar = tk.Menu(self)
-        self.mbar.add_command(accelerator="Cmd+X",label="open")
+        self.edit_menu = tk.Menu(self.mbar)
+        self.mbar.add_cascade(menu=self.edit_menu,label='Edit')
+        self['menu'] = self.mbar
         # self.mbar.grid(in_=self,column=0,row=0,sticky='w',ipadx=4)
         # self.mbar.grid_columnconfigure(-1,weight=1)
         tk.Frame(self,height=480,width=self.winfo_width()-2,padx=2,pady=2)

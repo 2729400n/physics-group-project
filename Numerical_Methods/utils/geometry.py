@@ -69,8 +69,13 @@ def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'
     return pixelated_annulus
 
 
-def rectangle(x0, y0, x1, y1, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'np.ndarray[np.ndarray[np.float64]]'=None,blocking=False):
+def rectangle(x0, y0, x1, y1, dx=1, dy=1, val:float=1.0, fill:bool=False, clear:bool=False, Grid:'np.ndarray[np.ndarray[np.float64]]'=None,blocking=False,thickness=1):
     
+    if y1<y0:
+        y0,y1 = y1,y0
+    if x1<x0:
+        x0,x1 = x1,x0
+        
     grid_class = type(Grid)
     
     if type(Grid) == tuple:
@@ -78,6 +83,7 @@ def rectangle(x0, y0, x1, y1, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid
     
     if Grid is not None:
         y,x = Grid.shape
+        
     if not blocking:
         x1 = None if x1 > x else x1
         x0 = None if x0 < 0 else x0
@@ -96,6 +102,7 @@ def rectangle(x0, y0, x1, y1, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid
     if fill:
         mul_mask[y0:y1,x0:x1] = 0 if clear else 1
     else:
+        
         mul_mask[tuple( [i for i in (y0,y1) if i is not None]  ),x0:x1] = mul_mask[y0:y1, tuple( [i for i in (x0,x1) if i is not None]  )] = 0 if clear else 1
     if Grid is not  None:
         if(grid_class!=tuple):
