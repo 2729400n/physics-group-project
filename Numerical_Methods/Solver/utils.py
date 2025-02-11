@@ -1,11 +1,6 @@
 # Load modules and imports neceasasary 
-import numba.cuda
+
 import numpy as np
-import scipy.optimize as optimist
-import matplotlib.pyplot as plt, matplotlib.colors as mcolors, matplotlib.colorbar as mcolorbar
-import sys,os
-import matplotlib.cm as cm
-from ..utils.custom_cmap_maker import rollerCoaster
 
 # we will be using 64bit floating point representation
 # Stay clear of recursion if possible it a bad game to play unless you have 
@@ -22,7 +17,7 @@ defualtResolutions = {'1080i':'Nice Try!☺'}
 
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1)):
+def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]', fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1)):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
 
