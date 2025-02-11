@@ -1,7 +1,7 @@
-from Numerical_Methods.utils import geometry
+import  Numerical_Methods.utils.geometry as geometry
 import matplotlib.artist,matplotlib.patches,matplotlib.path,matplotlib.pyplot as plt
 import numpy as np
-import check_user_approval
+import test_Numerical.check_user_approval as check_user_approval
 
 class Test_Geometries:
     

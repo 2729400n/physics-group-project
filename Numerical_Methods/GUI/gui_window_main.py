@@ -9,7 +9,7 @@ import tkinter.dialog as tkdiag
 import tkinter.ttk as ttk
 import tkinter.scrolledtext as tksrolltxt
 
-from .menubar import MenuBar
+# from .menubar import MenuBar
 
 class NumericalDisplay(tk.Tk):
 
@@ -32,10 +32,11 @@ class DefaultNumericalDisplay(NumericalDisplay):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
     def populateWindow(self):
-        from . import scenes
-        self.mbar = MenuBar(self,scenes)
-        self.mbar.grid(in_=self,column=0,row=0,sticky='w',ipadx=4)
-        self.mbar.grid_columnconfigure(-1,weight=1)
+        self.winfo_toplevel().option_add('*tearOff', fa)
+        self.mbar = tk.Menu(self)
+        self.mbar.add_command(accelerator="Cmd+X",label="open")
+        # self.mbar.grid(in_=self,column=0,row=0,sticky='w',ipadx=4)
+        # self.mbar.grid_columnconfigure(-1,weight=1)
         tk.Frame(self,height=480,width=self.winfo_width()-2,padx=2,pady=2)
         
             

@@ -4,8 +4,45 @@ import scipy.optimize as optimist
 import matplotlib.pyplot as plt, matplotlib.colors as mcolors, matplotlib.colorbar as mcolorbar
 import sys,os
 import matplotlib.cm as cm
-from ..custom_cmap_maker import rollerCoaster
-from .. import geometry
+
+
+def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
+    # First solve for a qudrant the apply rotations
+    operations = [[lambda x,y,z:np.abs(x-y)<=z]*2,[lambda x,y,z:x<=y,lambda x,y,z:x>=y]]
+    
+    # === Fast Slow pointer ===
+    # r1 = np.array([0,r])
+    # r2 = np.array([r,0])
+    # theta = np.linspace(0,np.pi/4,1000)
+    # =======
+    grid_class=type(Grid)
+    # if all we want is a  circle
+    x = 2*int(r//dx)+5
+    y=2*int(r//dy)+5
+    if type(Grid) == tuple:
+        Grid = np.full(Grid,1)
+    # if we inplace into a grid
+    if Grid is not None:
+        y,x = Grid.shape
+        # print(x,y)
+
+    grid_x, grid_y = np.mgrid[:y, :x]
+    
+    # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius 
+    # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
+     
+    circle_mask = operations[bool(fill)][bool(clear)]((grid_x-cx)**2 + (grid_y-cy)**2 , r**2, r)
+    # Apply anti-aliasing using Gaussian blur
+    # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
+    vals = (1,0) 
+    # Threshold to create a binary image (0 or 1)
+    pixelated_circle = np.where(circle_mask == True, *vals)
+
+    # mul mask
+    if Grid is not  None:
+        if(grid_class!=tuple):
+            return Grid*pixelated_circle
+    return pixelated_circle
 
 # we will be using 64bit floating point representation
 # Stay clear of recursion if possible it a bad game to play unless you have 
@@ -47,7 +84,6 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
     # Frames  = np.zeros((2,int(pixel_w_X_h[1]),int(pixel_w_X_h[0])))
     Frames  = np.zeros((2,Ys.shape[0],Xs.shape[0]))
     Frames[0],overlay = startingshape(Frames[0],retoverlay=True)
-    print(Xs.shape[0],Ys.shape[0])
     i = 0
     # TODO: possibly remove while loop, its too messy.
     while True:
@@ -79,7 +115,7 @@ def findUandV(grid:np.ndarray[np.ndarray[np.float64]]):
 
 
 
-def makeGeometry2(val=1.0,r=35,cx=50,cy=100,relative=False):
+def makeGeometry2(val=1.0,r=35,cx=50,cy=150,relative=False):
     Gridder = None
     def endToEndLine(Grid:np.ndarray,overlay=None,retoverlay=False):
         Grid[(0,-1), 1:-1] = 0.25*(Grid[(0,-1), 2:]+Grid[(0,-1), :-2]+Grid[(-1,-2), 1:-1]+Grid[(1,0), 1:-1])
@@ -97,7 +133,7 @@ def makeGeometry2(val=1.0,r=35,cx=50,cy=100,relative=False):
         endx=midx+width//8
 
         if overlay is None:
-            overlay = geometry.circle(cx,cy,r,fill=True,clear=True,Grid=(*Grid.shape,))
+            overlay = circle(cx,cy,r,fill=True,clear=True,Grid=(*Grid.shape,))
         debug = False
         Grid = overlay*Grid
 
@@ -127,7 +163,7 @@ def BoxinBox(Grid:np.ndarray,r=1):
     return Grid
 
 # Example 1: End-to-End Line
-ys, xs, potential = laplace_ode_solver((200, 100), endToEndLine_, endToEndLine_)
+ys, xs, potential = laplace_ode_solver((200, 200), endToEndLine_, endToEndLine_)
 Xs, Ys = np.meshgrid(xs[::5], ys[::5])
 u, v = np.gradient(potential, xs[1]-xs[0], ys[1]-ys[0])  # Correct gradient calculation
 
