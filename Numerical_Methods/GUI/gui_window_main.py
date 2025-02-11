@@ -31,12 +31,17 @@ class DefaultNumericalDisplay(NumericalDisplay):
     def __init__(self, screenName = None, baseName = None, className = "Tk", useTk = True, sync = False, use = None):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
-    def populateWindow(self):
+    def setupMenuBar(self):
         self.winfo_toplevel().option_add('*tearOff', False)
         self.mbar = tk.Menu(self)
-        self.edit_menu = tk.Menu(self.mbar)
+        self.file_menu = tk.Menu(self.mbar,name='file_menu')
+        self.edit_menu = tk.Menu(self.mbar,name='edit_menu')
+        self.mbar.add_cascade(menu=self.file_menu,label='File')
         self.mbar.add_cascade(menu=self.edit_menu,label='Edit')
         self['menu'] = self.mbar
+    def populateWindow(self):
+        self.setupMenuBar()
+        
         # self.mbar.grid(in_=self,column=0,row=0,sticky='w',ipadx=4)
         # self.mbar.grid_columnconfigure(-1,weight=1)
         tk.Frame(self,height=480,width=self.winfo_width()-2,padx=2,pady=2)

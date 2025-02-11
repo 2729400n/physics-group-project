@@ -1,7 +1,7 @@
 import os
 import os.path as pth
 
-from ..utils.naming import slugify
+from ...utils.naming import slugify
 
 
 baseDir = pth.abspath(pth.dirname(__file__))
