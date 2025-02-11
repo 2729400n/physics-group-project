@@ -3,7 +3,7 @@ import numpy as np
 
 # TODO Fix all Circular constraints : The cirlce seems to have an r value that is 1 greater than expected
 
-def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
+def circle(cx:float,cy:float,r:float,dx:float=1,dy:float=1,val:float=1.0,fill:bool=False,clear:bool=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
     # First solve for a qudrant the apply rotations
     operations = [[lambda x,y,z:np.abs(x-y)<=z]*2,[lambda x,y,z:x<=y,lambda x,y,z:x>=y]]
     grid_class=type(Grid)

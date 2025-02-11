@@ -3,7 +3,7 @@ import numpy as np
 
 
 # Will employ the use of a closure to ensure uniqueness for multi-threading
-def geometryFactory(val=1.0,r1=35,r2=50,cx=50,cy=100,relative=False):
+def geometryFactory(val:float=1.0,r1:float=35,r2:float=50,cx:float=50,cy:float=100,relative=False):
     # A simple cacher 
     Gridder = None
     def AnnulusField(Grid:np.ndarray,overlay:bool=None,retoverlay:bool=False):
