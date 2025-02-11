@@ -68,47 +68,33 @@ def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'
     
     return pixelated_annulus
 
-def rectangle(x,y,w,h,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
+
+def rectangle(x0, y0, x1, y1, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
     operations = []
     if type(Grid) == tuple:
         Grid = np.full(Grid,1)
     if Grid is not None:
         y,x = Grid.shape
         # print(x,y)
-    grid_x, grid_y = np.full((max(0,x0)))
-    # Apply anti-aliasing using Gaussian blur
-    # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
-    vals = (1,0) 
-    # Threshold to create a binary image (0 or 1)
-    pixelated_annulus = np.where(annulus_mask == True, *vals)
+    
 
     # mul mask
     if Grid is not  None:
         if(grid_class!=tuple):
             return Grid*pixelated_annulus
     
-    return pixelated_annulus 
+    return pixelated_annulus
 
-def rectangle(x,y,w,h,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
-    operations = []
-    if type(Grid) == tuple:
-        Grid = np.full(Grid,1)
-    if Grid is not None:
-        y,x = Grid.shape
-        # print(x,y)
-    grid_x, grid_y = np.full((max(0,x0)))
-    # Apply anti-aliasing using Gaussian blur
-    # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
-    vals = (1,0) 
-    # Threshold to create a binary image (0 or 1)
-    pixelated_annulus = np.where(annulus_mask == True, *vals)
-
-    # mul mask
-    if Grid is not  None:
-        if(grid_class!=tuple):
-            return Grid*pixelated_annulus
+# A wrapper function for Rectangle 
+def rectangle_w_h(x,y,w,h,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
     
+    x0=x
+    x1=x+w
+    y0 = y
+    y1 =y+h
     return pixelated_annulus 
+
+ 
 
 # deal with essy overlays
 def identityOverlay(Grid:np.ndarray):
