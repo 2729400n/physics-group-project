@@ -17,7 +17,7 @@ def loadCMap(file):
     return cmaps
 
 class CMapper(tk.Frame):
-    def __init__(self, master=None):
+    def __init__(self, master=None,*args,**kwargs):
         tk.Frame.__init__(self, master)
         self.pack()
         
@@ -79,7 +79,7 @@ class CMapper(tk.Frame):
             elif(self.ftype=='file_single'):
                 self.file[self.current_sel]
         print(args)
-
+scene = CMapper
 if __name__ == '__main__':
     root = tk.Tk()
     frame = CMapper(master=root)
