@@ -20,6 +20,6 @@ for i in os.listdir(baseDir):
             scenes.update(**mod.scenes)
         except:
             pass
-import pprint
-pprint.pprint(scenes)
-del pprint
+# import pprint
+# pprint.pprint(scenes)
+# del pprint

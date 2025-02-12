@@ -19,8 +19,8 @@ class ResultsScene(tk.LabelFrame):
         self.config(width=width,height=height)
     def display(self):
         self.pack()
-        
-if __name__=='main':
+scene = ResultsScene
+if __name__=='__main__':
     root  =tk.Tk()
     root.wm_geometry('640x480')
     frame = tk.LabelFrame(root,text='SomeLabel',height=480,width=640)
