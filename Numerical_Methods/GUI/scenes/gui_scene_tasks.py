@@ -2,9 +2,9 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 class ResultsScene(tk.LabelFrame):
-    name='Results'
+    namne = 'Task'
     def __init__(self,master=None,*args,**kwargs):
-        
+        self.name='Task '+kwargs.get('task_name','')    
         super().__init__(master,*args,text='Results',**kwargs)
     
     def _addButtons(self):
