@@ -17,6 +17,7 @@ def loadCMap(file):
     return cmaps
 
 class CMapper(tk.Frame):
+    name='ColourMaps'
     def __init__(self, master=None,*args,**kwargs):
         tk.Frame.__init__(self, master)
         self.pack()

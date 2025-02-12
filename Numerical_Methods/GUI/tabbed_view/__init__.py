@@ -13,13 +13,14 @@ __base__ = pth.abspath(pth.dirname(__file__))
 
  
 
-
+class IScene(tk.Widget):
+    name:str
 
 def buildTab(dir):
     tk.Tk()
     nb=ttk.Notebook(width=640,height=480)
     for i in os.listdir(dir) :
-        # print(i)
+        print(i)
         if i.startswith('gui_scene'):
             # print(i)
             ldr = importlib.machinery.SourceFileLoader
@@ -29,8 +30,10 @@ def buildTab(dir):
             importlib.machinery.SourcelessFileLoader.exec_module(scene_module.__loader__,scene_module)
             scene =(scene_module.__dict__.get('scene'))
             if scene != None:
-                curr_scene = scene(nb)
-                nb.add(curr_scene,state='normal',sticky='nesw',text='mainFrame',)
+                curr_scene:IScene = scene(nb)
+                nb.add(curr_scene,state='normal',sticky='nesw',text=curr_scene.name or '',)
+            else:
+                print(scene_module, 'No Scene')
                 
     
     # mf=tk.Frame(nb,width=640,height=480)
