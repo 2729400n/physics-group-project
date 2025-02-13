@@ -79,3 +79,6 @@ if __name__ == '__main__':
     
     wmain.grid()
     root.mainloop()
+
+x = list[str]
+print(x.)
