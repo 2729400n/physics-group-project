@@ -1,0 +1,77 @@
+# License: Glasgow University Student License 
+# Author: P3 Comp. 2025 Lab Group B ( Electrostatics )
+# Description: A module of utilities for the Numerical Solver
+
+
+
+# Load modules and imports neceasasary 
+import numpy as np
+
+# we will be using 64bit floating point representation
+# Stay clear of recursion if possible it a bad game to play unless you have 
+# a hop up or hop out scheme
+
+
+# A function that leaves things unchanged
+# if a tuple is passed in and generate is True then generate a new grid
+ 
+def doNothing(x:'np.ndarray | tuple[int,int]'=None,generate=False):
+    if isinstance(x,tuple) and generate:
+        return np.zeros(x,np.float64)
+    return x
+
+
+defualtResolutions = {'1080i':'Nice Try!☺'}
+
+
+
+
+# We gonna solve this in a suitably fashion guys ☺
+def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]', fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1),tol=1e-6):
+    # TODO: Fix docstrings adding more detail to params
+    """Solves the Laplace equation using a finite difference scheme.
+
+    Args:
+        size: A tuple (x_size, y_size) specifying the grid dimensions.
+        fixedCondtions: A function that enforces boundary conditions on the potential grid.
+        startingshape: A function that defines the initial shape of the potential grid.
+        resolution: A tuple (dx, dy) specifying the grid spacing or a string 'auto' for automatic resolution.
+        tolerance: A relative lower tolerance of the maximal frame difference before assuming they are the same or nothing has changed.
+
+    Returns:
+        A NumPy array representing the electric potential at all grid points.
+    """
+    
+    w_x_h = np.array(size,int)
+    preception = np.array(resoultion,int)
+    # pixel_w_X_h = w_x_h/preception
+    
+    # two frames to allow rotation/Cyling and comparisons
+    
+    Xs= np.arange(0,w_x_h[0]+resoultion[0],resoultion[0])
+    Ys = np.arange(0,w_x_h[1]+resoultion[1],resoultion[1])
+    # Frames  = np.zeros((2,int(pixel_w_X_h[1]),int(pixel_w_X_h[0])))
+    Frames  = np.zeros((2,Ys.shape[0],Xs.shape[0]))
+    Frames[0],overlay = startingshape(Frames[0],retoverlay=True)
+    print(Xs.shape[0],Ys.shape[0])
+    i = 0
+    # TODO: possibly remove while loop, its too messy.
+    while True:
+        ForwardHSpace_A2f = Frames[i%2, 1:-1, 2:]
+        BackwardHSpace_A2f = Frames[i%2, 1:-1, :-2]
+        ForwardVSpace_A2f = Frames[i%2, 2:, 1:-1]
+        BackwardVSpace_A2f = Frames[i%2, :-2, 1:-1]
+
+        Frames[(i+1)%2, 1:-1, 1:-1] = 0.25*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f+BackwardVSpace_A2f)
+        Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2],overlay=overlay)
+        indexes=Frames[i%2]!=0
+        diff = (np.abs((Frames[0][indexes]-Frames[1][indexes]))/Frames[i%2][indexes])
+        i= (i+1)
+        
+        # TODO: Make the change relative easier to tell the precentage change
+        if np.max(diff) < 1e-6 and i>1:
+            break
+    retvals = (Ys,Xs,Frames[i%2])
+    # TODO: Tranform into a vector field
+    
+    return retvals

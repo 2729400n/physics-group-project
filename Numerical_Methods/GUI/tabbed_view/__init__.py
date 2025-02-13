@@ -16,7 +16,7 @@ __base__ = pth.abspath(pth.dirname(__file__))
 class IScene(tk.Widget):
     name:str
 class TabbedView(ttk.Notebook):
-    def __init__(self, master,  **kw):
+    def __init__(self, master=None,  **kw):
         super().__init__(master,width=640, height=480, **kw)
 
     def buildTab(self,dir):

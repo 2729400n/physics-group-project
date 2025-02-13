@@ -1,6 +1,6 @@
 *.dat
 **/__pycache__/
-*.png
+# *.png
 .vscode/settings.json
 **/*.dat
 BoxInBox.png

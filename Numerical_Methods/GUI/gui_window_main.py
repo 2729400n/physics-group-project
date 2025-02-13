@@ -55,7 +55,7 @@ class DefaultNumericalDisplay(NumericalDisplay):
 def testProd():
     import sys
     root = DefaultNumericalDisplay()
-    print(root.mbar,file=sys.stderr)
+    # print(root.mbar,file=sys.stderr)
     root.mainloop()
 
 if __name__=='__main__':

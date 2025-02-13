@@ -24,3 +24,58 @@ We could also create a wrapper class for `str` so its interfacable much the same
 It should rezemble the above diagram.
 
 this may allow for calling from other commands and event_listeners but we will see.
+
+When dealing with ranges add anotation to specify that they are bound between:\\
+Current Syntaxes allowed are specified below where a range is given as $[a,b]$
+
+Strings:
+
+* "a->b"
+* "_\*type_\[a:b:_\*step_\]"
+* "list\[a,b\]"
+* "a...b"
+
+Type Annotes:
+
+* list\[a,b\]
+* range\[a,b\]
+* AnyIterable\[a,b\]
+
+Variable Annotations:
+
+* range(a,b,_*step_)
+* \[...options\]
+
+_*var_ means optional argument
+
+
+Some examples of well formed functions are
+
+```python
+# String Example
+
+def example_func_a(choice:"int[0:10]"):
+    # You may optionally ommit any  type and range/validation checking
+    # This is because the  the gui_call_wrapper function decorator create a 
+    # wrapper that handles this. 
+    # The only to the above caveat is if you do not specify the type
+    
+    # e.g. of input validation
+    if not isinstance(choice,int):
+        if isinstance(choice,str):
+            choice = choice.strip()
+            if choice.isnumeric():
+                choice = int(choice)
+                return example_function_a(choice)
+        elif isinstance(choice,bytes):
+            sm = 0
+            for i in range(len(choice)):
+                sm+= choice[i]*256**i
+            return  example_func_a(sm)
+
+    ...
+    do STUFF
+    ..
+
+
+```
