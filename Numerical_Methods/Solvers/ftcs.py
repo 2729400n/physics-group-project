@@ -9,9 +9,10 @@ import numpy as np
 
 
 # Some easy to remember utils for readability 
-doNothing  = lambda x:x
-
-defualtResolutions = {'1080i':'Nice Try!☺'}
+def doNothing(x:'np.ndarray | tuple[int,int]'=None):
+    if isinstance(x,tuple):
+        return np.zeros(x,np.float64)
+    return x
 
 
 
@@ -64,9 +65,3 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]', fixedCondtions
     # TODO: Tranform into a vector field
     
     return retvals
-
-def findUandV(grid:np.ndarray[np.ndarray[np.float64]]):
-    E_field = np.zeros([*grid.shape,2],np.float64)
-    E_field[:,:-1,0] = grid[:,1:] - grid[:,:-1]
-    E_field[:-1,:,1] = grid[1:,:] - grid[:-1,:]
-    return E_field

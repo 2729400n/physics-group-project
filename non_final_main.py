@@ -1,6 +1,8 @@
 import Numerical_Methods.GUI as gui
-import sys,pytest
-import check_user_approval, unittest
+import sys
+import test_Numerical.check_user_approval as check_user_approval
+import unittest
+import pytest
 class Test_GUI():
     def test_scenes(self):
         assert(check_user_approval.didItWorkAsIntended()==0)
@@ -10,3 +12,6 @@ class Test_GUI():
         # assert(check_user_approval.didItWorkAsIntendedScale()>5,'Not satisfactory')
         return None
 
+if __name__ == "__main__":
+    tester = Test_GUI()
+    tester.test_show()
