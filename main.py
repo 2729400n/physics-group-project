@@ -1,5 +1,8 @@
 import argparse
 import curses
+import sys
+
+
 
 Options = []
 
@@ -69,4 +72,16 @@ def showMenu():
     print(BANNER)
     print(MENU)#
     
-showMenu()
+
+
+
+cliParser = argparse.ArgumentParser(sys.argv[0])
+
+cliParser.add_argument('--gui','--display',action='store_true',help="Wether to enter GUI Mode or not.",dest='gui')
+flags = cliParser.parse_args(sys.argv[1:])
+
+if flags.gui:
+    Open_GUI()
+else:
+    showMenu()
+
