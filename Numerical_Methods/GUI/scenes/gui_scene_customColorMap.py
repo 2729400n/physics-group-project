@@ -14,11 +14,13 @@ def loadCMap(file):
     print('Loading',file)
     with open(file,'rb') as file:
         cmap = np.load(file,allow_pickle=True)
+        
         cmaps = dict()
-        for key in mplib.colormaps:
-            cmaps[key] = mplib.colormaps.get_cmap(key)
+        if not os.getenv('NM_NO_DEF_CMAPS',False):
+            for key in mplib.colormaps:
+                cmaps[key] = mplib.colormaps.get_cmap(key)
         for key in cmap.files:
-            cmaps[key] = cmap[key]
+            cmaps[key] = mcolors.ListedColormap(colors=cmap[key],name=key,N=cmap[key].shape[0])
         
     
 
@@ -69,22 +71,26 @@ class CMapper(tk.Frame):
             self.loc=None
             return []
     def createWidgets(self):
-        L1 = tk.Label(self, text='Color Map')
-        cmaps=self.cmaps=tk.Listbox(self, selectmode=tk.SINGLE)
+        L1 = tk.Label(self, text='Color Map',justify='center')
+        labelframe = tk.LabelFrame(self)
+        cmaps=self.cmaps=tk.Listbox(labelframe, selectmode=tk.SINGLE)
         cmapsList=self.getAvailableCMaps()
         cmaps.insert(0,*cmapsList)
         cmaps.grid(row=1,sticky='NW')
         cmaps.bind('<<ListboxSelect>>',self.selected_cmap,add='+')
+        cmaps.bind('<KeyPress-Up>',self.handle_keys,'+')
+        cmaps.bind('<KeyPress-Down>',self.handle_keys,'+')
         self.cmaps.selection_handle(self.selected_cmap)
         self.current_sel = cmaps.get(0,0)
         self.key = None
-        L1.grid(row=0,sticky='NWE',column=0)
+        L1.grid(row=0,sticky='NE',column=0,columnspan=1,)
         L1.grid_propagate(True)
         L1.grid_columnconfigure(0,weight=1)
-        button = tk.Button(self, text='Select Color Map', command=self.submit)
+        button = tk.Button(labelframe, text='Select Color Map', command=self.submit)
         button.grid(row=2,sticky='NW')
         button.grid_propagate(True)
         button.grid_columnconfigure(0)
+        labelframe.grid(row=1,sticky='NW')
         
         self.example_heatmap = matplotlib.figure.Figure()
         self.test_axes = self.example_heatmap.add_subplot(111)
@@ -100,6 +106,7 @@ class CMapper(tk.Frame):
 
     def selected_cmap(self,*args):
         index:tuple = self.cmaps.curselection()
+        
         if(index.__len__()==0):
             return
         
@@ -109,11 +116,32 @@ class CMapper(tk.Frame):
             self.test_axes.cla()
             sel_cmap = self.file.get(key,self.cmap)
             self.test_axes.imshow(self.test_grid,cmap=sel_cmap)
-            self.test_axes.set_ylabel(key)
+            label = ' '.join([ i.capitalize() for i in f"{key}".split('_')])
+            self.test_axes.set_ylabel(label)
             self.test_axes.xaxis.set_visible(False)
             self.example_display.draw()
             self.key=key
+    
+    def handle_keys(self,evt,*args,**kwargs):
+        index:tuple = self.cmaps.curselection()
+        print(evt)
+        if(index.__len__()==0):
+            return
+        index = index[0]
         
+        if(evt.keysym=='Up'):
+            new_index =  max(0,(index -1) % self.cmaps.size())
+            self.cmaps.selection_clear(index)
+            self.cmaps.selection_set(new_index)
+            self.cmaps.activate(new_index)
+            self.cmaps.event_generate('<<ListboxSelect>>')
+            
+        elif(evt.keysym=='Down'):
+            new_index =  (index +1) % self.cmaps.size()
+            self.cmaps.selection_clear(index)
+            self.cmaps.selection_set(new_index)
+            self.cmaps.activate(new_index)
+            self.cmaps.event_generate('<<ListboxSelect>>')
 
     def submit(self,*args):
         print(self.key)
