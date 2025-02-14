@@ -43,7 +43,9 @@
     "autopep8.importStrategy": "fromEnvironment",
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
-    "python-envs.pythonProjects": []
+    "python.terminal.activateEnvironment": false,
+    "python.createEnvironment.contentButton": "show",
+    "python.terminal.activateEnvInCurrentTerminal": false
     // ,"terminal.integrated.env.windows": {,
 
     //     "PYTHONDONTWRITEBYTECODE":"1"
