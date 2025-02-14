@@ -2,7 +2,7 @@ import matplotlib.backend_tools as mb_tools, matplotlib.backend_managers as mb_m
 import matplotlib.figure
 import tkinter as tk
 import numpy as np
-import threading
+import threading, time, sched, signal
 
 class RealTimeFigure(tk.Frame):
     
@@ -64,10 +64,46 @@ class RealTimeFigure(tk.Frame):
     
     def update(self):
         pass
+
+def timerFactory():
+    clock = 0
+    def timer():
+        print('Clock polled at', time.perf_counter(),f"tick={timer.__dict__.get('t')}")
+        nonlocal clock
+        retval = clock
+        clock+=1
+        timer.__dict__.update(t=retval)
+        return retval
+    timer.__dict__.update(t=0)
+    def delayer(DEL):
+        return 
     
+    return timer,delayer
     
 if __name__ == '__main__':
+    counter,delayC = timerFactory()
+    rlayer = sched.scheduler(timefunc=counter,delayfunc=delayC)
+    print('inited tiner')
     
+    rlayer.enter(22,0,lambda:print('elem',22,counter.__dict__.get('t')))
+    print('Added Wait time',22)
+    
+    rlayer.enter(8,0,lambda:print('elem',8,counter.__dict__.get('t')))
+    print('Added Wait time',8) 
+    
+    rlayer.enter(16,0,lambda:print("Hello\nWorld!"))
+    print('Added Wait time',16)
+    
+    rlayer.enter(12,99,lambda:print('elem',12,counter.__dict__.get('t')))
+    print('Added Wait time',12)
+    
+    rlayer.enter(5.6,0,lambda:print('elem',5.6,counter.__dict__.get('t')))
+    print('Added Wait time',5.6)
+    
+    rlayer.enter(4,0,lambda:print('elem',4,counter.__dict__.get('t')))
+    print('Added Wait time',4)
+    
+    rlayer.run(True)
 # root= tk.Tk()
 # figureFrame = RealTimeFigure(root)
 # figureFrame.pack()

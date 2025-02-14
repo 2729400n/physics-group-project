@@ -1,4 +1,3 @@
-import gzip
 import tkinter as tk
 import tkinter.commondialog as tkcommon
 import os, os.path as pth
@@ -38,12 +37,14 @@ class CMapper(tk.Frame):
         self.loc = None
         self.cmap=None
         tk.Frame.__init__(self, master)
-        self.pack()
-        
+        # self.pack()
+        # tk.Wm.geometry(self.winfo_toplevel(),'640x480')
+        # self.config(height=480,width=640)
         self.createWidgets()
-        self.config(height=480,width=640)
+        self.pack(anchor=tk.NW,fill=tk.BOTH,expand=True)
+        
         self.update()
-        tk.Wm.geometry(self.winfo_toplevel(),'640x480')
+        
 
     def getAvailableCMaps(self):
         print('Available CMaps:')
@@ -74,6 +75,7 @@ class CMapper(tk.Frame):
         cmaps.insert(0,*cmapsList)
         cmaps.grid(row=1,sticky='NW')
         cmaps.bind('<<ListboxSelect>>',self.selected_cmap,add='+')
+        self.cmaps.selection_handle(self.selected_cmap)
         self.current_sel = cmaps.get(0,0)
         self.key = None
         L1.grid(row=0,sticky='NWE',column=0)
@@ -81,13 +83,37 @@ class CMapper(tk.Frame):
         L1.grid_columnconfigure(0,weight=1)
         button = tk.Button(self, text='Select Color Map', command=self.submit)
         button.grid(row=2,sticky='NW')
+        button.grid_propagate(True)
+        button.grid_columnconfigure(0)
+        
+        self.example_heatmap = matplotlib.figure.Figure()
+        self.test_axes = self.example_heatmap.add_subplot(111)
+        self.example_display = mb_tkagg.FigureCanvasTkAgg(self.example_heatmap,master=self)
+        self.example_canvas=self.example_display.get_tk_widget()
+        self.example_canvas.grid(row=1,column=1,sticky='NE')
+        self.example_display.draw()
+        
+        self.test_grid, _ = np.mgrid[:1024,:100]
+        
+        
         
 
     def selected_cmap(self,*args):
         index:tuple = self.cmaps.curselection()
         if(index.__len__()==0):
             return
-        self.key =self.cmaps.get(index[0])
+        
+        key =self.cmaps.get(index[0])
+        if self.key!=key:
+            self.example_display.blit()
+            self.test_axes.cla()
+            sel_cmap = self.file.get(key,self.cmap)
+            self.test_axes.imshow(self.test_grid,cmap=sel_cmap)
+            self.test_axes.set_ylabel(key)
+            self.test_axes.xaxis.set_visible(False)
+            self.example_display.draw()
+            self.key=key
+        
 
     def submit(self,*args):
         print(self.key)
