@@ -1,1 +1,0 @@
-from ..task1.boundary import geometryFactory as Boundary
