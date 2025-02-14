@@ -21,6 +21,7 @@ def clearPythonCaches(directory,recursiveley=True,depth=-1):
                     os.remove(cache)
                 else:
                     shutil.rmtree(cache)
+                print('removed',cache)
         
         if files[i:] == []:
             break
@@ -35,4 +36,6 @@ def clearPythonCaches(directory,recursiveley=True,depth=-1):
         
         
         i+=1
-        # print(files)
+
+if __name__ == '__main__':
+    clearPythonCaches(sys.argv[1])

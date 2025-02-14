@@ -2,7 +2,10 @@ import gzip
 import tkinter as tk
 import tkinter.commondialog as tkcommon
 import os, os.path as pth
-import sys
+import sys, matplotlib.colors as mcolors, matplotlib as mplib , matplotlib.pyplot as plt, matplotlib.colorbar as mcolorbars, matplotlib.cm as cm
+
+import matplotlib.backend_tools as mb_tools, matplotlib.backend_managers as mb_managers, matplotlib.backends.backend_tkagg as mb_tkagg
+import matplotlib.figure
 
 import numpy as np
 
@@ -13,10 +16,15 @@ def loadCMap(file):
     with open(file,'rb') as file:
         cmap = np.load(file,allow_pickle=True)
         cmaps = dict()
+        for key in mplib.colormaps:
+            cmaps[key] = mplib.colormaps.get_cmap(key)
         for key in cmap.files:
             cmaps[key] = cmap[key]
+        
+    
 
     return cmaps
+
 
 class CMapper(tk.Frame):
     name='ColourMaps'
@@ -68,7 +76,9 @@ class CMapper(tk.Frame):
         cmaps.bind('<<ListboxSelect>>',self.selected_cmap,add='+')
         self.current_sel = cmaps.get(0,0)
         self.key = None
-        L1.grid(row=0,sticky='NW',column=0)
+        L1.grid(row=0,sticky='NWE',column=0)
+        L1.grid_propagate(True)
+        L1.grid_columnconfigure(0,weight=1)
         button = tk.Button(self, text='Select Color Map', command=self.submit)
         button.grid(row=2,sticky='NW')
         
