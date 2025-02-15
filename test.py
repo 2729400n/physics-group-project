@@ -138,6 +138,8 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray'):
     (n,m) = Grid.shape
     XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(n,m)
+    
+    # Using curve fit is lazy but its better than writing a lsq function
     xOptimal,xCov=optimist.curve_fit(XPolyNomial,Grid[0,:],Grid[0,:])
     yOptimal,yCov=optimist.curve_fit(YPolyNomial,Grid[0,:],Grid[:,0].T)
     
