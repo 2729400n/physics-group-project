@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import tkinter.commondialog as tkcommon
 import os, os.path as pth
 import sys, matplotlib.colors as mcolors, matplotlib as mplib , matplotlib.pyplot as plt, matplotlib.colorbar as mcolorbars, matplotlib.cm as cm
@@ -10,17 +11,19 @@ import numpy as np
 
 __base__ = pth.abspath(pth.dirname(__file__))
 
-def loadCMap(file):
+def loadCMap(file=None):
     print('Loading',file)
-    with open(file,'rb') as file:
-        cmap = np.load(file,allow_pickle=True)
-        
-        cmaps = dict()
-        if not os.getenv('NM_NO_DEF_CMAPS',False):
-            for key in mplib.colormaps:
-                cmaps[key] = mplib.colormaps.get_cmap(key)
-        for key in cmap.files:
-            cmaps[key] = mcolors.ListedColormap(colors=cmap[key],name=key,N=cmap[key].shape[0])
+    cmaps = dict()
+    if not os.getenv('NM_NO_DEF_CMAPS',False):
+        print('Using Default ColorMaps')
+        for key in mplib.colormaps:
+            cmaps[key] = mplib.colormaps.get_cmap(key)
+    
+    if file is not None:
+        with open(file,'rb') as file:
+            cmap = np.load(file,allow_pickle=True)
+            for key in cmap.files:
+                cmaps[key] = mcolors.ListedColormap(colors=cmap[key],name=key,N=cmap[key].shape[0])
         
     
 
@@ -64,12 +67,15 @@ class CMapper(tk.Frame):
             self.ftype = 'file_single'
             self.loc = self._color_map_path
             self.file = loadCMap(self.loc)
-            return [*self.file.keys()]
+            return 
         else:
-            print('\tNo Available CMaps')
-            self.ftype=None
+            self.ftype = 'default_only'
             self.loc=None
-            return []
+            self.file = loadCMap(self.loc)
+        keys = [*self.file.keys()]
+        if len(keys) == 0 :
+            print('\tNo Available CMaps')
+        return keys
     def createWidgets(self):
         L1 = tk.Label(self, text='Color Map',justify='center')
         labelframe = tk.LabelFrame(self)

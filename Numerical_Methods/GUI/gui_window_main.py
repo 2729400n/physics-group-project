@@ -14,7 +14,7 @@ import tkinter.scrolledtext as tksrolltxt
 class NumericalDisplay(tk.Tk):
 
     def decorateWindow(self):
-        self.wm_geometry('640x480+0+0')
+        # self.wm_geometry('640x480+0+0')
         self.title('Eletrostatic Project')
     
     def populateWindow(self):
@@ -49,7 +49,7 @@ class DefaultNumericalDisplay(NumericalDisplay):
         
         # self.mbar.grid(in_=self,column=0,row=0,sticky='w',ipadx=4)
         # self.mbar.grid_columnconfigure(-1,weight=1)
-        tk.Frame(self,height=480,width=self.winfo_width()-2,padx=2,pady=2)
+        # tk.Frame(self,height=480,width=self.winfo_width()-2,padx=2,pady=2)
         
             
 def testProd():
