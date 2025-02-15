@@ -1,3 +1,4 @@
+import tkinter as tk
 from . import gui_window_main, tabbed_view, py_iface
 
 import os, os.path as pth
@@ -8,5 +9,6 @@ def start():
     numericalScreen =gui_window_main.DefaultNumericalDisplay()
     tabs=tabbed_view.TabbedView(numericalScreen)
     tabs.buildTab(pth.abspath(pth.join(__base__,'./scenes')))
-    tabs.pack()
+    tabs.pack(anchor=tk.NW,fill=tk.BOTH,expand=True,)
     numericalScreen.mainloop()
+    
