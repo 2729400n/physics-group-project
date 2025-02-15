@@ -52,3 +52,8 @@ image.png
 .vscode/settings.json
 *.sqlite3
 *.db
+**/__pycache__/
+# *.png
+.vscode/**
+**/*.dat
+BoxInBox.png
