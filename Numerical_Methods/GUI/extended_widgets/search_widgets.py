@@ -15,7 +15,16 @@ class SearchField(tk.Frame):
     
     def setup(self):
         self.pattern = tk.StringVar(self,"","search_query")
-        self.search_entry  = ttk.Entry(self,)
+        self.search_entry  = ttk.Entry(self,name='searchbox',textvariable=self.pattern,validate='all',class_="Searchbox")
+        self.search_entry.bind_class('Searchbox','<Return>',SearchField._search)
+        self.search_entry.pack(fill=tk.BOTH,expand=True)
+        
+    @staticmethod
+    def _search(evt:'tk.Event[tk.Entry]'):
+        searhVar = evt.widget.cget('textvariable')
+        queryString = searhVar.get()
+        evt.widget.event_generate('<<Search>>')
+        
     def search(self,hayStack,regex=False,single = False):
         queryString = self.pattern.get()
         if isinstance(hayStack,(abc.Iterable,typing.Iterable)):
@@ -55,8 +64,12 @@ class SearchField(tk.Frame):
                 
 
 if __name__ == '__main__':
-    sfield = SearchField()
+    root = tk.Tk()
+    sfield = SearchField(root)
     sfield.pattern.set('test')
     print(sfield.search({'test':0,'test2':1,'none':4,' some': 42}))
+    sfield.pack(fill=tk.BOTH,expand=True)
+    root.wm_geometry('640x480+0+0')
+    root.mainloop()
 # sfield.pack(file=tk.BOTH,expand=True)
 # tk.mainloop()
