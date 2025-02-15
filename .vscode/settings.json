@@ -45,7 +45,8 @@
     "python-envs.defaultPackageManager": "ms-python.python:conda",
     "python.terminal.activateEnvironment": false,
     "python.createEnvironment.contentButton": "show",
-    "python.terminal.activateEnvInCurrentTerminal": false
+    "python.terminal.activateEnvInCurrentTerminal": false,
+    "python.autoComplete.extraPaths": ["C:\\Users\\Kevnn\\anaconda3\\envs\\phys_proj\\Lib\\"]
     // ,"terminal.integrated.env.windows": {,
 
     //     "PYTHONDONTWRITEBYTECODE":"1"
