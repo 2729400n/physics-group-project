@@ -104,6 +104,21 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
     return XLin, YLin, polyProduct
 
 
-def InterpolateGrid(Grid:'np.ndarray'):
+def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray'):
     (n,m) = Grid.shape
+    XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(n,m)
+    xOptimal,xCov=optimist.curve_fit(XPolyNomial,Grid[0,:],Grid[0,:])
+    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Grid[0,:],Grid[:,0].T)
+    
+    def __innerProduct(x:np.float64,y:np.float64):
+        nonlocal xOptimal,yOptimal
+        def _innerProduct(x,*args):
+            nonlocal xOptimal,yOptimal
+            return XYPolyNomial(x,y,xOptimal,yOptimal,*args)
+        sig = inspect.signature(_innerProduct)
+        
+        # TODO add a function signature to _innerProduct before returning it
+        return _innerProduct
+    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Grid[0,:],Grid[0,:])
+    
     
