@@ -54,8 +54,9 @@ class SearchField(tk.Frame):
             return places
                 
 
-sfield = SearchField()
-sfield.pattern.set('test')
-print(sfield.search({'test':0,'test2':1,'none':4,' some': 42}))
+if __name__ == '__main__':
+    sfield = SearchField()
+    sfield.pattern.set('test')
+    print(sfield.search({'test':0,'test2':1,'none':4,' some': 42}))
 # sfield.pack(file=tk.BOTH,expand=True)
 # tk.mainloop()
