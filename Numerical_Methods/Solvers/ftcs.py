@@ -1,3 +1,7 @@
+# License: None
+# Author: P3 Comp. 2025 Lab Group B ( Electrostatics )
+# Description: A module of utilities for the Numerical Solver
+
 # Load modules and imports neceasasary 
 
 import numpy as np

@@ -28,7 +28,13 @@ class TestUtils(unittest.TestCase):
         fixed_conditions = lambda x: np.ones_like(x)  #Constant boundary
         start_shape = lambda x: np.zeros_like(x)
 
-        ys, xs, potential = laplace_ode_solver(size, fixed_conditions, start_shape, (1,1))
+        ys, xs, potential = laplace_ode_solver(size, fixed_conditions, start_shape, (1,1),overlaySaver=False)
+        fig=plt.figure()
+        plt.imshow(potential)
+        plt.suptitle('LP Solver!')
+        plt.colorbar()
+        plt.savefig('test_legacy_ode_solver_simple.png')
+        
         self.assertTrue(np.allclose(potential, 1)) # expect potential to converge to boundary value
 
 

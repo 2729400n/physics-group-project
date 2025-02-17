@@ -21,14 +21,17 @@ class RealTimeFigure(tk.Frame):
             
         self.canvas.draw()
         self.canvas.get_tk_widget().pack()
-        self.toolbar = mb_tkagg.NavigationToolbar2Tk(self.canvas,self)
-        self.toolbar.update()
+        # self.toolbar = mb_tkagg.NavigationToolbar2Tk(self.canvas,self)
+        # self.toolbar.update()
         self.pack()
         self.figure.clear(False)
         self.figure
         self.update_thread = None
         self._should_run_thread = False
-        
+    
+    def get_tk_widget(self):
+        return self.canvas.get_tk_widget()
+    
     def draw(self):
        self.frame=self.swapchain[self.framebuffer]
        self.framebuffer = (self.framebuffer+1)%self.swpachain_size
@@ -63,7 +66,8 @@ class RealTimeFigure(tk.Frame):
             raise threading.ThreadError('The realtime thread is already running you must stop it before you can a new one!')
     
     def update(self):
-        pass
+        super().update()
+
 
 def timerFactory():
     clock = 0
@@ -81,30 +85,33 @@ def timerFactory():
     return timer,delayer
     
 if __name__ == '__main__':
-    counter,delayC = timerFactory()
-    rlayer = sched.scheduler(timefunc=counter,delayfunc=delayC)
-    print('inited tiner')
+    # counter,delayC = timerFactory()
+    # rlayer = sched.scheduler(timefunc=counter,delayfunc=delayC)
+    # print('inited tiner')
     
-    rlayer.enter(22,0,lambda:print('elem',22,counter.__dict__.get('t')))
-    print('Added Wait time',22)
+    # rlayer.enter(22,0,lambda:print('elem',22,counter.__dict__.get('t')))
+    # print('Added Wait time',22)
     
-    rlayer.enter(8,0,lambda:print('elem',8,counter.__dict__.get('t')))
-    print('Added Wait time',8) 
+    # rlayer.enter(8,0,lambda:print('elem',8,counter.__dict__.get('t')))
+    # print('Added Wait time',8) 
     
-    rlayer.enter(16,0,lambda:print("Hello\nWorld!"))
-    print('Added Wait time',16)
+    # rlayer.enter(16,0,lambda:print("Hello\nWorld!"))
+    # print('Added Wait time',16)
     
-    rlayer.enter(12,99,lambda:print('elem',12,counter.__dict__.get('t')))
-    print('Added Wait time',12)
+    # rlayer.enter(12,99,lambda:print('elem',12,counter.__dict__.get('t')))
+    # print('Added Wait time',12)
     
-    rlayer.enter(5.6,0,lambda:print('elem',5.6,counter.__dict__.get('t')))
-    print('Added Wait time',5.6)
+    # rlayer.enter(5.6,0,lambda:print('elem',5.6,counter.__dict__.get('t')))
+    # print('Added Wait time',5.6)
     
-    rlayer.enter(4,0,lambda:print('elem',4,counter.__dict__.get('t')))
-    print('Added Wait time',4)
+    # rlayer.enter(4,0,lambda:print('elem',4,counter.__dict__.get('t')))
+    # print('Added Wait time',4)
     
-    rlayer.run(True)
-# root= tk.Tk()
-# figureFrame = RealTimeFigure(root)
-# figureFrame.pack()
-# root.mainloop()
+    # rlayer.run(True)
+    root= tk.Tk()
+    figureFrame = RealTimeFigure(root)
+    figureFrame.pack()
+    ax=figureFrame.figure.add_subplot(111)
+    ax.plot(xs:=[i for i in range(200)],np.sin(xs))
+    figureFrame.canvas.draw()
+    root.mainloop()

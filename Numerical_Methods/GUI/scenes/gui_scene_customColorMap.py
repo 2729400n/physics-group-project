@@ -96,13 +96,13 @@ class CMapper(tk.Frame):
         button.grid(row=2,sticky='NW')
         button.grid_propagate(True)
         button.grid_columnconfigure(0)
-        labelframe.grid(row=1,sticky='NW')
+        labelframe.grid(row=1,sticky='NW',padx=5)
         
-        self.example_heatmap = matplotlib.figure.Figure()
-        self.test_axes = self.example_heatmap.add_subplot(111)
+        self.example_heatmap = matplotlib.figure.Figure(figsize=(3,3),dpi=64,tight_layout=True)
+        self.test_axes = None
         self.example_display = mb_tkagg.FigureCanvasTkAgg(self.example_heatmap,master=self)
         self.example_canvas=self.example_display.get_tk_widget()
-        self.example_canvas.grid(row=1,column=1,sticky='NE')
+        self.example_canvas.grid(row=1,column=1,sticky='NE',padx=5,pady=5)
         self.example_display.draw()
         
         self.test_grid, _ = np.mgrid[:1024,:100]
@@ -119,6 +119,8 @@ class CMapper(tk.Frame):
         key =self.cmaps.get(index[0])
         if self.key!=key:
             self.example_display.blit()
+            if self.test_axes is None:
+                self.test_axes = self.example_heatmap.add_subplot(111)
             self.test_axes.cla()
             sel_cmap = self.file.get(key,self.cmap)
             self.test_axes.imshow(self.test_grid,cmap=sel_cmap)

@@ -59,7 +59,7 @@ defualtResolutions = {'1080i':'Nice Try!☺'}
 
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1)):
+def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1),overlaySaver=True):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
 
@@ -83,7 +83,11 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
     Ys = np.arange(0,w_x_h[1]+resoultion[1],resoultion[1])
     # Frames  = np.zeros((2,int(pixel_w_X_h[1]),int(pixel_w_X_h[0])))
     Frames  = np.zeros((2,Ys.shape[0],Xs.shape[0]))
-    Frames[0],overlay = startingshape(Frames[0],retoverlay=True)
+    if overlaySaver:
+        Frames[0],overlay = startingshape(Frames[0],retoverlay=True)
+    else:
+        Frames[0] = startingshape(Frames[0])
+        overlay=None
     i = 0
     # TODO: possibly remove while loop, its too messy.
     while True:
@@ -93,7 +97,11 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
         BackwardVSpace_A2f = Frames[i%2, :-2, 1:-1]
 
         Frames[(i+1)%2, 1:-1, 1:-1] = 0.25*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f+BackwardVSpace_A2f)
-        Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2],overlay=overlay)
+        if overlay is not None:
+            Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2],overlay=overlay)
+        else:
+            Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2])
+        
         indexes=Frames[i%2]!=0
         diff = (np.abs((Frames[0][indexes]-Frames[1][indexes]))/Frames[i%2][indexes])
         i= (i+1)
