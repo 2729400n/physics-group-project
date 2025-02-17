@@ -34,7 +34,7 @@ def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: fl
         (grid_x-cx)**2 + (grid_y-cy)**2, r**2, r)
     # Apply anti-aliasing using Gaussian blur
     # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
-    vals = val
+    vals = (val,0) if not isinstance(val,bool) else (val,not val)
     # Threshold to create a binary image (0 or 1)
     pixelated_circle = np.where(circle_mask == True, *vals)
 
@@ -42,6 +42,39 @@ def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: fl
     if Grid is not None:
         if (grid_class != tuple):
             return Grid*pixelated_circle
+
+    return pixelated_circle
+
+def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
+    # First solve for a qudrant the apply rotations
+    operations = [[lambda x, y, z:np.abs(
+        x-y) <= z]*2, [lambda x, y, z:x <= y, lambda x, y, z:x >= y]]
+    grid_class = type(Grid)
+
+    # if all we want is a  circle
+    x = 2*int(r//dx)+5
+    y = 2*int(r//dy)+5
+
+    if type(Grid) == tuple:
+        Grid = np.full(Grid, 1)
+
+    # if we inplace into a grid
+    if Grid is not None:
+        y, x = Grid.shape
+        # print(x,y)
+
+    grid_x, grid_y = np.mgrid[:y, :x]
+
+    # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius
+    # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
+
+    circle_mask = operations[bool(fill)][bool(clear)](
+        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, r)
+    # Apply anti-aliasing using Gaussian blur
+    # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
+    vals = (val,) if not isinstance(val,bool) else (val,not val)
+    # Threshold to create a binary image (0 or 1)
+    pixelated_circle = circle_mask ==True# np.where(circle_mask == True, *vals)
 
     return pixelated_circle
 
