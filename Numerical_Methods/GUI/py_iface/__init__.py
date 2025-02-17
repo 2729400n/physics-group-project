@@ -13,6 +13,9 @@ import tkinter.messagebox as msgbox
 typePattern = re.compile(r'[^\|\s]*(?=([.*])*)')
 print(re.match(typePattern,"int | x").group())
 
+class Bundler:
+    def __init__(self,entry:'tk.StringVar|tk.BooleanVar|tk.IntVar|tk.DoubleVar',field:'ttk.Entry|ttk.Checkbutton',iframe:'tk.LabelFrame|ttk.Frame|tk.Frame'):
+        pass
 
 def toBytes(x:str):
     return x.encode('ascii','strict')
@@ -103,7 +106,7 @@ def  add_Field_Var(master, field_name, field_type,field_value=None):
         entry= tk.IntVar(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame, name=field_name,text=field_name, validate='all',validatecommand=lambda x: x.isnumeric(), textvariable=entry)
     if(field_type==float):
-        entry= tk.BooleanVar(master, value=field_value, name=varname)
+        entry= tk.DoubleVar(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all',validatecommand=lambda x: x.isdecimal(), textvariable=entry)
     else:
         entry= tk.StringVar(master, value=field_value, name=varname)
@@ -116,10 +119,9 @@ def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
     msgbox.showinfo(title=func.__name__,message=f"{func(**(kwargs))}")
     return None
 
-def makeFunctionCallable(func:'function'):
+def makeFunctionCallable(func:'function',master=None):
     argMapping=getArgsToType(func)
-    root=tk.Tk()
-    wmain=ttk.Labelframe(root,width=640,height=480, text=func.__name__)
+    wmain=ttk.Labelframe(master=master,width=640,height=480, text=func.__name__)
     stores = {}
     for i in  argMapping:
         store,field, iframe =add_Field_Var(wmain,i,argMapping[i])
@@ -137,7 +139,7 @@ def makeFunctionCallable(func:'function'):
     wmain.grid_rowconfigure(0,weight=1)
     
     
-    root.mainloop()
+    master.mainloop()
 if __name__ == '__main__':
     bin_gui = gui_call_wrapper(int,number=int)(bin)
     makeFunctionCallable(bin_gui)

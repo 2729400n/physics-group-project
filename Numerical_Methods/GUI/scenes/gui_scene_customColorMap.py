@@ -163,7 +163,7 @@ class CMapper(tk.Frame):
             self.current_sel=key
             self.cmap =  self.file[key]
             print(self.cmap)
-           
+        mplib.rc('image', cmap=self.cmap)   
         print(args)
 scene = CMapper
 if __name__ == '__main__':

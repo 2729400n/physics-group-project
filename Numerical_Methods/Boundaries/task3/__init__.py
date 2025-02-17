@@ -6,9 +6,10 @@ from ...Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,lap
 import typing
 import tkinter as tk
 from matplotlib.axes import Axes
+from ..task import Task
 
-
-class Task2(typing.Callable, typing.Protocol):
+class Task3( typing.Protocol):
+    name = "HighSpeed"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         self.axes = axes
         self.boundaryCondition = None
@@ -27,8 +28,6 @@ class Task2(typing.Callable, typing.Protocol):
         Xs, Ys = self.Xs,self.Ys
         axes.quiver(Xs, Ys, u_v[:,:,0], u_v[:,:,1], color='b', scale=0.1, scale_units='xy') # Adjust scale and color
         
-    def __call__(self, *args, **kwargs):
-        pass
 
     def run(self):
         xs,ys,self.grid=laplace_ode_solver_continue(self.grid,self.boundaryCondition)
