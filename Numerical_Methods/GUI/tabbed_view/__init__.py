@@ -2,12 +2,15 @@ import importlib.machinery
 import importlib.metadata
 import importlib.simple
 import importlib.util
+from importlib.machinery import ModuleSpec,SourceFileLoader,PathFinder
+
 import tkinter as tk
 import tkinter.ttk as ttk
 from typing import Iterable
 
 import importlib
 import os, os.path as pth
+import sys
 
 __base__ = pth.abspath(pth.dirname(__file__))
 
@@ -26,9 +29,15 @@ class TabbedView(ttk.Notebook):
             if i.startswith('gui_scene'):
                 # print(i)
                 ldr = importlib.machinery.SourceFileLoader
-                finder =importlib.machinery.FileFinder(dir,(ldr,['.py']))
-                mod= finder.find_spec(i.removesuffix('.py'))
+                # finder =importlib.machinery.FileFinder(dir,(ldr,['.py']))
+                
+                # mod= finder.find_spec(i.removesuffix('.py'))
+                modname =f'Numerical_Methods.GUI.scenes.{i.removesuffix('.py')}'
+                modorigin = pth.join(dir,i)
+                mod =ModuleSpec(modname,origin=modorigin,loader=SourceFileLoader(modname,modorigin),is_package=False)
+                # mod.name=f'{i.removesuffix('.py')}'
                 scene_module=importlib.util.module_from_spec(mod)
+                scene_module.__file__ = modorigin
                 importlib.machinery.SourcelessFileLoader.exec_module(scene_module.__loader__,scene_module)
                 scene =(scene_module.__dict__.get('scene'))
                 if scene != None:
