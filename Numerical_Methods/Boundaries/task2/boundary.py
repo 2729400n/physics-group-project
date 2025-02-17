@@ -15,9 +15,6 @@ def geometryFactory(val=1.0,r=35,cx=50,cy=100,relative=False):
                 Gridder = overlay = circle(cx,cy,r,fill=True,clear=True,Grid=(*Grid.shape,))
             else:
                 overlay = Gridder
-            
         Grid = overlay*Grid
-        if retoverlay:
-            return Grid, overlay
         return Grid
     return endToEndLine
