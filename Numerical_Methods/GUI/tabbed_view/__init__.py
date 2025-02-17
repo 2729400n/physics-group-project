@@ -3,6 +3,7 @@ import importlib.metadata
 import importlib.simple
 import importlib.util
 from importlib.machinery import ModuleSpec,SourceFileLoader,PathFinder
+from importlib.util import find_spec,module_from_spec
 
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -13,9 +14,9 @@ import os, os.path as pth
 import sys
 
 __base__ = pth.abspath(pth.dirname(__file__))
+__base_package__ = pth.abspath(pth.join(__base__,'..','..'))
 
- 
- 
+
 
 class IScene(tk.Widget):
     name:str
