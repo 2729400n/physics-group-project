@@ -130,9 +130,9 @@ def makeFunctionCallable(func:'function'):
     btn.bind_class('Submit','<Button-1>',lambda ev:callFunc(ev,func,**stores))
     btn.grid()
     
-    root.wm_geometry('640x480')
-    wmain.master.wm_geometry('640x480')
-    wmain.grid(sticky='nw',)
+    # root.wm_geometry('640x480')
+    # wmain.master.wm_geometry('640x480')
+    wmain.grid(sticky='nw',padx=5,pady=5)
     wmain.grid_columnconfigure(0,weight=1)
     wmain.grid_rowconfigure(0,weight=1)
     

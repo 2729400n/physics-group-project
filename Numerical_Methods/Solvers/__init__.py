@@ -1,3 +1,7 @@
+# License: None
+# Author: P3 Comp. 2025 Lab Group B ( Electrostatics )
+# Description: The solver submodule initializer 
+
 from .ftcs import laplace_ode_solver
 import numpy as np
 

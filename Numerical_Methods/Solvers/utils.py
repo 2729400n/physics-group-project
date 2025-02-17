@@ -1,4 +1,4 @@
-# License: Glasgow University Student License 
+# License: None
 # Author: P3 Comp. 2025 Lab Group B ( Electrostatics )
 # Description: A module of utilities for the Numerical Solver
 

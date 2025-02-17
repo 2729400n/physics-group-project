@@ -1,3 +1,5 @@
+# License: None
+# Author: P3 Comp. 2025 Lab Group B ( Electrostatics )
 # Description: This script generates a custom colormap for the heatmap
 
 import matplotlib.colors as mcolors, numpy as np
