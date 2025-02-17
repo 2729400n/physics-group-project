@@ -5,11 +5,12 @@ from ...Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,lap
 import typing
 import tkinter as tk
 from matplotlib.axes import Axes
+from ..task import Task
 
 
-rc('image', cmap='PiYG')
 
-class Task1(typing.Callable, typing.Protocol):
+class Task1(Task):
+    name="Anulus"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         self.axes = axes
         self.boundaryCondition = None

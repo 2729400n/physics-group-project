@@ -3,57 +3,74 @@ import os.path as pth
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from ... import Boundaries as tasks
+from ... import Boundaries as tasks_module
+from .. import py_iface
+
+import matplotlib.backend_tools as mb_tools, matplotlib.backend_managers as mb_managers, matplotlib.backends.backend_tkagg as mb_tkagg
+import matplotlib.figure
+from ..extended_widgets.realtime_update_figure import RealTimeFigure
+
+import numpy as np
 
 __base__ = pth.abspath(pth.dirname(__file__))
 
 class TasksFrame(tk.Frame):
-    name='ColourMaps'
+    name='TaskSolver'
     def __init__(self, master=None,*args,**kwargs):
-        self._color_map_path = kwargs.get('dir',None)
-        if self._color_map_path is None:
-            self._color_map_path = os.getenv('NM_CMAP_DIR',None)
-            if self._color_map_path is None:
-                self._color_map_path = pth.abspath(pth.join(__base__,'../','../','./utils/res/default_cmaps'))
-        self.ftype = None
-        self.loc = None
-        self.cmap=None
+        
         super().__init__( master)
+        self.current_task = None
         self.createWidgets()
-        self.pack(anchor=tk.NW,fill=tk.BOTH,expand=True)
-        
+        self.propagate(True)
         self.update()
-        
+    
+    def load_Tasks(self):
+        self.taskMap = taskMap = self.controlSets = dict()
+        for task in tasks_module.tasks:
+           curr_task:tasks_module.Task=task(self._heatmap)
+           taskMap[curr_task.name]=curr_task
 
     
     def createWidgets(self):
-        L1 = tk.Label(self, text='Color Map',justify='center')
-        labelframe = tk.LabelFrame(self)
-        cmaps=self.cmaps=tk.Listbox(labelframe, selectmode=tk.SINGLE)
-        cmapsList=self.getAvailableCMaps()
-        cmaps.insert(0,*cmapsList)
-        cmaps.grid(row=1,sticky='NW')
-        cmaps.bind('<<ListboxSelect>>',self.selected_cmap,add='+')
-        cmaps.bind('<KeyPress-Up>',self.handle_keys,'+')
-        cmaps.bind('<KeyPress-Down>',self.handle_keys,'+')
-        self.cmaps.selection_handle(self.selected_cmap)
-        self.current_sel = cmaps.get(0,0)
-        self.key = None
+        
+        # Create root label
+        L1 = tk.Label(self, text='Solver',justify=tk.LEFT)
         L1.grid(row=0,sticky='NE',column=0,columnspan=1,)
         L1.grid_propagate(True)
         L1.grid_columnconfigure(0,weight=1)
-        button = tk.Button(labelframe, text='Select Color Map', command=self.submit)
+        
+        self._heatmap = matplotlib.figure.Figure(figsize=(3,3),dpi=64,tight_layout=True)
+        
+        labelframe = tk.LabelFrame(self)
+        labelframe.grid(row=1,sticky='NW',padx=5)
+        
+        self.load_Tasks()
+        
+        taskList=self.taskList=tk.Listbox(labelframe, selectmode=tk.SINGLE)
+        self.Iframe :'ttk.Frame|tk.Frame|tk.LabelFrame'=None
+        taskList.insert(0,*self.taskMap)
+        taskList.grid(row=1,sticky='NW')
+        taskList.grid_propagate(True)
+        taskList.bind('<<ListboxSelect>>',self.selected_cmap,add='+')
+        taskList.bind('<KeyPress-Up>',self.handle_keys,'+')
+        taskList.bind('<KeyPress-Down>',self.handle_keys,'+')
+        taskList.selection_handle(self.selected_cmap)
+        self.current_sel = taskList.get(0,0)
+        self.key = None
+        
+        
+        button = tk.Button(labelframe, text='Select Task', command=self.submit)
         button.grid(row=2,sticky='NW')
         button.grid_propagate(True)
         button.grid_columnconfigure(0)
-        labelframe.grid(row=1,sticky='NW',padx=5)
         
-        self.example_heatmap = matplotlib.figure.Figure(figsize=(3,3),dpi=64,tight_layout=True)
-        self.test_axes = None
-        self.example_display = mb_tkagg.FigureCanvasTkAgg(self.example_heatmap,master=self)
-        self.example_canvas=self.example_display.get_tk_widget()
-        self.example_canvas.grid(row=1,column=1,sticky='NE',padx=5,pady=5)
-        self.example_display.draw()
+        
+        
+        self._axes = None
+        self._display = mb_tkagg.FigureCanvasTkAgg(self._heatmap,master=self)
+        self._canvas=self._display.get_tk_widget()
+        self._canvas.grid(row=1,column=1,sticky='NE',padx=5,pady=5)
+        self._display.draw()
         
         self.test_grid, _ = np.mgrid[:1024,:100]
         
@@ -61,27 +78,24 @@ class TasksFrame(tk.Frame):
         
 
     def selected_cmap(self,*args):
-        index:tuple = self.cmaps.curselection()
+        index:tuple = self.taskList.curselection()
         
         if(index.__len__()==0):
             return
         
-        key =self.cmaps.get(index[0])
+        key:tasks_module.Task =self.taskList.get(index[0])
+        print(key)
+        
         if self.key!=key:
-            self.example_display.blit()
-            if self.test_axes is None:
-                self.test_axes = self.example_heatmap.add_subplot(111)
-            self.test_axes.cla()
-            sel_cmap = self.file.get(key,self.cmap)
-            self.test_axes.imshow(self.test_grid,cmap=sel_cmap)
-            label = ' '.join([ i.capitalize() for i in f"{key}".split('_')])
-            self.test_axes.set_ylabel(label)
-            self.test_axes.xaxis.set_visible(False)
-            self.example_display.draw()
-            self.key=key
+            self._display.blit()
+            self._heatmap.clf()
+            curr_task =self.currnent_task = self.taskMap[key]
+            print(curr_task)
+
+            
     
-    def handle_keys(self,evt,*args,**kwargs):
-        index:tuple = self.cmaps.curselection()
+    def handle_keys(self,evt:'tk.Event[tk.Listbox]',*args,**kwargs):
+        index:tuple = self.taskList.curselection()
         print(evt)
         if(index.__len__()==0):
             return
@@ -89,17 +103,17 @@ class TasksFrame(tk.Frame):
         
         if(evt.keysym=='Up'):
             new_index =  max(0,(index -1) % self.cmaps.size())
-            self.cmaps.selection_clear(index)
-            self.cmaps.selection_set(new_index)
-            self.cmaps.activate(new_index)
-            self.cmaps.event_generate('<<ListboxSelect>>')
+            self.taskList.selection_clear(index)
+            self.taskList.selection_set(new_index)
+            self.taskList.activate(new_index)
+            self.taskList.event_generate('<<ListboxSelect>>')
             
         elif(evt.keysym=='Down'):
             new_index =  (index +1) % self.cmaps.size()
-            self.cmaps.selection_clear(index)
-            self.cmaps.selection_set(new_index)
-            self.cmaps.activate(new_index)
-            self.cmaps.event_generate('<<ListboxSelect>>')
+            self.taskList.selection_clear(index)
+            self.taskList.selection_set(new_index)
+            self.taskList.activate(new_index)
+            self.taskList.event_generate('<<ListboxSelect>>')
 
     def submit(self,*args):
         print(self.key)
@@ -114,3 +128,5 @@ class TasksFrame(tk.Frame):
             print(self.cmap)
            
         print(args)
+        
+scene = TasksFrame

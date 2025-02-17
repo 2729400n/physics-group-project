@@ -23,6 +23,7 @@ class IScene(tk.Widget):
 class TabbedView(ttk.Notebook):
     def __init__(self, master=None,  **kw):
         super().__init__(master,width=640, height=480, **kw)
+        
 
     def buildTab(self,dir):
         for i in os.listdir(dir) :
@@ -44,10 +45,18 @@ class TabbedView(ttk.Notebook):
                 if scene != None:
                     curr_scene:IScene = scene(self)
                     self.add(curr_scene,state='normal',sticky='nesw',text=curr_scene.name or '',)
+                    
                 else:
                     print(scene_module, 'No Scene')
-                
-        self.pack()
+        self.bind('<Configure>',self.resize_subviews,'+')
+    def resize_subviews(self,evt:'tk.Event[tk.Frame]'):
+        
+        print(evt.type,evt.width,evt.height)
+        if(evt.type == 22):
+            tabs:'list[tk.Wm|tk.Tk|tk.Toplevel|tk.Frame]' = self.tabs()
+            tabs = [] if tabs is None else tabs
+            
+
 
 if __name__=='__main__':
     root=tk.Tk()
