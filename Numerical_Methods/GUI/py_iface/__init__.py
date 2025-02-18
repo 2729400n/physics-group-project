@@ -10,6 +10,8 @@ import tkinter.constants as tkconst
 import tkinter.simpledialog as diag
 import tkinter.messagebox as msgbox
 
+import numpy as np
+
 typePattern = re.compile(r'[^\|\s]*(?=([.*])*)')
 print(re.match(typePattern,"int | x").group())
 
@@ -77,17 +79,18 @@ def argumentToTypeFactory(extras:dict = None):
         if(currtype is None):
             transTable.get(type(val))
         print(currtype)
-        if currtype is None:
-            return str
         return currtype
         
     return arguments
 
 defaultArgsToTypes = argumentToTypeFactory()
 
-def getArgsToType(func:'function',argumetMapper = defaultArgsToTypes):
+def getArgsToType(func:'function',argumetMapper = defaultArgsToTypes,classType=False,instance=None):
     func_info = inspect.getfullargspec(func)
-    arg_types = {i:argumetMapper(func_info.annotations.get(i),({**(func_info.kwonlydefaults or {})}).get(i)) for i in [*func_info.args,*func_info.kwonlyargs]}
+    arg_types = dict()
+    for i in [*func_info.args,*func_info.kwonlyargs]:
+        if(classType==True and i =='self'):continue
+        arg_types[i]=argumetMapper(func_info.annotations.get(i),({**(func_info.kwonlydefaults or {})}).get(i))
     
     if (func_info.varargs) is not None:
         arg_types[func_info.varargs]=list
@@ -109,18 +112,45 @@ def  add_Field_Var(master, field_name, field_type,field_value=None):
         entry= tk.DoubleVar(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all',validatecommand=lambda x: x.isdecimal(), textvariable=entry)
     else:
-        entry= tk.StringVar(master, value=field_value, name=varname)
+        entry= tk.Variable(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all', textvariable=entry)
     return entry,entry_field,innerFrame
 def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
     form = ev.widget.master
+    print(args,kwargs)
     for i in kwargs:
-        print(i,kwargs[i].get())
-    msgbox.showinfo(title=func.__name__,message=f"{func(**(kwargs))}")
+        
+        if isinstance(kwargs[i],(tk.Variable,tk.StringVar,tk.BooleanVar,tk.IntVar,tk.DoubleVar)):
+            arg = kwargs[i].get()
+            if  isinstance(kwargs[i],tk.Variable):
+                try:
+                    if arg.strip() =='True':
+                        arg=True
+                    elif arg.strip() =='False':
+                        arg=False
+                    else:
+                        raise ValueError()
+
+                except:
+                    try:
+                        arg=int(arg)
+                    except:
+                        print('not int')
+                        try:
+                            arg=np.float64(arg)
+                        except:
+                            print('not float')
+                            arg=str(arg)
+            print(arg,type(arg))
+            kwargs[i]=arg
+    
+    returnValue=func(**(kwargs))
+    if returnValue is not None:
+        msgbox.showinfo(title=func.__name__,message=f"{returnValue}")
     return None
 
-def makeFunctionCallable(func:'function',master=None):
-    argMapping=getArgsToType(func)
+def makeFunctionCallable(func:'function',master=None,classType=False,instance=None,direction='left'):
+    argMapping=getArgsToType(func,classType=classType)
     wmain=ttk.Labelframe(master=master,width=640,height=480, text=func.__name__)
     stores = {}
     for i in  argMapping:
@@ -129,17 +159,12 @@ def makeFunctionCallable(func:'function',master=None):
         iframe.grid(sticky='w')
         stores.setdefault(i,store)
     btn=ttk.Button(wmain,text="Submit", class_='Submit', name='submit_button')
-    btn.bind_class('Submit','<Button-1>',lambda ev:callFunc(ev,func,**stores))
+    btn.bind('<Button-1>',lambda ev:callFunc(ev,func,**stores))
     btn.grid()
     
     # root.wm_geometry('640x480')
     # wmain.master.wm_geometry('640x480')
-    wmain.grid(sticky='nw',padx=5,pady=5)
-    wmain.grid_columnconfigure(0,weight=1)
-    wmain.grid_rowconfigure(0,weight=1)
-    
-    
-    master.mainloop()
+    wmain.pack(fill=tk.BOTH,expand=True,padx=5,pady=5,side=direction,anchor=tk.NW)
 if __name__ == '__main__':
     bin_gui = gui_call_wrapper(int,number=int)(bin)
     makeFunctionCallable(bin_gui)
