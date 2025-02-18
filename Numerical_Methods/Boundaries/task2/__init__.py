@@ -10,8 +10,8 @@ from ..task import Task
 class Task2(Task):
     name="EndtoEndLine"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        self.axes = axes
-        self.boundaryCondition = None
+        super().__init__()
+        
 
     def setup(self, height: int, width: int):
         grid = np.zeros(shape=(height,width),dtype=np.float64)

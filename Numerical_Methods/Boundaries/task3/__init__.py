@@ -1,3 +1,4 @@
+from matplotlib.figure import Figure
 from .boundary import highSpeedFactory as Boundary
 
 from matplotlib import pyplot as plt
@@ -8,11 +9,10 @@ import tkinter as tk
 from matplotlib.axes import Axes
 from ..task import Task
 
-class Task3( typing.Protocol):
+class Task3(Task):
     name = "HighSpeed"
-    def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        self.axes = axes
-        self.boundaryCondition = None
+    def __init__(self, figure: 'Axes|Figure' = None, *args, **kwargs):
+        super().__init__(figure,*args,**kwargs)
 
     def setup(self, height: int, width: int):
         grid = np.zeros(shape=(height,width),dtype=np.float64)

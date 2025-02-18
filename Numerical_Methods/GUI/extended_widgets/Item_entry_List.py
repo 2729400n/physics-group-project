@@ -10,9 +10,17 @@ class ItemType(enum.StrEnum):
 
 class ItemList(tk.Frame):
     def __init__(self,master,):
+        super().__init__(master)
+        self.setupList()
         self.item_num = 0
-        pass
-    def add_item(self,item_type: Literal['str','number','float','bool']):
+    
+    def setupList(self):
+        self.add_item_button = ttk.Button(self,text="Add Item")
+        self.add_item_button.grid(column=0,row=0,sticky='ne',padx=5,pady=5)
+    
+    
+        
+    def add_item(self,item_type: Literal['str','number','float','bool']=ItemType.STR):
         item_num = self.item_num
         match item_type:
             case 'str':
@@ -35,4 +43,16 @@ class ItemList(tk.Frame):
         new_item_section.grid(column=0,row=item_num,sticky='nsew',padx=5,pady=5)
         self.update()
         
+class TypedItemList(ItemList):
+    def __init__(self,master,item_type:"Literal['str','number','float','bool']"):
+        self.item_type = ItemType(item_type)
+        super().__init__(master)
+    
+    def add_item(self,):
+        return super().add_item(self.item_type.value)
         
+root=tk.Tk()
+typeList = TypedItemList(root,'str')
+typeList.pack(fill=tk.BOTH,expand=True,padx=5,pady=5,anchor=tk.NW)
+typeList.propagate(True)
+root.mainloop()
