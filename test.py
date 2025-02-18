@@ -155,3 +155,4 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     yOptimal,yCov=optimist.curve_fit(YPolyNomial,Grid[0,:],Grid[0,:])
     
     
+XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(5,5)
