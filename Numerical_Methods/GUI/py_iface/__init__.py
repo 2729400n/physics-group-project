@@ -36,7 +36,7 @@ def argumentToTypeFactory(extras:dict = None):
         transTable.update(**extras)
     def arguments(annot:'str|type'=None,val=None):
         nonlocal transTable
-        print('Annotation Type',type(annot))
+        # print('Annotation Type',type(annot))
         if val is None and annot is None:
             return str
         
@@ -53,7 +53,7 @@ def argumentToTypeFactory(extras:dict = None):
             currtype = None
         if(currtype is None):
             transTable.get(type(val))
-        print(currtype)
+        # print(currtype)
         return currtype
         
     return arguments
@@ -85,21 +85,34 @@ def gui_call_wrapper(*positional_types,**kwargs_types):
         posType_len = len(pos_types)
         for i in range(len(argspec.args)):
             if argspec.args[i] not in kw_types:
-                kwargs_types.update(argspec.args[i],arg2Type.get(argspec.args[i]))
+                kw_types.update(**{argspec.args[i]:arg2Type.get(argspec.args[i])})
                 if len(pos_types)<=i:
                     ntype = arg2Type.get(argspec.args[i])
                     if ntype is not None:
                         pos_types+=[ntype]
-                    
+        for i in argspec.kwonlyargs:
+            if argspec.kwonlyargs[i] not in kw_types:
+                kw_types.update(**{argspec.kwonlyargs[i]:arg2Type.get(argspec.kwonlyargs[i])})
+        # print('pos_types',pos_types)
+        # print('kw_types',kw_types)
         
         
         @functools.wraps(func)
         def arg_transform_wrapper(*args,**kwargs):
             nonlocal pos_types,kw_types,argspec
-            print(args,kwargs)
-            args = [pos_types[i](args[i].get()) for i in range(len(args))]
+            # print(args,kwargs)
+            
+            for i in range(len(args)):
+                if(isinstance(i,(tk.StringVar,tk.BooleanVar,tk.IntVar,tk.DoubleVar,extended_widgets.ItemList))):
+                    args+=[pos_types[i](args[i].get()) ]
+                    
             pos_args= [ *args]+ [ None for i in range(max(len(argspec.args) - len(args),0)) ]
-            kwargs = {i:kw_types[i](kwargs[i].get()) for i in kwargs}
+            
+            
+            for i in kwargs:
+                if(isinstance(i,(tk.StringVar,tk.BooleanVar,tk.IntVar,tk.DoubleVar,extended_widgets.ItemList))):
+                    kwargs.update(**{i:kw_types[i](kwargs[i].get())})
+            # print(args,kwargs)
             kargs={}
             for i in kwargs:
                 index =argspec.args.index(i)
@@ -107,6 +120,8 @@ def gui_call_wrapper(*positional_types,**kwargs_types):
                     pos_args[index]=kwargs[i]
                 else:
                     kargs[i]=kwargs[i]
+                    
+            # print(pos_args,kargs)
             if len(kargs.keys())==0:
                 return func(*pos_args)
             return func(*args,**kwargs)
@@ -130,20 +145,22 @@ def  add_Field_Var(master, field_name, field_type,field_value=None):
     elif(field_type==float):
         entry= tk.DoubleVar(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all',validatecommand=lambda x: x.isdecimal(), textvariable=entry)
-    elif(field_type==list):
-        entry_field = extended_widgets.TypedItemList(innerFrame,item_type='number')
+    elif(issubclass(field_type,list)):
+        entry_field = extended_widgets.TypedItemList(innerFrame,item_type='float')
         entry= entry_field
     else:
         entry= tk.Variable(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all', textvariable=entry)
     return entry,entry_field,innerFrame
 
+
+# Calling Function that begin call
 def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
     form = ev.widget.master
-    print(args,kwargs)
+    # print(args,kwargs)
     for i in kwargs:
         
-        if isinstance(kwargs[i],(tk.Variable,tk.StringVar,tk.BooleanVar,tk.IntVar,tk.DoubleVar,)):
+        if isinstance(kwargs[i],(tk.Variable,tk.StringVar,tk.BooleanVar,tk.IntVar,tk.DoubleVar,extended_widgets.ItemList)):
             arg = kwargs[i].get()
             if  isinstance(kwargs[i],tk.Variable):
                 try:
@@ -164,10 +181,11 @@ def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
                         except:
                             print('not float')
                             arg=str(arg)
-            print(arg,type(arg))
+            # print('callFunc before Storing:',arg,type(arg))
             kwargs[i]=arg
-    
-    returnValue=func(**(kwargs))
+    # print(kwargs)
+    returnValue=func(**kwargs)
+    # print(func)
     if returnValue is not None:
         msgbox.showinfo(title=func.__name__,message=f"{returnValue}")
     return None
@@ -177,11 +195,13 @@ def makeFunctionCallable(func:'function',master=None,classType=False,instance=No
     wmain=ttk.Labelframe(master=master,width=640,height=480, text=func.__name__)
     stores = {}
     for i in  argMapping:
+        print(i)
         store,field, iframe =add_Field_Var(wmain,i,argMapping[i])
         field.grid(sticky='w')
         iframe.grid(sticky='w')
-        stores.setdefault(i,store)
+    stores.update(**{i:store})
     btn=ttk.Button(wmain,text="Submit", class_='Submit', name='submit_button')
+    # print(stores)
     btn.bind('<Button-1>',lambda ev:callFunc(ev,func,**stores))
     btn.grid()
     

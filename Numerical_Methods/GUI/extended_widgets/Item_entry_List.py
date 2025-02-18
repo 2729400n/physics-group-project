@@ -35,6 +35,7 @@ def validateDouble(new_str,d_str=None,*args):
 class ItemList(tk.Frame):
     def __init__(self,master,):
         super().__init__(master)
+        self.item_type=None
         self.items=[]
         self.setupList()
         self.item_num = 0
@@ -51,7 +52,9 @@ class ItemList(tk.Frame):
         self.remove_item_button = ttk.Button(self._buttons_frame,text="Remove")
         self.remove_item_button.pack(fill=tk.NONE,expand=True, side=tk.RIGHT,padx=5,pady=5)
         self._buttons_frame.pack(side=tk.TOP,fill=tk.X,expand=True)
-        
+    
+    def type_select(self):
+        pass
         
         
     def add_item(self,evt:'tk.Event[tk.Button]',item_type: Literal['str','number','float','bool']=ItemType.STR):
@@ -76,6 +79,8 @@ class ItemList(tk.Frame):
         else:
             ttk.Entry(master=new_item_section,textvariable=var,validate='all',validatecommand=(self.validateDictionary[item_type],'%P')).grid(column=1,row=0,sticky='ne',padx=5,pady=5)
         ttk.Label(master=new_item_section,text=f'Item {item_num}:').grid(column=0,row=0,sticky='nw',padx=5,pady=5)
+        if self.item_type is not None:
+            ttk.Spinbox(master=new_item_section,,)
         new_item_section.pack(side=tk.TOP,padx=5,pady=5,before=self._buttons_frame)
         self.item_num+=1
         self._buttons_frame.pack()
@@ -103,8 +108,8 @@ class ItemList(tk.Frame):
     
 class TypedItemList(ItemList):
     def __init__(self,master,item_type:"Literal['str','number','float','bool']"):
-        self.item_type = ItemType(item_type)
         super().__init__(master)
+        self.item_type = ItemType(item_type)
     def setupList(self):
         super().setupList()
         self.add_item_button.bind('<Button-1>', self.add_item)
