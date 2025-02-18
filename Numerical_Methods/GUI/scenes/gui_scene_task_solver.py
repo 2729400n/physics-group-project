@@ -88,9 +88,6 @@ class TasksFrame(tk.Frame):
         button = tk.Button(labelframe, text='Select Task', command=self.submit)
         button.pack(fill=tk.BOTH,expand=False,side=tk.TOP,padx=5,pady=5,anchor=tk.NW)
         button.propagate(True)
-        
-        animation.FuncAnimation()
-        
         self.test_grid, _ = np.mgrid[:1024,:100]
         
 
