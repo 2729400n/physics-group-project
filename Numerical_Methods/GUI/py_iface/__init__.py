@@ -115,6 +115,7 @@ def  add_Field_Var(master, field_name, field_type,field_value=None):
         entry= tk.Variable(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all', textvariable=entry)
     return entry,entry_field,innerFrame
+
 def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
     form = ev.widget.master
     print(args,kwargs)
