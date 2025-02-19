@@ -2,10 +2,10 @@ import typing
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-
+# Our task Class
 class Task( typing.Protocol):
     
-    'An Iterface for the Tasks class only useful for intelisense.'
+    'An Iterface for the Tasks class should be subclassed to add new tasks'
     
     name:str='Task'
     def __init__(self, figure: 'Figure|Axes' = None, *args, **kwargs):
