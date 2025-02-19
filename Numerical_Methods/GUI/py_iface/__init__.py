@@ -1,3 +1,4 @@
+from enum import Enum
 import inspect, sys, functools
 import lzma, linecache, gzip, zipfile, zlib, base64, binascii
 import signal
@@ -12,6 +13,10 @@ import tkinter.messagebox as msgbox
 
 import numpy as np
 from .. import extended_widgets
+
+class ArgsState(Enum):
+    NOTARG = 'narg'
+    ISARG = 'isarg'
 
 typePattern = re.compile(r'[^\|\s]*(?=([.*])*)')
 print(re.match(typePattern,"int | x").group())
@@ -217,13 +222,20 @@ def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
         msgbox.showinfo(title=func.__name__,message=f"{returnValue}")
     return None
 
+def getDefault(arg,func):
+    func_sig=inspect.signature(func)
+    param=func_sig.parameters.get(arg)
+    if param is None:
+        return ArgsState.NOTARG,None
+    return ArgsState.ISARG,param.default
+
 def makeFunctionCallable(func:'function',master=None,classType=False,instance=None,direction='left'):
     argMapping=getArgsToType(func,classType=classType)
     wmain=ttk.Labelframe(master=master,width=640,height=480, text=func.__name__)
     stores = {}
     for i in  argMapping:
-        print(i)
-        store,field, iframe =add_Field_Var(wmain,i,argMapping[i])
+        defarg = getDefault(i,func)
+        store,field, iframe =add_Field_Var(wmain,i,argMapping[i],defarg[1] if defarg[0]==ArgsState.ISARG else None)
         field.grid(sticky='w')
         iframe.grid(sticky='w')
         stores.update(**{i:store})
