@@ -1,6 +1,15 @@
 import numpy as np
 import numba as nb
 
+
+
+def laplaceify(grid:np.ndarray,dx,dy):
+    dphi_dx_2 = (grid[:,:-2] - 2*grid[:,1:-1]+ grid[:,2:])/(dx**2)
+    dphi_dy_2 = (grid[:-2,:] - 2*grid[1:-1,:]+ grid[2:,:])/(dy**2)
+    residuals =dphi_dx_2+dphi_dy_2
+    abs_residuals = np.abs(residuals)
+    
+    return residuals, abs_residuals
 class ErrorCalculator:
     def __init__(self,valuesA, valuesB,func:'function'=lambda x:x):
         self.Avals:np.ndarray = valuesA
@@ -28,6 +37,4 @@ class ErrorCalculator:
     
     def findError(self):
         self.error=(self.Avals-self.Bvals)
-        
-        
-print(np.spacing(1))
+
