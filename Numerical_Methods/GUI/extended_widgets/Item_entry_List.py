@@ -80,7 +80,7 @@ class ItemList(tk.Frame):
             ttk.Entry(master=new_item_section,textvariable=var,validate='all',validatecommand=(self.validateDictionary[item_type],'%P')).grid(column=1,row=0,sticky='ne',padx=5,pady=5)
         ttk.Label(master=new_item_section,text=f'Item {item_num}:').grid(column=0,row=0,sticky='nw',padx=5,pady=5)
         if self.item_type is not None:
-            ttk.Spinbox(master=new_item_section,,)
+            ttk.Spinbox(master=new_item_section,)
         new_item_section.pack(side=tk.TOP,padx=5,pady=5,before=self._buttons_frame)
         self.item_num+=1
         self._buttons_frame.pack()
