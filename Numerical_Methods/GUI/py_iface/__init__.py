@@ -24,6 +24,31 @@ def toBytes(x:str):
     return x.encode('ascii','strict')
 
 
+def validateInt(new_str,d_str=None,*args):
+    if new_str=='':
+        return  True
+    try:
+        int(new_str)
+    except:
+        return False
+    return True
+
+def validateBool(new_str:str,d_str=None,*args):
+    if new_str=='':
+        return True
+    if (new_str.upper() in 'TRUE') or (new_str.upper() in 'FALSE'):
+        return True
+    else: return False
+
+def validateDouble(new_str,d_str=None,*args):
+    if new_str=='':
+        return True
+    try:
+        float(new_str)
+    except:
+        return False
+    return True
+    
         
     
 
@@ -130,7 +155,7 @@ def gui_call_wrapper(*positional_types,**kwargs_types):
     return partial_decorator
 
 fieldToWidget = {}
-def  add_Field_Var(master, field_name, field_type,field_value=None):
+def  add_Field_Var(master:'tk.Widget', field_name, field_type,field_value=None):
     varname =f'val_{field_name}'
     innerFrame =tk.LabelFrame(master,text=field_name)
     if(field_type==bool):
@@ -140,11 +165,13 @@ def  add_Field_Var(master, field_name, field_type,field_value=None):
         entry= tk.StringVar(master, value=field_value, name=varname)
         entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all', textvariable=entry)
     elif(field_type==int):
+        valInt=innerFrame.register(validateInt)
         entry= tk.IntVar(master, value=field_value, name=varname)
-        entry_field = ttk.Entry(innerFrame, name=field_name,text=field_name, validate='all',validatecommand=lambda x: x.isnumeric(), textvariable=entry)
+        entry_field = ttk.Entry(innerFrame, name=field_name,text=field_name, validate='all',validatecommand=(valInt,'%P'), textvariable=entry)
     elif(field_type==float):
+        valNum=innerFrame.register(validateDouble)
         entry= tk.DoubleVar(master, value=field_value, name=varname)
-        entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all',validatecommand=lambda x: x.isdecimal(), textvariable=entry)
+        entry_field = ttk.Entry(innerFrame,name=field_name,text=field_name, validate='all',validatecommand=(valNum,'%P'), textvariable=entry)
     elif(issubclass(field_type,list)):
         entry_field = extended_widgets.TypedItemList(innerFrame,item_type='float')
         entry= entry_field
@@ -199,7 +226,7 @@ def makeFunctionCallable(func:'function',master=None,classType=False,instance=No
         store,field, iframe =add_Field_Var(wmain,i,argMapping[i])
         field.grid(sticky='w')
         iframe.grid(sticky='w')
-    stores.update(**{i:store})
+        stores.update(**{i:store})
     btn=ttk.Button(wmain,text="Submit", class_='Submit', name='submit_button')
     # print(stores)
     btn.bind('<Button-1>',lambda ev:callFunc(ev,func,**stores))

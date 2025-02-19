@@ -25,6 +25,7 @@ class Task( typing.Protocol):
         else:
             raise TypeError(f'Got Class {figure.__class__} \r\nfigure= Must be a Figure or Axes Object')
         self.boundaryCondition = None
+        self.exposed_methods = [self.setup,self.run,self._show_Efield]
 
     def setup(self, height: int, width: int): ...
         
