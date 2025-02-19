@@ -8,7 +8,6 @@ from .. import py_iface
 
 import matplotlib.backend_tools as mb_tools, matplotlib.backend_managers as mb_managers, matplotlib.backends.backend_tkagg as mb_tkagg
 import matplotlib.figure
-import matplotlib.animation as animation
 from ..extended_widgets.realtime_update_figure import RealTimeFigure
 
 import numpy as np
@@ -33,7 +32,6 @@ class TasksFrame(tk.Frame):
            curr_task:tasks_module.Task=task()
            taskMap[curr_task.name]=curr_task
 
-    
     
     def createWidgets(self):
         
@@ -88,9 +86,11 @@ class TasksFrame(tk.Frame):
         button = tk.Button(labelframe, text='Select Task', command=self.submit)
         button.pack(fill=tk.BOTH,expand=False,side=tk.TOP,padx=5,pady=5,anchor=tk.NW)
         button.propagate(True)
+        
         self.test_grid, _ = np.mgrid[:1024,:100]
         
-
+        
+        
 
     def selected_cmap(self,*args):
         index:tuple = self.taskList.curselection()
