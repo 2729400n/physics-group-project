@@ -1,3 +1,5 @@
+
+
 import inspect
 import numpy as np
 import scipy.optimize as optimist
@@ -5,7 +7,7 @@ import numpy.linalg as linalg
 
 
 
-# A function to make polynomial functions 
+# A polynomial function maker and an XY Product Maker
 def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
     '''
     Args:
@@ -19,13 +21,21 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
     
     '''
     
-    # Defines an linear Polynomial function for X given n Parameters
+    # Defines an linear Polynomial function dependent only on x given n Parameters
     def XLin(x, *args):
+        '''
+        XLin: A linear polynomial in one axis.
         
-        # initilizes the results variable
+        We generalise the idea of unkowns.
+        
+            x:  The value of x at the point we want to soove the polynomial
+        *args:  The polynomial coefficients in order of most important to least important 
+        '''
+        
+        # initilizes the results variable to zero
         result = 0
         
-        # Evaluates te polynomial terms and adds them together
+        # Evaluates each polynomial terms and adds them together
         for i in range(1, n + dx, dx):
             result += args[-i] * (x ** (i))
         
@@ -104,13 +114,34 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
     
     
     
+    
+    
+    
     mixedParam = [
         inspect.Parameter(
                 f"x",
                 inspect._ParameterKind.POSITIONAL_OR_KEYWORD,
                 default=0,
                 annotation=np.float64,
-            )
+            ),
+        inspect.Parameter(
+                f"y",
+                inspect._ParameterKind.POSITIONAL_OR_KEYWORD,
+                default=0,
+                annotation=np.float64,
+            ),
+        inspect.Parameter(
+                f"xcoeffs",
+                inspect._ParameterKind.POSITIONAL_OR_KEYWORD,
+                default=0,
+                annotation=np.float64,
+            ),
+        inspect.Parameter(
+                f"ycoeffs",
+                inspect._ParameterKind.POSITIONAL_OR_KEYWORD,
+                default=0,
+                annotation=np.float64,
+            ),
     ]
     
     mixedParams = [
@@ -123,11 +154,20 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
             for i in range(0, n*m, 1)
         ]
     
+    def polyProduct(x, y, xcoeffs:'list[float]'=None, ycoeffs:'list[float]'=None,*coeffs):
+        coeff_len = len(coeffs)
+        interpolated_func = XLin(x, *xcoeffs) * YLin(y, ycoeffs)
+        fixingProduct = 0
+        sum([i for i in range(coeff_len)])
+
+    
     polyProduct.__signature__ = inspect.Signature(
         mixedParams,
         return_annotation=np.float64,
         __validate_parameters__=True,
     )
+    
+    
     
     # return the X-dependent Linear polynomial, 
     # Y Linear Polynomial and Polynomial Product function
@@ -151,8 +191,7 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
         sig = inspect.signature(_innerProduct)
         
         # TODO add a function signature to _innerProduct before returning it
-        return _innerProduct
-    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Grid[0,:],Grid[0,:])
+        return _innerProduct                                   
     
     
 XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(5,5)
