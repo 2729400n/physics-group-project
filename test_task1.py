@@ -9,6 +9,7 @@ root=tk.Tk()
 varFloat=tk.DoubleVar(root)
 varFloat.set('9.0')
 def validateEntry(textafter,*args,**kwargs):
+    
     print('Validate',textafter,args,kwargs)
     try:
         float(textafter)
