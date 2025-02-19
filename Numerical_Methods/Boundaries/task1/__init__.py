@@ -19,9 +19,9 @@ class Task1(Task):
         self.Image : AxesImage = None
         
 
-    def setup(self, height: int, width: int):
+    def setup(self, height: int, width: int,r1:float,r2:float,cx:float,cy:float,v:float=1.0):
         grid = np.zeros(shape=(height+1,width+1),dtype=np.float64)
-        self.boundaryCondition=Boundary()
+        self.boundaryCondition=Boundary(v,r1,r2,cx,cy)
         self.cbar:Colorbar = None
         self.quivers:Quiver=None
         self.grid = grid=self.boundaryCondition(Grid=grid,retoverlay=False)
