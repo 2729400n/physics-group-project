@@ -19,13 +19,21 @@ class Task1(Task):
         self.Image : AxesImage = None
         
 
-    def setup(self, height: int, width: int,r1:float,r2:float,cx:float,cy:float,v:float=1.0):
-        grid = np.zeros(shape=(height+1,width+1),dtype=np.float64)
+    def setup(self, x1: float, y1: float,r1:float,r2:float,cx:float,cy:float,v:float=1.0,x0:float=0.0,y0:float=0.0,dy:float=1.0,dx:float=1.0):
+        
+        Xs=np.arange(x0,x1+dx,dx)
+        Ys=np.arange(y0,y1+dy,dy)
+        
+        grid = np.zeros(shape=(Ys.shape[0],Xs.shape[0]),dtype=np.float64)
         self.boundaryCondition=Boundary(v,r1,r2,cx,cy)
         self.cbar:Colorbar = None
         self.quivers:Quiver=None
         self.grid = grid=self.boundaryCondition(Grid=grid,retoverlay=False)
         self.Xs,self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]
+        self.resXs = Xs
+        self.resYs = Ys
+        self.resdx = dx
+        self.resdy = dy
         axes = self.axes
         img=self.Image = axes.imshow(grid)
         
