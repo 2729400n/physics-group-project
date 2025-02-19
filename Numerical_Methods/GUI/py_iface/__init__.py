@@ -227,6 +227,7 @@ def getDefault(arg,func):
     param=func_sig.parameters.get(arg)
     if param is None:
         return ArgsState.NOTARG,None
+    print(param.default)
     return ArgsState.ISARG,param.default
 
 def makeFunctionCallable(func:'function',master=None,classType=False,instance=None,direction='left'):
@@ -235,6 +236,8 @@ def makeFunctionCallable(func:'function',master=None,classType=False,instance=No
     stores = {}
     for i in  argMapping:
         defarg = getDefault(i,func)
+        if defarg[1] == inspect._empty:
+            defarg = (defarg[0],None)
         store,field, iframe =add_Field_Var(wmain,i,argMapping[i],defarg[1] if defarg[0]==ArgsState.ISARG else None)
         field.grid(sticky='w')
         iframe.grid(sticky='w')
