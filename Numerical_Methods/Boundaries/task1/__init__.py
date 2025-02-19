@@ -17,10 +17,13 @@ class Task1(Task):
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__()
         self.Image : AxesImage = None
+        self.grid=None
         
 
     def setup(self, x1: float, y1: float,r1:float,r2:float,cx:float,cy:float,v:float=1.0,x0:float=0.0,y0:float=0.0,dy:float=1.0,dx:float=1.0):
-        
+        x0,x1 = x0,x1 if x0<=x1 else x1,x0
+        y0,y1 = y0,y1 if y0<=y1 else y1,y0
+        print(x0,x1,dx)
         Xs=np.arange(x0,x1+dx,dx)
         Ys=np.arange(y0,y1+dy,dy)
         
@@ -35,6 +38,7 @@ class Task1(Task):
         self.resdx = dx
         self.resdy = dy
         axes = self.axes
+        print(grid.shape)
         img=self.Image = axes.imshow(grid)
         
         axes.set_title('Electrostatic Potential')
@@ -42,6 +46,14 @@ class Task1(Task):
         self.figure.canvas.figure = self.figure
         self.figure.canvas.draw_idle()
         print(self.grid)
+    
+    
+    def redraw(self):
+        if(self.grid) is not None:
+            return
+        self.axes.clear()
+        img=self.axes.imshow(self.grid)
+        return
         
     def _show_Efield(self):
         u_v= findUandV(grid=self.grid)[::5,::5]*25

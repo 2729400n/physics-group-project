@@ -68,6 +68,7 @@ class TasksFrame(tk.Frame):
         canvas_view.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
         canvas_view.propagate(True)
         
+        
         sideView.pack(fill=tk.BOTH,expand=True,side=tk.RIGHT,padx=5,pady=5,anchor=tk.NE)
         
         # Create root label
@@ -106,10 +107,12 @@ class TasksFrame(tk.Frame):
         root=self.winfo_toplevel()
         nroot = tk.Toplevel(root,)
         canvas_view = tk.Frame(nroot)
-        _display = mb_tkagg.FigureCanvasTkAgg(self._heatmap,master=canvas_view)
+        _display = mb_tkagg.FigureCanvasTkAgg(self.current_task.figure,master=canvas_view)
+        _display.new_manager(self.current_task.figure,0)
         _canvas = _display.get_tk_widget()
         _canvas.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
         _display.draw()
+        _display.new_timer(300,[(lambda:_display.draw())])
         canvas_view.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
         canvas_view.propagate(True)
         
@@ -133,6 +136,7 @@ class TasksFrame(tk.Frame):
             
             curr_task.figure.draw_without_rendering()
             w,h = self._display.figure.get_size_inches()
+            self._display.new_manager(self.current_task.figure,0)
             self._display.figure = self.current_task.figure
             self._display.figure.set_size_inches(w,h)
             self._display.renderer.clear()
