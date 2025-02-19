@@ -17,6 +17,7 @@ class Task1(Task):
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__()
         self.Image : AxesImage = None
+        
 
     def setup(self, height: int, width: int):
         grid = np.zeros(shape=(height+1,width+1),dtype=np.float64)
