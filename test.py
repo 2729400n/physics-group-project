@@ -53,9 +53,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
             
         return np.float64(result)
 
-    def polyProduct(x, y, xcoeffs:'list[float]'=None, ycoeffs:'list[float]'=None,*coeffs):
-        coeff_len = len(coeffs)
-        return XLin(x, *xcoeffs) * YLin(y, ycoeffs) + sum([i for i in range(coeff_len)])
+    
 
     # Everything in this function context beyond here is for compatibility with 
     # introspective curve fitter. For most people this can be ignored
@@ -157,8 +155,13 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
     def polyProduct(x, y, xcoeffs:'list[float]'=None, ycoeffs:'list[float]'=None,*coeffs):
         coeff_len = len(coeffs)
         interpolated_func = XLin(x, *xcoeffs) * YLin(y, ycoeffs)
-        fixingProduct = 0
-        sum([i for i in range(coeff_len)])
+        
+        xs=np.vander([x],n)
+        ys=np.vander([y],m)
+        fixingProduct = ((xs.T@ys).flatten())*coeffs
+        
+        return interpolated_func+fixingProduct
+            
 
     
     polyProduct.__signature__ = inspect.Signature(
@@ -175,23 +178,55 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 
 
 # A default ready made but slow fitting function 
-def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray'):
+def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray',dy:float=1.0,dx:float=1.0):
     (n,m) = Grid.shape
     XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(n,m)
     
-    # Using curve fit is lazy but its better than writing a lsq function
-    xOptimal,xCov=optimist.curve_fit(XPolyNomial,Grid[0,:],Grid[0,:])
-    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Grid[0,:],Grid[:,0].T)
+    Xs=np.arange(x0,x1+dx,dx)
+    Ys=np.arange(y0,y1+dy,dy)
     
-    def __innerProduct(x:np.float64,y:np.float64):
+    # Using curve fit is lazy but its better than writing a lsq function
+    xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:])
+    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T)
+    
+    def __innerProduct(y:np.float64):
         nonlocal xOptimal,yOptimal
-        def _innerProduct(x,*args):
+        def _innerProduct(x:np.float64,*args):
             nonlocal xOptimal,yOptimal
             return XYPolyNomial(x,y,xOptimal,yOptimal,*args)
-        sig = inspect.signature(_innerProduct)
+        sig = inspect.signature(XYPolyNomial)
+        sig = inspect.Signature([sig.parameters.get(param) for param in sig.parameters if param!='y'])
+        
+        _innerProduct.__signature__ = sig
         
         # TODO add a function signature to _innerProduct before returning it
-        return _innerProduct                                   
+        return _innerProduct
+    XYoptimal = None
+    XYcov = None
+    for i in range(0,Ys.shape[0]):
+        polyProd = __innerProduct(Ys[i])
+        
+        if (XYoptimal is not None):
+            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:],p0=XYoptimal,sigma=XYcov)
+        else:
+            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:])
+    return xOptimal,yOptimal,XYoptimal
+        
+                                      
     
     
-XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(5,5)
+def PolYproduct(x,y):
+    return (2*(x**2)+2*(x)+2)*(3*(y**2)+3*(y)+3)
+
+Xgrid,Ygrid = np.mgrid[:100,:100]
+
+print(Xgrid,Ygrid,sep='\n\n')
+input()
+
+grid = PolYproduct(Xgrid,Ygrid)
+print(grid)
+input('Ready ?')
+
+xopt,yopt,xyopt = InterpolateGrid(grid,0,0,99,99)
+
+print(xopt,yopt,xyopt)
