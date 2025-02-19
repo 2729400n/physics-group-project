@@ -36,16 +36,21 @@ class TasksFrame(tk.Frame):
     def createWidgets(self):
         
         
-        
+        # Create The Figure
         self._heatmap = matplotlib.figure.Figure(figsize=(3,3),dpi=64,tight_layout=True)
         
+        # Create A label Frame to hold ListBox
         labelframe = tk.LabelFrame(self)
         labelframe.pack(fill=tk.BOTH,expand=False,side=tk.LEFT,padx=5,pady=5)
         labelframe.propagate(True)
         
+        # Create a side view to hold canvas and options
+        sideView = self.SideView = ttk.Frame(self)
+        
+        # Load tasks into a list of task
         self.load_Tasks()
         
-        sideView = self.SideView = ttk.Frame(self)
+        
         
         self.Iframe :'ttk.Frame|tk.Frame|tk.LabelFrame'=ttk.Frame(sideView)
         Iframe  = self.Iframe
@@ -54,12 +59,14 @@ class TasksFrame(tk.Frame):
         
         self.__innerFrame = None
         
-        
+        self.__canvas_view = canvas_view = tk.Frame(sideView)
         self._axes = None
-        self._display = mb_tkagg.FigureCanvasTkAgg(self._heatmap,master=sideView)
+        self._display = mb_tkagg.FigureCanvasTkAgg(self._heatmap,master=canvas_view)
         self._canvas=self._display.get_tk_widget()
         self._canvas.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
         self._display.draw()
+        canvas_view.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
+        canvas_view.propagate(True)
         
         sideView.pack(fill=tk.BOTH,expand=True,side=tk.RIGHT,padx=5,pady=5,anchor=tk.NE)
         
@@ -69,7 +76,7 @@ class TasksFrame(tk.Frame):
         L1.propagate(True)
         
         
-        # Create LalebFrames Childeren
+        # Create LabelFrames Childeren
          
         taskList=self.taskList=tk.Listbox(labelframe, selectmode=tk.SINGLE)
         taskList.insert(0,*self.taskMap)
@@ -82,13 +89,29 @@ class TasksFrame(tk.Frame):
         taskList.propagate(True)
         self.key = None
         
+        self.inFrame_Window=None
         
-        button = tk.Button(labelframe, text='Select Task', command=self.submit)
-        button.pack(fill=tk.BOTH,expand=False,side=tk.TOP,padx=5,pady=5,anchor=tk.NW)
-        button.propagate(True)
+        
+        self.select_button = sel_button = tk.Button(labelframe, text='Select Task', command=self.submit)
+        sel_button.pack(fill=tk.BOTH,expand=False,side=tk.TOP,padx=5,pady=5,anchor=tk.NW)
+        sel_button.propagate(True)
+        
+        pop_out_canvas_button = ttk.Button(labelframe,command=self.pop_out_canvas,text='Pop Out Canvas')
+        pop_out_canvas_button.pack() 
+        
         
         self.test_grid, _ = np.mgrid[:1024,:100]
         
+    def pop_out_canvas(self):
+        root=self.winfo_toplevel()
+        nroot = tk.Toplevel(root,)
+        canvas_view = tk.Frame(nroot)
+        _display = mb_tkagg.FigureCanvasTkAgg(self._heatmap,master=canvas_view)
+        _canvas = _display.get_tk_widget()
+        _canvas.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
+        _display.draw()
+        canvas_view.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
+        canvas_view.propagate(True)
         
         
 
