@@ -185,9 +185,13 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     Xs=np.arange(x0,x1+dx,dx)
     Ys=np.arange(y0,y1+dy,dy)
     
+    
+    print(XPolyNomial.__signature__)
+    print(YPolyNomial.__signature__)
+    
     # Using curve fit is lazy but its better than writing a lsq function
-    xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:])
-    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T)
+    xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:],maxfev=99999999)
+    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T,maxfev=99999999)
     
     def __innerProduct(y:np.float64):
         nonlocal xOptimal,yOptimal
@@ -228,5 +232,5 @@ print(grid)
 input('Ready ?')
 
 xopt,yopt,xyopt = InterpolateGrid(grid,0,0,99,99)
-
 print(xopt,yopt,xyopt)
+input('Done!')
