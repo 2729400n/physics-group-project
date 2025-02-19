@@ -185,14 +185,27 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     Xs=np.arange(x0,x1+dx,dx)
     Ys=np.arange(y0,y1+dy,dy)
     
+    xCov=None
+    yCov = None
     
     print(XPolyNomial.__signature__)
     print(YPolyNomial.__signature__)
-    
-    # Using curve fit is lazy but its better than writing a lsq function
-    xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:],maxfev=99999999)
-    yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T,maxfev=99999999)
-    
+    try:
+        # Using curve fit is lazy but its better than writing a lsq function
+        xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:],maxfev=999)
+        
+    except RuntimeError:
+        xOptimal = np.polyfit(Xs,Grid[0,:],Xs.shape[0])
+    print('XOptimal=',xOptimal)
+    print('XCov=',xCov) if xCov is not None else None
+    try:
+        yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T,maxfev=999)
+        
+    except RuntimeError:
+        yOptimal = np.polyfit(Ys,Grid[:,0].T,Ys.shape[0])
+
+    print('YOptimal=',yOptimal)
+    print('XCov=',xOptimal) if yCov is not None else None
     def __innerProduct(y:np.float64):
         nonlocal xOptimal,yOptimal
         def _innerProduct(x:np.float64,*args):
@@ -211,16 +224,16 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
         polyProd = __innerProduct(Ys[i])
         
         if (XYoptimal is not None):
-            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:],p0=XYoptimal,sigma=XYcov)
+            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:],p0=XYoptimal,sigma=XYcov,maxfev=999)
         else:
-            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:])
+            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:],maxfev=999)
     return xOptimal,yOptimal,XYoptimal
         
                                       
     
     
 def PolYproduct(x,y):
-    return (2*(x**2)+2*(x)+2)*(3*(y**2)+3*(y)+3)
+    return (2*(x**2)+2*(x)+3)*(3*(y**2)+3*(y)+3)
 
 Xgrid,Ygrid = np.mgrid[:100,:100]
 
