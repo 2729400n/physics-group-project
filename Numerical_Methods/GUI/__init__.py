@@ -15,4 +15,5 @@ def start():
     tabs = tabbed_view.TabbedView(numericalScreen)
     tabs.buildTab(pth.abspath(pth.join(__base__, './scenes')))
     tabs.pack(anchor=tk.NW, fill=tk.BOTH, expand=True,)
+    numericalScreen.wm_protocol("WM_DELETE_WINDOW",lambda:numericalScreen.destroy())
     numericalScreen.mainloop()

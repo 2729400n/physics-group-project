@@ -53,6 +53,8 @@ def testProd():
     import sys
 
     root = DefaultNumericalDisplay()
+    
+    root.wm_protocol("WM_DELETE_WINDOW",lambda: root.destroy())
 
     root.mainloop()
 

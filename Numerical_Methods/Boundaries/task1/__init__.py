@@ -21,8 +21,8 @@ class Task1(Task):
         
 
     def setup(self, x1: float, y1: float,r1:float,r2:float,cx:float,cy:float,v:float=1.0,x0:float=0.0,y0:float=0.0,dy:float=1.0,dx:float=1.0):
-        x0,x1 = x0,x1 if x0<=x1 else x1,x0
-        y0,y1 = y0,y1 if y0<=y1 else y1,y0
+        x0,x1 = (x0,x1) if x0<=x1 else (x1,x0)
+        y0,y1 = (y0,y1) if y0<=y1 else (y1,y0)
         print(x0,x1,dx)
         Xs=np.arange(x0,x1+dx,dx)
         Ys=np.arange(y0,y1+dy,dy)
