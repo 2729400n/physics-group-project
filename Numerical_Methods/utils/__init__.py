@@ -3,3 +3,4 @@
 # Description: The Utilies and resources sub module
 
 from . import geometry, naming, custom_cmap_maker
+from .cnw import createConvMatrix

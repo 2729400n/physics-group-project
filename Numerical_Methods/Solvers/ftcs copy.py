@@ -5,6 +5,7 @@
 # Load modules and imports neceasasary 
 
 import numpy as np
+from ..utils import createConvMatrix
 
 # we will be using 64bit floating point representation
 # Stay clear of recursion if possible it a bad game to play unless you have 
@@ -22,7 +23,7 @@ def doNothing(x:'np.ndarray | tuple[int,int]'=None,*args,**kwargs):
 
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver_8pointd(size:'tuple[int,int]|np.ndarray[int,int]', fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1)):
+def laplace_ode_solver_8pointd(size:'tuple[int,int]|np.ndarray[int,int]', fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1), convMatrix = np.array([])):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
 
@@ -47,6 +48,7 @@ def laplace_ode_solver_8pointd(size:'tuple[int,int]|np.ndarray[int,int]', fixedC
     # Frames  = np.zeros((2,int(pixel_w_X_h[1]),int(pixel_w_X_h[0])))
     Frames  = np.zeros((2,Ys.shape[0],Xs.shape[0]))
     Frames[0] = startingshape(Frames[0])
+    convolutionSpace = np.zeros((Frames.shape[0]+2,Frames[1]+2),dtype=np.float64)
     print(Xs.shape[0],Ys.shape[0])
     i = 0
     # TODO: possibly remove while loop, its too messy.
