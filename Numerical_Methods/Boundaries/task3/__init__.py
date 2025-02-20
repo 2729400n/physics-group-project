@@ -16,7 +16,7 @@ class Task3(Task):
 
     def setup(self, height: int, width: int):
         grid = np.zeros(shape=(height,width),dtype=np.float64)
-        self.boundaryCondition=Boundary()
+        self.boundaryCondition=Boundary(width=width,height=height)
         self.grid =grid=self.boundaryCondition(Grid=grid,retoverlay=False)
         axes = self.axes
         axes.imshow(grid)

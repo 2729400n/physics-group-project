@@ -2,6 +2,8 @@ import typing
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+    
+tasks:'set[Task]' = set()
 # Our task Class
 class Task( typing.Protocol):
     
@@ -28,6 +30,11 @@ class Task( typing.Protocol):
         self.exposed_methods = [self.setup,self.run,self._show_Efield]
 
     def setup(self, height: int, width: int) -> None: ...
+    
+    def __init_subclass__(cls):
+        global tasks
+        tasks.add(cls)
+        return super().__init_subclass__()
     
     def canDraw(self) -> bool: 
         return True
