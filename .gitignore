@@ -6,3 +6,6 @@
 BoxInBox.png
 **_experiment_mod/
 **_experiment_mod/
+/Lib
+/Scripts
+pyvenv.*
