@@ -25,7 +25,7 @@ class NumericalDisplay(tk.Tk):
                        useTk=useTk, sync=sync, use=use, **kw)
         self.decorateWindow()
         self.populateWindow()
-        self.update()
+        self.propagate(True)
 
 
 class DefaultNumericalDisplay(NumericalDisplay):
