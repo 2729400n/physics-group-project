@@ -1,14 +1,4 @@
-import tkinter.colorchooser as tkcc
 import tkinter as tk
-import tkinter.commondialog as tkcommon
-import tkinter.dnd as tkdnd
-import tkinter.filedialog as tkfd
-import tkinter.font as tkfont
-import tkinter.messagebox as tkmb
-import tkinter.dialog as tkdiag
-import tkinter.ttk as ttk
-import tkinter.scrolledtext as tksrolltxt
-
 
 
 class NumericalDisplay(tk.Tk):
@@ -19,7 +9,8 @@ class NumericalDisplay(tk.Tk):
     def populateWindow(self):
         pass
 
-    def __init__(self, master=None, baseName=None, className="Tk", useTk=True, sync=False, use=None, **kw):
+    def __init__(self, master=None, baseName=None, className="Tk", useTk=True,
+                 sync=False, use=None, **kw):
 
         tk.Tk.__init__(self, None, baseName, className=className,
                        useTk=useTk, sync=sync, use=use, **kw)
@@ -29,7 +20,8 @@ class NumericalDisplay(tk.Tk):
 
 
 class DefaultNumericalDisplay(NumericalDisplay):
-    def __init__(self, screenName=None, baseName=None, className="Tk", useTk=True, sync=False, use=None):
+    def __init__(self, screenName=None, baseName=None, className="Tk",
+                 useTk=True, sync=False, use=None):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
     def setupMenuBar(self):
@@ -50,11 +42,11 @@ class DefaultNumericalDisplay(NumericalDisplay):
 
 
 def testProd():
-    import sys
+    # import sys
 
     root = DefaultNumericalDisplay()
-    
-    root.wm_protocol("WM_DELETE_WINDOW",lambda: root.destroy())
+
+    root.wm_protocol("WM_DELETE_WINDOW", lambda: root.destroy())
 
     root.mainloop()
 
