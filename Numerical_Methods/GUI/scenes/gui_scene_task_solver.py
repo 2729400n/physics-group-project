@@ -8,7 +8,6 @@ from .. import py_iface
 
 import matplotlib.backend_tools as mb_tools, matplotlib.backend_managers as mb_managers, matplotlib.backends.backend_tkagg as mb_tkagg
 import matplotlib.figure
-from ..extended_widgets.realtime_update_figure import RealTimeFigure
 
 import numpy as np
 

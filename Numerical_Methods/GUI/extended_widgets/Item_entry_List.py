@@ -85,7 +85,6 @@ class ItemList(tk.Frame):
         self.item_num+=1
         self._buttons_frame.pack()
         self.items += [[new_item_section,var]]
-        self.update()
         return None
     
     def remove_item(self,evt):
