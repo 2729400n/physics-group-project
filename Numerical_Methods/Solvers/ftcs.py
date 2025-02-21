@@ -71,7 +71,7 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]', fixedCondtions
 
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,resoultion:'str|tuple[int,int]|np.ndarray[int,int]'=(1,1)):
+def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions:'function'=doNothing,startingshape:'function'=doNothing,dy:float=1.0,dx:float=1.0):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
 

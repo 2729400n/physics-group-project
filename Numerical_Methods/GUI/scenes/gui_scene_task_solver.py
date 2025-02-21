@@ -26,6 +26,8 @@ class TasksFrame(tk.Frame):
         self.current_task = None
         self.createWidgets()
         self.propagate(True)
+        self.stores:'dict[str,tk.Variable]' = dict()
+        self._to_clear = dict()
 
     def load_Tasks(self):
         self.taskMap = taskMap = self.controlSets = dict(
@@ -180,28 +182,49 @@ class TasksFrame(tk.Frame):
             self.taskList.activate(new_index)
             self.taskList.event_generate('<<ListboxSelect>>')
 
+
+    # TODO: Optimize entry persistence
     def submit(self, *args):
         print(self.key)
+        
         if self.current_task is None:
             return
+        
+        backup_old_store = {i:self.stores[i].get() for i in self.stores}
+        _to_clear = {i:(self._to_clear.get(i,0)+1) for i in self.stores}
+        for i in _to_clear :
+            if _to_clear.get(i,0)>=2:
+                self.stores.pop(i,None)
+                self._to_clear.pop(i,None)
+                
+        
         if self.__innerFrame is not None:
             self.__innerFrame.destroy()
+
         self.__innerFrame = ttk.Frame(self.Iframe)
         self.__innerFrame.pack(fill=tk.BOTH, expand=True,
                                side=tk.TOP, padx=5, pady=5, anchor=tk.NW)
         if len(self.current_task.exposed_methods) == 0:
-            py_iface.makeFunctionCallable(
+            self.stores.update(**py_iface.makeFunctionCallable(
                 self.current_task.setup, self.__innerFrame, classType=True,
-                instance=self.current_task)
-            py_iface.makeFunctionCallable(
+                instance=self.current_task))
+            self.stores.update(**py_iface.makeFunctionCallable(
                 self.current_task.run, self.__innerFrame, classType=True,
-                instance=self.current_task)
-            py_iface.makeFunctionCallable(
-                self.current_task._show_Efield, self.__innerFrame, classType=True, instance=self.current_task)
+                instance=self.current_task))
+            self.stores.update(**py_iface.makeFunctionCallable(
+                self.current_task._show_Efield, self.__innerFrame, classType=True, instance=self.current_task))
         else:
             for i in self.current_task.exposed_methods:
-                py_iface.makeFunctionCallable(
-                    i, self.__innerFrame, classType=True, instance=self.current_task)
+                self.stores.update(**py_iface.makeFunctionCallable(
+                    i, self.__innerFrame, classType=True, instance=self.current_task))
+        for i in self.stores:
+            old_value=backup_old_store.get(i)
+            if old_value is None:
+                continue
+            try:
+                self.stores[i].set(old_value)
+            except:
+                pass
 
         print(args)
 
