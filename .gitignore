@@ -9,3 +9,4 @@ BoxInBox.png
 /Lib
 /Scripts
 pyvenv.*
+.vscode/settings.json

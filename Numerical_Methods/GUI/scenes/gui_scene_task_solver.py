@@ -116,7 +116,7 @@ class TasksFrame(tk.Frame):
     
     def pop_out_canvas(self):
         root=self.winfo_toplevel()
-        nroot = tk.Toplevel(root,)
+        nroot = tk.Toplevel(self,)
         canvas_view = tk.Frame(nroot)
         _display = mb_tkagg.FigureCanvasTkAgg(self.current_task.figure,master=canvas_view)
         # _display.new_manager(self.current_task.figure,0)
