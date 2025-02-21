@@ -16,7 +16,7 @@ import numpy as np
 def doNothing(x: 'np.ndarray | tuple[int,int]' = None, *args, **kwargs):
     if isinstance(x, tuple):
         return np.zeros(x, np.float64)
-    return x
+    return x # Some COMMNT
 
 
 # We gonna solve this in a suitably fashion guys ☺

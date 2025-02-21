@@ -9,12 +9,20 @@ from ..task import Task
 
 
 class Task1(Task):
+    '''
+        Task1:
+            description: Task one is the first task given to solve the anulus situation.
+            The class defines the standard task inteface methods.
+    '''
+    
     name = "Anulus"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__()
         self.Image: AxesImage = None
         self.grid = None
+        self.cbar: Colorbar = None
+        self.quivers: Quiver = None
 
     def setup(self, x1: float, y1: float, r1: float, r2: float, cx: float,
               cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,
@@ -22,6 +30,7 @@ class Task1(Task):
 
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
+        
         print(x0, x1, dx)
         Xs = np.arange(x0, x1+dx, dx)
         Ys = np.arange(y0, y1+dy, dy)
@@ -37,14 +46,11 @@ class Task1(Task):
         self.resdx = dx
         self.resdy = dy
         axes = self.axes
-        print(grid.shape)
-        # img = self.Image = axes.imshow(grid)
 
         axes.set_title('Electrostatic Potential')
         self.figure.canvas.figure = None
         self.figure.canvas.figure = self.figure
         self.figure.canvas.draw_idle()
-        print(self.grid)
 
     def redraw(self):
         if (self.grid) is not None:
@@ -83,7 +89,11 @@ class Task1(Task):
         self.figure.canvas.draw()
 
     def _cleanup(self):
-        pass
+        self.Image: AxesImage = None
+        self.grid: np.ndarray = None
+        self.cbar: Colorbar = None
+        self.quivers: Quiver = None
 
     def reset(self):
-        pass
+        if self.grid is not None:
+            self.grid[:,:] = 0
