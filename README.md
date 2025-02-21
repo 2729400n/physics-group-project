@@ -21,12 +21,18 @@ which is our polynomial then it becomes a problem of solving $n\cdot m$ unkowns 
 
 My idea solve inthe respective domains then solve for each where we know a given value \(harder with non rectilinear geometries as we can no longer be sure of a given points value\)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 if we add som elee way for the errors in thi swe get a nice function al=s long a we linearize it
-=======
+
 We can solve for the polynomial coeffiecients
->>>>>>> 7427a7f (Fixed ending)
-=======
+
 We can solve for the polynomial coeffiecients
->>>>>>> 5157c7a (Formatted readme)
+
+
+
+## Possible Idea
+
+Issue polynomial interpolation currenltly does not work what do we need 
+need a way to form good polynomial curve fit does not depend on the x parameter given we can make a grid then solve the grid for different as the xs a bit like
+
+new_xs = np.array([x,y for i in X,y])  will be a flat array containing x,y as psuedo scalars thenpassing it as an x parameter to curve fit we 
+can interpolate for polynomial shifts
