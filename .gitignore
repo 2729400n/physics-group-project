@@ -1,12 +1,2 @@
-*.dat
-**/__pycache__/
-# *.png
-.vscode/settings.json
-**/*.dat
-BoxInBox.png
-**_experiment_mod/
-**_experiment_mod/
-/Lib
-/Scripts
-pyvenv.*
-.vscode/settings.json
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*

@@ -190,23 +190,18 @@ class TasksFrame(tk.Frame):
         self.__innerFrame.pack(fill=tk.BOTH, expand=True,
                                side=tk.TOP, padx=5, pady=5, anchor=tk.NW)
         if len(self.current_task.exposed_methods) == 0:
-
             py_iface.makeFunctionCallable(
                 self.current_task.setup, self.__innerFrame, classType=True,
                 instance=self.current_task)
-
             py_iface.makeFunctionCallable(
                 self.current_task.run, self.__innerFrame, classType=True,
                 instance=self.current_task)
-
             py_iface.makeFunctionCallable(
-                self.current_task._show_Efield, self.__innerFrame,
-                classType=True, instance=self.current_task)
+                self.current_task._show_Efield, self.__innerFrame, classType=True, instance=self.current_task)
         else:
             for i in self.current_task.exposed_methods:
                 py_iface.makeFunctionCallable(
-                    i, self.__innerFrame, classType=True,
-                    instance=self.current_task)
+                    i, self.__innerFrame, classType=True, instance=self.current_task)
 
         print(args)
 
