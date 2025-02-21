@@ -41,7 +41,7 @@ def laplace_ode_solver_8pointd(size:'tuple[int,int]|np.ndarray[int,int]', fixedC
     w_x_h = np.array(size,int)
     preception = np.array(resoultion,int)
     if convMatrix is None:
-        convMatrix = createConvMatrix(1/8)
+        convMatrix = createConvMatrix(0)
         
     # pixel_w_X_h = w_x_h/preception
     
@@ -89,6 +89,11 @@ def laplace_ode_solver_8pointd_continue(Grid: 'np.ndarray[np.ndarray[np.float64]
     """
     
     Frames  = np.zeros((2,*Grid.shape),dtype=np.float64)
+    try:
+        Frames[0],aoi = startingshape(Grid,aoi=True)
+    except:
+        Frames[0] = startingshape(Grid)
+        aoi = np.full_like(Frames[0],True,dtype=bool) 
     Frames[0] = startingshape(Grid)
     Xs = np.arange(0,Grid.shape[1]+1,1)
     Ys = np.arange(0,Grid.shape[0]+1,1)
@@ -96,19 +101,19 @@ def laplace_ode_solver_8pointd_continue(Grid: 'np.ndarray[np.ndarray[np.float64]
     i = 0
     # TODO: possibly remove while loop, its too messy.
     if convMatrix is None:
-        convMatrix = createConvMatrix(1/8)
-    for i in range(2):
+        convMatrix = createConvMatrix(0)
+    while True:
         
         
 
-        Frames[(i+1)%2] = convolveMatrixes(Frames[i%2], convMatrix,wrap=False)
+        Frames[(i+1)%2][aoi] = convolveMatrixes(Frames[i%2], convMatrix,wrap=False)[aoi]
         Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2])
-        indexes=Frames[i%2]!=0
+        indexes=np.logical_and(aoi,(Frames[i%2]!=0))
         diff = (np.abs((Frames[0][indexes]-Frames[1][indexes]))/Frames[i%2][indexes])
         i= (i+1)
         
         # TODO: Make the change relative easier to tell the precentage change
-        if np.max(diff) < 1e-6 and i>1:
+        if np.max(diff) < 1e-3 and i>1:
             break
     retvals = (Ys,Xs,Frames[i%2])
     

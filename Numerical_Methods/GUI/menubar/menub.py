@@ -10,7 +10,6 @@ class MenuBar(tk.Frame):
         super().__init__(master,*args,**kwargs)
     def additem(self,item):
         self.menuitems+=[item]
-        self.update()
 
 from . import MenuItem
 

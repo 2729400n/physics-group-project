@@ -48,8 +48,7 @@ class CMapper(tk.Frame):
         # self.config(height=480,width=640)
         self.createWidgets()
         self.pack(anchor=tk.NW,fill=tk.BOTH,expand=True)
-        
-        self.update()
+        self.propagate(True)
         
 
     def getAvailableCMaps(self):
