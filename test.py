@@ -192,14 +192,14 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     print(YPolyNomial.__signature__)
     try:
         # Using curve fit is lazy but its better than writing a lsq function
-        xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:],maxfev=999)
+        xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:])
         
     except RuntimeError:
         xOptimal = np.polyfit(Xs,Grid[0,:],Xs.shape[0])
     print('XOptimal=',xOptimal)
     print('XCov=',xCov) if xCov is not None else None
     try:
-        yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T,maxfev=999)
+        yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T)
         
     except RuntimeError:
         yOptimal = np.polyfit(Ys,Grid[:,0].T,Ys.shape[0])
@@ -233,7 +233,7 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     
     
 def PolYproduct(x,y):
-    return (2*(x**2)+2*(x)+3)*(3*(y**2)+3*(y)+3)
+    return (2*(x**2)+2*(x)+3)*(1)
 
 Xgrid,Ygrid = np.mgrid[:100,:100]
 
