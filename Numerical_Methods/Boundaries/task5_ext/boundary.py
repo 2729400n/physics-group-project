@@ -3,7 +3,7 @@ import numpy as np
 
 
 # Will employ the use of a closure to ensure uniqueness for multi-threading
-def geometryFactory(val:float=1.0,r1:float=35,r2:float=50,cx:float=100,cy:float=100,relative=False):
+def geometryFactory(val:float=1.0,r1:float=35,r2:float=50,cx:float=100,cy:float=100,relative=False,**kwargs):
     
     # A simple cacher 
     Gridder:'list[np.ndarray[np.ndarray[np.float64]], np.ndarray[np.ndarray[np.bool]]]' = None
@@ -19,6 +19,8 @@ def geometryFactory(val:float=1.0,r1:float=35,r2:float=50,cx:float=100,cy:float=
             Gridder = [circ1*circ2,circ3]
         temp1 = Grid*Gridder[0]
         temp1[Gridder[1]] = val
-        
+        aoi = kwargs.get('aoi')
+        if (aoi is not None) and (aoi):
+            return temp1,(Gridder[0]!=0)
         return temp1
     return AnnulusField

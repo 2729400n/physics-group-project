@@ -14,7 +14,7 @@ import numpy as np
 
 __base__ = pth.abspath(pth.dirname(__file__))
 
-class TasksFrame(tk.Frame):
+class SettngsFrame(tk.Frame):
     name='TaskSolver'
     def __init__(self, master=None,*args,**kwargs):
         
@@ -65,7 +65,7 @@ class TasksFrame(tk.Frame):
         self._canvas.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
         self._display.draw()
         canvas_view.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
-        canvas_view.propagate(False)
+        canvas_view.propagate(True)
         
         
         sideView.pack(fill=tk.BOTH,expand=True,side=tk.RIGHT,padx=5,pady=5,anchor=tk.NE)
@@ -107,8 +107,6 @@ class TasksFrame(tk.Frame):
         
         self.test_grid, _ = np.mgrid[:1024,:100]
     
-    
-    
     def reload(self):
         self.load_Tasks()
         self.taskList.delete(0,tk.END)
@@ -126,9 +124,7 @@ class TasksFrame(tk.Frame):
         _display.draw()
         # _display.new_timer(300,[(lambda:_display.draw())])
         canvas_view.pack(fill=tk.BOTH,expand=True,side=tk.BOTTOM,padx=5,pady=5,anchor=tk.SW)
-        # canvas_view.propagate(True)
-        
-        
+        canvas_view.propagate(True)
         
         
 
@@ -181,21 +177,5 @@ class TasksFrame(tk.Frame):
             self.taskList.event_generate('<<ListboxSelect>>')
 
     def submit(self,*args):
-        print(self.key)
-        if self.current_task is None:
-            return
-        if self.__innerFrame is not None:
-            self.__innerFrame.destroy()
-        self.__innerFrame = ttk.Frame(self.Iframe)
-        self.__innerFrame.pack(fill=tk.BOTH,expand=True,side=tk.TOP,padx=5,pady=5,anchor=tk.NW)
-        if len(self.current_task.exposed_methods)==0:
-            py_iface.makeFunctionCallable(self.current_task.setup,self.__innerFrame,classType=True,instance=self.current_task)
-            py_iface.makeFunctionCallable(self.current_task.run,self.__innerFrame,classType=True,instance=self.current_task)
-            py_iface.makeFunctionCallable(self.current_task._show_Efield,self.__innerFrame,classType=True,instance=self.current_task)
-        else:
-            for i in self.current_task.exposed_methods:
-                py_iface.makeFunctionCallable(i,self.__innerFrame,classType=True,instance=self.current_task)
+        pass
         
-        print(args)
-        
-scene = TasksFrame

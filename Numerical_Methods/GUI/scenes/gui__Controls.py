@@ -45,7 +45,6 @@ class ShapeDisplay(tk.Frame):
             self.paint_canvas.set(False)
             self.heatMap.unbind('<Motion>',self.tracer)
     def reload(self):
-        self.update()
         self.pack()
     def reshape(self):
         self.reload()

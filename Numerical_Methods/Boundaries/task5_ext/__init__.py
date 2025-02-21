@@ -10,6 +10,7 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from ..task import Task
 
+# Hello
 
 class Task5(Task):
     name = "Task5"
@@ -17,7 +18,12 @@ class Task5(Task):
         super().__init__()
         self.Image : 'AxesImage' = None
         self.grid=None
-        
+        self.cbar:'Colorbar' = None
+        self.quivers:'Quiver'=None
+        self.exposed_methods = [self.setup,self.run,self._show_Efield,self.extra]
+    
+    def extra(self):
+        print('Reloaded')
 
     def setup(self, x1: float, y1: float,r1:float,r2:float,cx:float,cy:float,v:float=1.0,x0:float=0.0,y0:float=0.0,dy:float=1.0,dx:float=1.0):
         x0,x1 = (x0,x1) if x0<=x1 else (x1,x0)
@@ -28,8 +34,13 @@ class Task5(Task):
         
         grid = np.zeros(shape=(Ys.shape[0],Xs.shape[0]),dtype=np.float64)
         self.boundaryCondition=Boundary(v,r1,r2,cx,cy)
-        self.cbar:'Colorbar' = None
-        self.quivers:'Quiver'=None
+        
+        if self.cbar is not None:
+            self.cbar.remove()
+        if self.quivers is not None:
+            self.quivers.remove()
+        
+        
         self.grid = grid=self.boundaryCondition(Grid=grid,retoverlay=False)
         self.Xs,self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]
         self.resXs = Xs
@@ -45,6 +56,7 @@ class Task5(Task):
         self.figure.canvas.figure = self.figure
         self.figure.canvas.draw_idle()
         print(self.grid)
+        print('Reloaded')
     
     
     def redraw(self):
