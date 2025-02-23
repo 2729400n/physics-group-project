@@ -26,6 +26,9 @@ if __name__ == "__main__":
         rtLoader.start_realtime_module()
         try:
             gui.start()
+        except KeyboardInterrupt:
+            rtLoader.stop_realtime_module()
+            exit(0)
         except Exception as e:
             rtLoader.stop_realtime_module()
             raise e

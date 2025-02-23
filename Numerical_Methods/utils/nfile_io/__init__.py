@@ -58,6 +58,8 @@ def saveFileCurses(data:bytes):
     return True
 
 def saveFileGui(data:bytes,ftypes=None,initname:str=None):
+    if ftypes is None:
+        ftypes = [("All",'*.*')]
     import tkinter.filedialog as fdiag
     fout=fdiag.asksaveasfile(mode='wb',confirmoverwrite=True,defaultextension='.npy',initialdir=SAVEDIR,filetypes=ftypes, title="Choose Outputfile",initialfile=initname)
     if fout is None:

@@ -27,10 +27,16 @@ class TasksFrame(tk.Frame):
         super().__init__(master)
         self.taskMap: dict = None
         self.current_task = None
-        self.createWidgets()
-        self.propagate(True)
+        
         self.stores:'dict[str,tk.Variable]' = dict()
         self._to_clear = dict()
+        self.canvasEntry : tk.Canvas =None
+        self.WindowID :int = None
+        self.windowWidget : 'ttk.Frame' = None
+        
+        self.createWidgets()
+        self.propagate(True)
+        
 
     def load_Tasks(self):
         self.taskMap = taskMap = self.controlSets = dict(
@@ -51,19 +57,42 @@ class TasksFrame(tk.Frame):
         labelframe.pack(fill=tk.BOTH, expand=False,
                         side=tk.LEFT, padx=5, pady=5)
         labelframe.propagate(True)
-
+        
         # Create a side view to hold canvas and options
         sideView = self.SideView = ttk.Frame(self)
 
         # Load tasks into a list of task
         self.load_Tasks()
-
-        self.Iframe: 'ttk.Frame|tk.Frame|tk.LabelFrame' = ttk.Frame(sideView)
+        self.windowWidget=iiframe = ttk.Frame(sideView)
+        iiframe.pack(fill=tk.BOTH, expand=True, side=tk.TOP,
+                    padx=5, pady=5, anchor=tk.NW)
+        iiframe.propagate(True)
+        canvasEntry=self.canvasEntry = tk.Canvas(iiframe)
+        
+        
+        self.Iframe: 'ttk.Frame|tk.Frame|tk.LabelFrame' = ttk.Frame(self.canvasEntry)
         Iframe = self.Iframe
-        Iframe.pack(fill=tk.X, expand=True, side=tk.TOP,
+        Iframe.pack(fill=tk.BOTH, expand=True, side=tk.TOP,
                     padx=5, pady=5, anchor=tk.NW)
         Iframe.propagate(True)
-
+        self.WindowID=self.canvasEntry.create_window(0,0,anchor=tk.NW,window=Iframe)
+        iiframe.bind('<Configure>',self._configure_interior,'+')
+        iiframe.bind('<Configure>',self._configure_canvas,'+')
+        canvasEntry.propagate(True)
+        
+        self.canvasEntry.pack(fill=tk.BOTH, expand=True, side=tk.TOP,
+                    padx=5, pady=5, anchor=tk.NW)
+        
+        lrscroller = ttk.Scrollbar(iiframe,orient='horizontal',command=canvasEntry.xview)
+        lrscroller.pack(fill=tk.X, expand=False, side=tk.BOTTOM,
+                    padx=5, pady=5, anchor=tk.NW,before=canvasEntry)
+        
+        lrscroller = ttk.Scrollbar(iiframe,orient='vertical',command=canvasEntry.yview)
+        lrscroller.pack(fill=tk.Y, expand=False, side=tk.RIGHT,
+                    padx=5, pady=5, anchor=tk.NW,before=canvasEntry)
+        
+        canvasEntry.config(xscrollcommand=lrscroller.set,yscrollcommand=lrscroller.set)
+        
         self.__innerFrame = None
 
         self.__canvas_view = canvas_view = tk.Frame(sideView)
@@ -122,11 +151,22 @@ class TasksFrame(tk.Frame):
 
         self.test_grid, _ = np.mgrid[:1024, :100]
         
-        lrscroller = ttk.Scrollbar(self,orient='horizontal')
-        lrscroller.pack()
+        self.windowWidget.propagate(True)
         
-        lrscroller = ttk.Scrollbar(self,orient='vertical'   )
-        lrscroller.pack()
+    
+    def _configure_interior(self, event):
+        # Update the scrollbars to match the size of the inner frame
+        size = (self.windowWidget.winfo_reqwidth(), self.windowWidget.winfo_reqheight())
+        self.canvasEntry.config(scrollregion=(0, 0, size[0], size[1]))
+        if self.windowWidget.winfo_reqwidth() != self.windowWidget.winfo_width():
+            # Update the canvas's width to fit the inner frame
+            self.canvasEntry.config(width=self.windowWidget.winfo_reqwidth())
+
+    def _configure_canvas(self, event):
+        if self.windowWidget.winfo_reqwidth() != self.canvasEntry.winfo_width():
+            # Update the inner frame's width to fill the canvas
+            self.canvasEntry.itemconfigure(self.WindowID, width=self.canvasEntry.winfo_width())
+            pass
 
     def reload(self):
         self.load_Tasks()
@@ -271,9 +311,9 @@ class TasksFrame(tk.Frame):
             if name is None:
                 name=i
             if nfile_io.saveFileGui(data,initname=name):
-                msgbox_.showinfo(f"Saved {i}")
+                msgbox_.showinfo(message=f"Saved Successfully {i}",title='Save')
             else:
-                msgbox_.showerror(f"Failed to save {i}")
+                msgbox_.showerror(message=f"Failed to save {i}",title='Save')
         msgbox_.showinfo(message="Saving Complete",title="Save")
             
 
