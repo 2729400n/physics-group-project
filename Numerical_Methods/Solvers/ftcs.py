@@ -124,14 +124,10 @@ def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixe
 
     Frames = np.zeros((2, *Grid.shape), dtype=np.float64)
 
-    if overlaySaver:
-        Frames[0], overlay = startingshape(Grid, retoverlay=True)
-    else:
-        Frames[0] = startingshape(Grid)
-        overlay = None
+    Frames[0] = startingshape(Grid)
 
-    Xs = np.arange(0, Grid.shape[1]+1, resoultion[0])
-    Ys = np.arange(0, Grid.shape[0]+1, resoultion[1])
+    Xs = np.arange(0, Grid.shape[1]+resoultion[0], resoultion[0])
+    Ys = np.arange(0, Grid.shape[0]+resoultion[1], resoultion[1])
 
     if stencil == 9:
         diagamult = gamma*(1/8)
@@ -187,17 +183,14 @@ def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixe
                 Frames[(i+1)%2, 1:-1,(0, -1)] = adjacentmult*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f +
                                                     BackwardVSpace_A2f)+diagamult*(DiagBackUp+DiagBackDown+DiagForwardDown+DiagForwardUp)
 
-        if overlay is not None:
-            Frames[(i+1) % 2] = fixedCondtions(Frames[(i+1) %
-                                                      2], overlay=overlay)
-        else:
-            Frames[(i+1) % 2] = fixedCondtions(Frames[(i+1) % 2])
+        
+        Frames[(i+1) % 2] = fixedCondtions(Frames[(i+1) % 2])
 
 
-        indexes = Frames[i % 2] != 0
+        indexes = Frames[(i+1) % 2] != 0
         
         diff = np.abs(((Frames[0][indexes]-Frames[1]
-                [indexes]))/Frames[i % 2][indexes])
+                [indexes]))/Frames[(i+1) % 2][indexes])
         if(np.size(diff)>0):
             # TODO: Make the change relative easier to tell the precentage change
             if np.max(diff) < rel_tol and i > 1:
