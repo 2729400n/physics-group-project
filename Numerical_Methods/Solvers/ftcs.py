@@ -108,7 +108,7 @@ def laplace_ode_solver(size: 'tuple[int,int]|np.ndarray[int,int]', fixedCondtion
 
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions: 'function' = doNothing, startingshape: 'function' = doNothing, resoultion: 'str|tuple[int,int]|np.ndarray[int,int]' = (1, 1), overlaySaver: bool = False, stencil: 'Literal[5,9]' = 5, gamma: float = 0.0, wrap: bool = False, wrap_direction: Literal["both", "x", "y"] = 'none',rel_tol:float=1e-2,abs_tol:float=1e-9):
+def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions: 'function' = doNothing, startingshape: 'function' = doNothing, resoultion: 'str|tuple[int,int]|np.ndarray[int,int]' = (1, 1), overlaySaver: bool = False, stencil: 'Literal[5,9]' = 5, gamma: float = 0.0, wrap: bool = False, wrap_direction: Literal["both", "x", "y"] = 'none',rel_tol:float=1e-6,abs_tol:float=1e-9):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
 
@@ -193,8 +193,11 @@ def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixe
                 [indexes]))/Frames[(i+1) % 2][indexes])
         if(np.size(diff)>0):
             # TODO: Make the change relative easier to tell the precentage change
-            if np.max(diff) < rel_tol and i > 1:
+            max_diff = np.max(diff)
+            if max_diff < rel_tol and i > 1:
+                print(max_diff)
                 break
+            
         else:
             diff = np.abs((Frames[0]-Frames[1]))
             # TODO: Make the change relative easier to tell the precentage change
