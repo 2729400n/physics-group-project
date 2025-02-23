@@ -3,7 +3,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.quiver import Quiver
 import numpy as np
 from .boundary import geometryFactory as Boundary
-from ...Solvers import laplace_ode_solver_8pointd,findUandV,laplace_ode_solver_8pointd_continue
+from ...Solvers import laplace_ode_solver_continue,findUandV
 import typing
 import tkinter as tk
 from matplotlib.axes import Axes

@@ -68,8 +68,10 @@ def updateModules():
                 continue
             if imptime < modtime:
                 print(f'reloaded {i}')
-                reload(mod)
-
+                try:
+                    reload(mod)
+                except (SyntaxError,ImportError):
+                    pass
                 iptime[i] = modtime
     return None
 
