@@ -28,7 +28,8 @@ class Task( typing.Protocol):
             raise TypeError(f'Got Class {figure.__class__} \r\nfigure= Must be a Figure or Axes Object')
         self.boundaryCondition = None
         self.exposed_methods = [self.setup,self.run,self._show_Efield]
-
+        self.savables:'dict[str,typing.Callable[[],tuple[str,bytes]]]'  = {}
+        
     def setup(self, height: int, width: int) -> None: ...
     
     def __init_subclass__(cls):

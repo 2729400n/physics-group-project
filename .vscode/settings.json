@@ -46,7 +46,10 @@
     "python.terminal.activateEnvironment": false,
     "python.createEnvironment.contentButton": "show",
     "python.terminal.activateEnvInCurrentTerminal": false,
-    "python-envs.pythonProjects": []
+    "python-envs.pythonProjects": [],
+    "terminal.integrated.env.windows": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+    }
     // ,"terminal.integrated.env.windows": {,
 
     //     "PYTHONDONTWRITEBYTECODE":"1"

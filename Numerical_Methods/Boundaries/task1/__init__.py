@@ -6,6 +6,9 @@ from ...Solvers import findUandV, laplace_ode_solver_continue
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from ..task import Task
+import io
+from PIL import Image
+
 
 
 class Task1(Task):
@@ -23,6 +26,7 @@ class Task1(Task):
         self.grid = None
         self.cbar: Colorbar = None
         self.quivers: Quiver = None
+        self.savables.update(**{'Grid': self.save_grid})
 
     def setup(self, x1: float, y1: float, r1: float, r2: float, cx: float,
               cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,
@@ -97,3 +101,28 @@ class Task1(Task):
     def reset(self):
         if self.grid is not None:
             self.grid[:,:] = 0
+            
+    def save_grid(self):
+        if self.grid is None:
+            return (None,None)
+        outfile = io.BytesIO()
+        np.save(outfile,self.grid,allow_pickle=True)
+        try:
+            outfile.flush()
+        except:
+            pass
+        outfile.seek(0)
+        return 'Task1_grid.npy',outfile
+    
+    def save_figure(self):
+        if self.figure is None:
+            return
+        outfile = io.BytesIO()
+        self.figure.savefig(outfile,format='png')
+        try:
+            outfile.flush()
+        except:
+            pass
+        outfile.seek(0)
+        return 'Task1_figure.png',outfile
+

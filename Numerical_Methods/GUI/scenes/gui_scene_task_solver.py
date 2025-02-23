@@ -2,6 +2,7 @@ import os
 import os.path as pth
 import tkinter as tk
 import tkinter.ttk as ttk
+import tkinter.messagebox as msgbox_
 
 from ... import Boundaries as tasks_module
 from .. import py_iface
@@ -10,6 +11,8 @@ import matplotlib.backend_tools as mb_tools
 import matplotlib.backend_managers as mb_managers
 import matplotlib.backends.backend_tkagg as mb_tkagg
 import matplotlib.figure
+
+from ...utils import nfile_io
 
 import numpy as np
 
@@ -112,6 +115,10 @@ class TasksFrame(tk.Frame):
         pop_out_canvas_button = ttk.Button(
             labelframe, command=self.reload, text='Reload Tasks')
         pop_out_canvas_button.pack()
+        
+        save_data_button = ttk.Button(
+            labelframe, command=self.save_data, text='Save Data')
+        save_data_button.pack()
 
         self.test_grid, _ = np.mgrid[:1024, :100]
         
@@ -234,6 +241,40 @@ class TasksFrame(tk.Frame):
                 pass
 
         print(args)
-
+        
+    def save_data(self)->None:
+        curr_task=self.current_task
+        if curr_task is None:
+            msgbox_.showinfo(message="No Task Selected",title="Save")
+            return
+        if curr_task.savables is None:
+            msgbox_.showinfo(message="Nothing to save",title="Save")
+            return
+        if len(curr_task.savables)==0:
+            msgbox_.showinfo(message="Nothing to save",title="Save")
+            return
+        for i in curr_task.savables:
+            save_func = curr_task.savables.get(i)
+            if save_func is None:
+                continue
+            opt=msgbox_.askyesno(message=f"Would you like to save {i}",title='Save')
+            if not opt:
+                continue
+            savedata = save_func()
+            try:
+                name,data = savedata
+            except:
+                name=i
+                data=savedata
+            if data is None:
+                continue
+            if name is None:
+                name=i
+            if nfile_io.saveFileGui(data,initname=name):
+                msgbox_.showinfo(f"Saved {i}")
+            else:
+                msgbox_.showerror(f"Failed to save {i}")
+        msgbox_.showinfo(message="Saving Complete",title="Save")
+            
 
 scene = TasksFrame
