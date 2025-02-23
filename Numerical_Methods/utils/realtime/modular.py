@@ -3,16 +3,20 @@ import os.path as pth
 from importlib import reload
 import threading
 import pathlib as pthlib
+from os import kill
+from signal import SIGTERM,SIGABRT,SIGBREAK
 
-main_thread_running = False
+
+shouldRunRTLoader = False
+rtLoaderThread:threading.Thread = None
 
 
 def updateModules():
-    global main_thread_running
+    global shouldRunRTLoader
     iptime = {}
     notSpeced = []
     copydict = {}
-    while main_thread_running:
+    while shouldRunRTLoader:
         copydict = sys.modules.copy()
         for i in copydict:
             if i in notSpeced:
@@ -60,3 +64,44 @@ def updateModules():
                     pass
                 iptime[i] = modtime
     return None
+
+
+def init_realtime_module():
+    if(rtLoaderThread is not None):
+        return rtLoaderThread
+    rtLoaderThread = threading.Thread(target=updateModules)
+
+    return rtLoaderThread
+
+
+
+def start_realtime_module():
+    global shouldRunRTLoader
+    if rtLoaderThread is None:
+        rtLoaderThread = init_realtime_module()
+    
+    shouldRunRTLoader = True
+    rtLoaderThread.start()
+    
+
+def stop_realtime_module(timeout=0.5):
+    global shouldRunRTLoader
+    shouldRunRTLoader = False
+    if rtLoaderThread is not None:
+        rtLoaderThread.join(timeout=timeout)
+        if rtLoaderThread.is_alive():
+            try:
+                kill(rtLoaderThread.native_id,SIGTERM)
+            except:
+                pass
+            rtLoaderThread.join(timeout=timeout)
+            if rtLoaderThread.is_alive():
+                try:
+                    kill(rtLoaderThread.native_id,SIGABRT)
+                except:
+                    pass
+                rtLoaderThread.join(timeout=timeout)
+                if rtLoaderThread.is_alive():
+                    return False
+    rtLoaderThread = None
+    return True
