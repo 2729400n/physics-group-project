@@ -30,15 +30,13 @@ class TabbedView(ttk.Notebook):
         for i in os.listdir(dir) :
             print(i)
             if i.startswith('gui_scene'):
-                # print(i)
-                ldr = importlib.machinery.SourceFileLoader
-                # finder =importlib.machinery.FileFinder(dir,(ldr,['.py']))
                 
-                # mod= finder.find_spec(i.removesuffix('.py'))
+                ldr = importlib.machinery.SourceFileLoader
+                
                 modname =f'Numerical_Methods.GUI.scenes.{i.removesuffix('.py')}'
                 modorigin = pth.join(dir,i)
                 mod =ModuleSpec(modname,origin=modorigin,loader=SourceFileLoader(modname,modorigin),is_package=False)
-                # mod.name=f'{i.removesuffix('.py')}'
+                
                 scene_module=importlib.util.module_from_spec(mod)
                 scene_module.__file__ = modorigin
                 importlib.machinery.SourcelessFileLoader.exec_module(scene_module.__loader__,scene_module)
@@ -50,6 +48,7 @@ class TabbedView(ttk.Notebook):
                 else:
                     print(scene_module, 'No Scene')
         self.bind('<Configure>',self.resize_subviews,'+')
+        
     def resize_subviews(self,evt:'tk.Event[tk.Frame]'):
         
         print(evt.type,evt.width,evt.height)

@@ -139,6 +139,7 @@ class TasksFrame(tk.Frame):
         canvas_view.pack(fill=tk.BOTH, expand=True,
                          side=tk.BOTTOM, padx=5, pady=5, anchor=tk.SW)
         # canvas_view.propagate(True)
+        nroot.protocol('WM_DELETE_WINDOW',lambda:nroot.destroy())
 
     def selected_cmap(self, *args):
         index: tuple = self.taskList.curselection()
