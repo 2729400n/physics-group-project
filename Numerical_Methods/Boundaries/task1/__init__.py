@@ -26,7 +26,7 @@ class Task1(Task):
         self.grid = None
         self.cbar: Colorbar = None
         self.quivers: Quiver = None
-        self.savables.update(**{'Grid': self.save_grid})
+        self.savables.update(**{'Grid': self.save_grid,'Figure':self.save_figure})
 
     def setup(self, x1: float, y1: float, r1: float, r2: float, cx: float,
               cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,
@@ -51,6 +51,7 @@ class Task1(Task):
         self.resdy = dy
         axes = self.axes
 
+        axes.imshow(grid)
         axes.set_title('Electrostatic Potential')
         self.figure.canvas.figure = None
         self.figure.canvas.figure = self.figure
@@ -112,7 +113,7 @@ class Task1(Task):
         except:
             pass
         outfile.seek(0)
-        return 'Task1_grid.npy',outfile
+        return 'Task1_grid.npy',outfile.read()
     
     def save_figure(self):
         if self.figure is None:
@@ -124,5 +125,5 @@ class Task1(Task):
         except:
             pass
         outfile.seek(0)
-        return 'Task1_figure.png',outfile
+        return 'Task1_figure.png',outfile.read()
 
