@@ -1,2 +1,3 @@
 import csv
-import pandas as pd
+import io
+from typing import Iterable

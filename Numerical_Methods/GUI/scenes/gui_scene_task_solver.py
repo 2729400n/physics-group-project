@@ -112,6 +112,12 @@ class TasksFrame(tk.Frame):
         pop_out_canvas_button.pack()
 
         self.test_grid, _ = np.mgrid[:1024, :100]
+        
+        lrscroller = ttk.Scrollbar(self,orient='horizontal')
+        lrscroller.pack()
+        
+        lrscroller = ttk.Scrollbar(self,orient='vertical'   )
+        lrscroller.pack()
 
     def reload(self):
         self.load_Tasks()
