@@ -10,11 +10,7 @@ def circle(cx,cy,r,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.
     # First solve for a qudrant the apply rotations
     operations = [[lambda x,y,z:np.abs(x-y)<=z]*2,[lambda x,y,z:x<=y,lambda x,y,z:x>=y]]
     
-    # === Fast Slow pointer ===
-    # r1 = np.array([0,r])
-    # r2 = np.array([r,0])
-    # theta = np.linspace(0,np.pi/4,1000)
-    # =======
+
     grid_class=type(Grid)
     # if all we want is a  circle
     x = 2*int(r//dx)+5
