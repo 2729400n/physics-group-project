@@ -67,6 +67,7 @@ def updateModules():
 
 
 def init_realtime_module():
+    global rtLoaderThread
     if(rtLoaderThread is not None):
         return rtLoaderThread
     rtLoaderThread = threading.Thread(target=updateModules)
@@ -76,7 +77,7 @@ def init_realtime_module():
 
 
 def start_realtime_module():
-    global shouldRunRTLoader
+    global shouldRunRTLoader,rtLoaderThread
     if rtLoaderThread is None:
         rtLoaderThread = init_realtime_module()
     
@@ -85,7 +86,7 @@ def start_realtime_module():
     
 
 def stop_realtime_module(timeout=0.5):
-    global shouldRunRTLoader
+    global shouldRunRTLoader,rtLoaderThread
     shouldRunRTLoader = False
     if rtLoaderThread is not None:
         rtLoaderThread.join(timeout=timeout)

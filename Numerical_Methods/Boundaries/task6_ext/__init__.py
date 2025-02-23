@@ -31,7 +31,7 @@ class Task6(Task):
         pass
 
     def run(self):
-        xs,ys,self.grid=laplace_ode_solver_continue(self.grid,self.boundaryCondition,stencil=5,stencil=9,gamma=0.5)
+        xs,ys,self.grid=laplace_ode_solver_continue(self.grid,self.boundaryCondition,stencil=9,gamma=0.5)
         self.Xs, self.Ys = np.meshgrid(xs[:-1:5], ys[:-1:5])
         self.Efield = findUandV(grid=self.grid)[::5,::5]
         self.axes.imshow(self.grid)
