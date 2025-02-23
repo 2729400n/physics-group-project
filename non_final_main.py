@@ -1,3 +1,4 @@
+import time
 import Numerical_Methods.GUI as gui
 import sys
 import test_Numerical.check_user_approval as check_user_approval
@@ -28,10 +29,18 @@ def updateModules():
     while main_thread_running:
         copydict = sys.modules.copy()
         for i in copydict:
+            if i in notSpeced:
+                continue
             mod = sys.modules.get(i)
+            
             if mod is None:
                 continue
-            modspec = mod.__spec__
+            try:
+                modspec = mod.__spec__
+            except Exception as e:
+                notSpeced.append(i)
+                print(e)
+                continue
             if modspec is None:
                 if i in notSpeced:
                     continue

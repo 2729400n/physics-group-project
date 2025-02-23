@@ -230,11 +230,19 @@ def getDefault(arg,func):
     print(param.default)
     return ArgsState.ISARG,param.default
 
-def makeFunctionCallable(func:'function',master=None,classType=False,instance=None,direction='left'):
+def makeFunctionCallable(func:'function',master=None,classType=False,instance=None,direction='left',max_rows=4):
     argMapping=getArgsToType(func,classType=classType)
-    wmain=ttk.Labelframe(master=master,width=640,height=480, text=func.__name__)
+    mroot = ttk.Labelframe(master=master,width=640,height=480, text=func.__name__)
+    wmain_outer= ttk.Frame(mroot)
+    
+    # wmain = ttk.Frame(wmain_outer)
+    
     stores = {}
+    count = 0
     for i in  argMapping:
+        if count%max_rows==0:
+            wmain = ttk.Frame(wmain_outer)
+            wmain.pack(fill=tk.BOTH,expand=True,padx=5,pady=5,side=direction,anchor=tk.NW)
         defarg = getDefault(i,func)
         if defarg[1] == inspect._empty:
             defarg = (defarg[0],None)
@@ -242,14 +250,20 @@ def makeFunctionCallable(func:'function',master=None,classType=False,instance=No
         field.grid(sticky='w')
         iframe.grid(sticky='w')
         stores.update(**{i:store})
-    btn=ttk.Button(wmain,text="Submit", class_='Submit', name='submit_button')
+        count+=1
+        
+    btn=ttk.Button(mroot,text="Submit", class_='Submit', name='submit_button')
     # print(stores)
     btn.bind('<Button-1>',lambda ev:callFunc(ev,func,**stores))
-    btn.grid()
+    # btn.pack(side='bottom',anchor=tk.S,fill=tk.NONE,expand=False,padx=5,pady=5)
     
     # root.wm_geometry('640x480')
     # wmain.master.wm_geometry('640x480')
-    wmain.pack(fill=tk.BOTH,expand=True,padx=5,pady=5,side=direction,anchor=tk.NW)
+    wmain_outer.grid(row=0,column=0)
+    wmain_outer.propagate(True)
+    btn.grid(row=1,column=0)
+    mroot.pack(fill=tk.BOTH,expand=True,padx=5,pady=5,side=direction,anchor=tk.NW)
+    mroot.propagate(True)
     return stores
 
 

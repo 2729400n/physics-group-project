@@ -10,12 +10,12 @@ def createConvMatrix(gamma) :
                      0, 1, 0,
                      1, -4, 1,
                      0,  1, 0
-                     ],dtype=np.float64),(3,3),"C")/4 # + gamma*np.reshape(np.array(
-                    # [
-                    #  1/2,  0, 1/2,
-                    #    0, -2,   0,
-                    #  1/2,  0, 1/2
-                    #  ],dtype=np.float64),(3,3),"C")
+                     ],dtype=np.float64),(3,3),"C")/4  + gamma*np.reshape(np.array(
+                    [
+                     1/2,  0, 1/2,
+                       0, -2,   0,
+                     1/2,  0, 1/2
+                     ],dtype=np.float64),(3,3),"C")
                      
 def  convolveMatrixes(a:np.ndarray,b:np.ndarray,wrap=False):
-    return signal.convolve2d(a,b,mode="same",boundary="fill",fillvalue=0)
+    return signal.convolve2d(a,b,mode="same",boundary= 'wrap' if wrap else"fill")

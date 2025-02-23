@@ -95,8 +95,14 @@ def laplace_ode_solver(size:'tuple[int,int]|np.ndarray[int,int]',fixedCondtions:
         BackwardHSpace_A2f = Frames[i%2, 1:-1, :-2]
         ForwardVSpace_A2f = Frames[i%2, 2:, 1:-1]
         BackwardVSpace_A2f = Frames[i%2, :-2, 1:-1]
+        
+        
+        DiagForwardUp  = Frames[i%2, 2:, 2:]
+        DiagForwardDown  = Frames[i%2, :-2, 2:]
+        DiagBackUp  = Frames[i%2, 2:, :-2]
+        DiagBackDown  = Frames[i%2, :-2, :-2]
 
-        Frames[(i+1)%2, 1:-1, 1:-1] = 0.25*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f+BackwardVSpace_A2f)
+        Frames[(i+1)%2, 1:-1, 1:-1] = 0.125*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f+BackwardVSpace_A2f)+0.125*(DiagBackUp+DiagBackDown+DiagForwardDown+DiagForwardUp)
         if overlay is not None:
             Frames[(i+1)%2] = fixedCondtions(Frames[(i+1)%2],overlay=overlay)
         else:
@@ -132,7 +138,18 @@ def makeGeometry2(val=1.0,r=35,cx=50,cy=150,relative=False):
         Grid[:,:2]=val
         Grid[:,-2:]=-val
         
-        Grid[(0,-1), 1:-1] = 0.25*(Grid[(0,-1), 2:]+Grid[(0,-1), :-2]+Grid[(-1,-2), 1:-1]+Grid[(1,0), 1:-1])
+        ForwardHSpace_A2f = Grid[(0,-1), 2:]
+        BackwardHSpace_A2f = Grid[(0,-1), :-2]
+        ForwardVSpace_A2f = Grid[(-1,-2), 1:-1]
+        BackwardVSpace_A2f = Grid[(1,0), 1:-1]
+        
+        
+        DiagForwardUp  = Grid[(1,0), 2:]
+        DiagForwardDown  = Grid[(-1,-2), 2:]
+        DiagBackUp  = Grid[(1,0), :-2]
+        DiagBackDown  = Grid[(-1,-2), :-2]
+        
+        Grid[(0,-1), 1:-1] = 0.125*(ForwardHSpace_A2f+BackwardHSpace_A2f+ForwardVSpace_A2f+BackwardVSpace_A2f)+0.125*(DiagBackUp+DiagBackDown+DiagForwardDown+DiagForwardUp)
         
         
 
