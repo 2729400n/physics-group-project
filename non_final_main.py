@@ -30,6 +30,7 @@ if __name__ == "__main__":
             rtLoader.stop_realtime_module()
             raise e
         finally:
+            rtLoader.stop_realtime_module()
             exit(1)
     else:
         try:
