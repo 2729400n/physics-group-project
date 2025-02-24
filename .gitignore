@@ -1,6 +1,6 @@
 *.dat
 **/__pycache__/
 # *.png
-.vscode/**
+**/.vscode
 **/*.dat
 BoxInBox.png
