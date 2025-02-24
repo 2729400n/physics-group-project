@@ -117,16 +117,10 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
     
     mixedParam = [
         inspect.Parameter(
-                f"x",
+                f"point",
                 inspect._ParameterKind.POSITIONAL_OR_KEYWORD,
                 default=0,
-                annotation=np.float64,
-            ),
-        inspect.Parameter(
-                f"y",
-                inspect._ParameterKind.POSITIONAL_OR_KEYWORD,
-                default=0,
-                annotation=np.float64,
+                annotation=np.ndarray,
             ),
         inspect.Parameter(
                 f"xcoeffs",
@@ -149,10 +143,18 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
                 default=0,
                 annotation=np.float64,
             )
-            for i in range(0, n*m, 1)
+            for i in range(0, (n+1)*(m+1), 1)
         ]
     
-    def polyProduct(x, y, xcoeffs:'list[float]'=None, ycoeffs:'list[float]'=None,*coeffs):
+    fullSuiteParams = mixedParam+mixedParams
+    
+    def polyProduct(point:np.ndarray, xcoeffs:'list[float]'=None, ycoeffs:'list[float]'=None,*coeffs):
+        if(point.ndim)==2:
+            x=point[:,:,1]
+            y=point[:,:,0]
+        else:
+            x=point[:,1]
+            y=point[:,0]
         coeff_len = len(coeffs)
         interpolated_func = XLin(x, *xcoeffs) * YLin(y, ycoeffs)
         
@@ -165,7 +167,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 
     
     polyProduct.__signature__ = inspect.Signature(
-        mixedParams,
+        fullSuiteParams,
         return_annotation=np.float64,
         __validate_parameters__=True,
     )
@@ -192,6 +194,8 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     
     print(XPolyNomial.__signature__)
     print(YPolyNomial.__signature__)
+    print(XYPolyNomial.__signature__)
+    input('...')
     params =[xmaxfev,ymaxfev,xymaxfev]
     runtimes =[n,m,n*m]
     xmaxfev,ymaxfev,xymaxfev = [params[i] if params[i] is not None else 999*runtimes[i] for i in range(3)]
@@ -213,27 +217,40 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
 
     print('YOptimal=',yOptimal)
     print('YCov=',xOptimal) if yCov is not None else None
-    def __innerProduct(y:np.float64):
+    
+    YGrid,XGrid = np.meshgrid(Ys,Xs)
+    points=np.stack((YGrid,XGrid),-1)
+    print(points)
+    points =points.reshape(points.shape[0]*points.shape[1],2)
+    
+    def __innerProduct():
         nonlocal xOptimal,yOptimal
-        def _innerProduct(x:np.float64,*args):
+        
+        def ___innerProduct(point:np.ndarray[np.float64,np.float64],*args):
             nonlocal xOptimal,yOptimal
-            return XYPolyNomial(x,y,xOptimal,yOptimal,*args)
+            return XYPolyNomial(point,xOptimal,yOptimal,*args)
+        
+        def _innerProduct(*args):
+            nonlocal ___innerProduct
+            return ___innerProduct(*args)
+        
         sig = inspect.signature(XYPolyNomial)
-        sig = inspect.Signature([sig.parameters.get(param) for param in sig.parameters if param!='y'])
-        
-        _innerProduct.__signature__ = sig
-        
+        sig = inspect.Signature([sig.parameters.get(param) for param in sig.parameters if param!='xcoeffs' and param!='ycoeffs'])
+        _innerProduct = np.frompyfunc(_innerProduct,2,1)
+        _innerProduct.__signature__ =___innerProduct.__signature__= sig
+        _innerProduct = np.vectorize(_innerProduct,signature=___innerProduct.signature)
+        _innerProduct.__signature__=_innerProduct.signature=___innerProduct.__sign
+        input('...')
         # TODO add a function signature to _innerProduct before returning it
         return _innerProduct
     XYoptimal = None
     XYcov = None
-    for i in range(0,Ys.shape[0]):
-        polyProd = __innerProduct(Ys[i])
-        
-        if (XYoptimal is not None):
-            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:],p0=XYoptimal,sigma=XYcov,maxfev=999)
-        else:
-            XYoptimal,XYcov = optimist.curve_fit(polyProd,Xs,Grid[i,:],maxfev=999)
+    polyProd = __innerProduct()
+    
+    if (XYoptimal is not None):
+        XYoptimal,XYcov = optimist.curve_fit(polyProd,points,Grid.flatten(),p0=XYoptimal,sigma=XYcov,maxfev=999)
+    else:
+        XYoptimal,XYcov = optimist.curve_fit(polyProd,points,Grid.flatten(),maxfev=999)
     return xOptimal,yOptimal,XYoptimal
         
                                       
