@@ -1,6 +1,7 @@
 
 import pathlib
-
+import pprint
+import typing
 
 
 SAVEDIR = pathlib.Path.home()
@@ -70,6 +71,17 @@ def saveFileGui(data:bytes,ftypes=None,initname:str=None):
     fout.close()
     return True
 
+def walkDirectory(directory:'pathlib.Path|str|bytes',extension=''):
+    if isinstance(dir,bytes):
+        directory=directory.decode()
+    if isinstance(directory,str):
+        directory=pathlib.Path(directory)
+    if isinstance(extension,(str)):
+        extension = [extension]
+    tree=(directory.glob(f'**/*{ext}',recurse_symlinks=True) for ext in extension)
+    return tree
+
 if __name__== '__main__':
-    saveFileCurses(b'Helllo\r\n')
+    tree=walkDirectory('./')
+    print([*tree])
     

@@ -110,7 +110,7 @@ def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid: 
     return pixelated_annulus
 
 
-def rectangle(x0, y0, x1, y1, dx=1, dy=1, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None, blocking=False, thickness=1):
+def rectangle(x0:np.float64, y0:np.float64, x1:np.float64, y1:np.float64, dx:float=1.0, dy:float=1.0, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None, blocking=False, thickness=1):
 
     if y1 < y0:
         y0, y1 = y1, y0
@@ -124,8 +124,13 @@ def rectangle(x0, y0, x1, y1, dx=1, dy=1, val: float = 1.0, fill: bool = False, 
 
     if Grid is not None:
         y, x = Grid.shape
+    
+    y0=y0/dy
+    y1=y1/dy
+    x0=x0/dx
+    x1=x1/dx
 
-    if not blocking:
+    if (not blocking) and (not fill):
         x1 = None if x1 > x else x1
         x0 = None if x0 < 0 else x0
 
@@ -139,18 +144,53 @@ def rectangle(x0, y0, x1, y1, dx=1, dy=1, val: float = 1.0, fill: bool = False, 
         y0 = max(0, y0)
 
     mul_mask = np.full_like(Grid, 1)
-
+    sets_masks = [np.full_like(Grid,False,dtype=bool),np.ones_like(Grid,dtype=np.float64)]
+    
+    
     if fill:
-        mul_mask[y0:y1, x0:x1] = 0 if clear else 1
+        
+        print([y0,y1,x0,x1])
+        y0_ceil,y1_ceil,x0_ceil,x1_ceil =[int(np.ceil(i)) for i in [y0,y1,x0,x1]]
+        y0_floor,y1_floor,x0_floor,x1_floor=[int(np.floor(i)) for i in [y0,y1,x0,x1]]
+        mul_mask[y0_ceil:y1_ceil, x0_ceil:x1_ceil] = 0 if clear else 1
+        print([y0_ceil,y1_ceil,x0_ceil,x1_ceil])
+        print([y0_floor,y1_floor,x0_floor,x1_floor])
+        
+        sets_masks[1][y0_floor, x0_ceil:x1_floor+1] = np.abs(y0_floor-y0)
+        sets_masks[1][y1_ceil, x0_ceil:x1_floor+1] = np.abs(y1_ceil-y1)
+        sets_masks[1][y0_ceil:y1_floor+1, x0_floor] = np.abs(x0_floor-x0)
+        sets_masks[1][y0_ceil:y1_floor+1, x1_ceil] = np.abs(x1_ceil-x1)
+        
+        print(np.abs(y0_floor-y0))
+        print(np.abs(y1_ceil-y1))
+        print(np.abs(x0_floor-x0))
+        print(np.abs(x1_ceil-x1))
+        
+        
+        sets_masks[1][y0_floor, x0_floor] = np.sqrt(((x0_floor-x0)**2+(y0_floor-y0)**2)/2)
+        sets_masks[1][y0_floor, x1_ceil] = np.sqrt(((x1_ceil-x1)**2+(y0_floor-y0)**2)/2)
+        sets_masks[1][y1_ceil, x0_floor] = np.sqrt(((x0_floor-x0)**2+(y1_ceil-y1)**2)/2)
+        sets_masks[1][y1_ceil, x1_ceil] = np.sqrt(((x1_ceil-x1)**2+(y1_ceil-y1)**2)/2)
+        
+        sets_masks[0][(y0_floor,y1_ceil), x0_floor:x1_ceil+1] = True 
+        sets_masks[0][y0_floor:y1_ceil+1, (x0_floor,x1_ceil)] = True
+        
     else:
 
         mul_mask[tuple([i for i in (y0, y1) if i is not None]), x0:x1] = mul_mask[y0:y1, tuple(
             [i for i in (x0, x1) if i is not None])] = 0 if clear else 1
+    
+    sets_masks[0]= sets_masks[0]==True
+    print(sets_masks[0],sets_masks[1],sep='\n')
     if Grid is not None:
         if (grid_class != tuple):
-            return Grid*mul_mask
-
-    return mul_mask
+            out = Grid*mul_mask
+            out[sets_masks[0]]= out[sets_masks[0]]*sets_masks[1][sets_masks[0]]
+            return out
+        
+    out = mul_mask
+    out[sets_masks[0]]= out[sets_masks[0]]*sets_masks[sets_masks[0]]
+    return out
 
 # A wrapper function for Rectangle
 
@@ -185,9 +225,9 @@ if __name__ == '__main__':
     import matplotlib.patches
     import matplotlib.path
     import matplotlib.pyplot as plt
-    grid = np.zeros((500, 500))
+    grid = np.zeros((100, 100))
     grid[:, :] = 1
-    circ = rectangle_w_h(100, 100, 6000, 200, fill=False,
+    circ = rectangle_w_h(1.5, 7.89, 79.83323, 20.332, fill=True,
                          clear=True, Grid=grid)
     plt.imshow(circ, cmap='gray')
     plt.colorbar()
