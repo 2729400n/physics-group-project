@@ -29,15 +29,20 @@ def save(name:str,is_multi:bool=True,*array:np.ndarray,compressed:bool=True,pick
         else:
             saveArray(name,array[0],compressed=compressed,pickle=pickle,**karray)
     except Exception as e:
-        raise e
+        return False
     
     return True
     
 
-def loadArray(name:str,array:np.ndarray,compressed:bool=True,as_Text:bool=False,fname:str=None,pickle:bool=False):
-    np.load(name,'c',allow_pickle=True,fix_imports=True)
-    return None
+def loadArray(name:str,pickle:bool=False):
+    if isinstance(name,bytes):
+        fname=name.decode()
+    if isinstance(name,str):
+        fname=pathlib.Path(name)
+    elif isinstance(name,pathlib.Path):
+        fname=name
+    return np.load(fname,'c',allow_pickle=pickle,fix_imports=pickle)
 
-fileOps = {'open':None,'save':save_Figure}
+fileOps = {'open':loadArray,'save':save}
 name = 'Figure'
 extensions = ['.npz','.npy','.txt']

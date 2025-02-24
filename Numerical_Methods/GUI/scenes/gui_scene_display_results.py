@@ -11,7 +11,8 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from ...utils.nfile_io import walkDirectory
-from ...utils.nfile_io import load
+from ...utils.nfile_io.extensions import numpy_io,image_io
+from ...Solvers import errors
 import pathlib
 import time
 import glob
@@ -66,6 +67,8 @@ class ResultsScene(ttk.Frame):
         
         self.data=None
         self.Grid_obj :np.ndarray=None
+        self.dx=1.0
+        self.dy=1.0
         self.cursel = None
     @property
     def results_dir(self)->pathlib.Path:
@@ -92,19 +95,77 @@ class ResultsScene(ttk.Frame):
             return
         
         self.cursel=selection
+    
+    def _error_finder(self):
+        fig = Figure(figsize=(5, 4), dpi=100)
+        ax = self.fig.add_subplot(111)
         
         
-    def _choose_data(self,evt:tk.Event):
+        newErrorWindow =tk.Toplevel(self,)
+        mainframe = ttk.Frame(newErrorWindow)
+        plot_frame = ttk.Frame(mainframe)
+        # Plot data
+
+        ax.set_title("The Laplacian Residuals")
+        ax.set_xlabel("X axis")
+        ax.set_ylabel("Y axis")
+        # self.ax.legend()
+
+        # Embed figure into Tkinter canvas
+        canvas = FigureCanvasTkAgg(fig, master=plot_frame)
+        canvas_widget = self.canvas.get_tk_widget()
+        canvas_widget.grid(row=0, column=0, sticky="nsew")
+
+        # Add Navigation Toolbar
+        toolbar = NavigationToolbar2Tk(canvas, plot_frame,pack_toolbar=False)
+        
+        toolbar.update()
+        toolbar.grid(row=1, column=0, sticky="ew")
+        toolbar.home
+        # Connect event for mouse clicks on the canvas
+        # canvas.mpl_connect("button_press_event", self.on_click)
+        
+    def _choose_data(self):
         cursel = self.cursel
         
         
         item=self.treeView.item(cursel,option=None)
         
         if not isinstance(item,(dict)):
-            msgbox.showerror("Could not find File in tree")
+            msgbox.showerror(message="Could not find File in tree")
             return
         vals=item.get('values',['',-1,'ANY',cursel])
-        
+        selcfile=pathlib.Path(vals[-1])
+        if selcfile.is_dir():
+            msgbox.showwarning(message="Cannot Open a Directory")
+            return
+        match selcfile.suffix:
+            case '.npy':
+                try:
+                    fil =numpy_io.loadArray(selcfile,True)
+                    self.ax.clear()
+                    self.line=self.ax.imshow(fil)
+                    self.canvas.draw()
+                    self.Grid_obj = fil
+                except Exception as e:
+                    msgbox.showerror(message=f"{e}",title='Exception')
+            case '.npz':
+                try:
+                    fil =numpy_io.loadArray(selcfile,True)
+                    print(fil)
+                    print(fil.__class__)
+                    print(fil.__dir__())
+                except Exception as e:
+                    msgbox.showerror(message=f"{e}",title='Exception')
+            case '.png':
+                try:
+                    fil =image_io.openImage(selcfile)
+                    self.ax.clear()
+                    self.line = self.ax.imshow(fil)
+                    self.ax
+                    self.canvas.draw()
+                except Exception as e:
+                    msgbox.showerror(message=f"{e}",title='Exception')
         
         
         
