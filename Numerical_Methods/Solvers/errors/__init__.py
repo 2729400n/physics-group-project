@@ -2,9 +2,10 @@ import numpy as np
 
 
 
-def laplaceify(grid:np.ndarray,dx,dy):
-    dphi_dx_2 = (grid[:,:-2] - 2*grid[:,1:-1]+ grid[:,2:])/(dx**2)
-    dphi_dy_2 = (grid[:-2,:] - 2*grid[1:-1,:]+ grid[2:,:])/(dy**2)
+def laplaceify(grid:'np.ndarray[np.ndarray[np.float64]]',dx,dy,wrap=False):
+    errors = np.zeros_like(grid)
+    dphi_dx_2 = ((grid[:,:-2] - 2*grid[:,1:-1]+ grid[:,2:])/(dx**2))[1:-1]
+    dphi_dy_2 = ((grid[:-2,:] - 2*grid[1:-1,:]+ grid[2:,:])/(dy**2))[:,1:-1]
     residuals =dphi_dx_2+dphi_dy_2
     abs_residuals = np.abs(residuals)
     

@@ -97,31 +97,59 @@ class ResultsScene(ttk.Frame):
         self.cursel=selection
     
     def _error_finder(self):
-        fig = Figure(figsize=(5, 4), dpi=100)
-        ax = self.fig.add_subplot(111)
+        
+        if self.Grid_obj is None:
+            msgbox.showerror(message="Make sure you have selected an insightable file.")
+            return
+        
+        fig = Figure(figsize=(8, 8),)
+        ax = fig.add_subplot(111)
         
         
         newErrorWindow =tk.Toplevel(self,)
         mainframe = ttk.Frame(newErrorWindow)
         plot_frame = ttk.Frame(mainframe)
+        button_frame = ttk.Frame(mainframe)
+        
+        newErrorWindow.propagate(True)
+        mainframe.propagate(True)
+        plot_frame.propagate(True)
+        button_frame.propagate(True)
+        
+        plot_frame.columnconfigure(0,weight=1)
+        plot_frame.rowconfigure(0,weight=1)
+        plot_frame.columnconfigure(0,weight=1)
+        plot_frame.rowconfigure(1,weight=1)
         # Plot data
-
-        ax.set_title("The Laplacian Residuals")
-        ax.set_xlabel("X axis")
-        ax.set_ylabel("Y axis")
-        # self.ax.legend()
-
+        mainframe.columnconfigure(0,weight=1)
+        mainframe.rowconfigure(0,weight=1)
+        mainframe.columnconfigure(0,weight=1)
+        mainframe.rowconfigure(1,weight=1)
         # Embed figure into Tkinter canvas
         canvas = FigureCanvasTkAgg(fig, master=plot_frame)
         canvas_widget = self.canvas.get_tk_widget()
         canvas_widget.grid(row=0, column=0, sticky="nsew")
+        canvas_widget.configure(width=640,height=480)
 
         # Add Navigation Toolbar
         toolbar = NavigationToolbar2Tk(canvas, plot_frame,pack_toolbar=False)
         
         toolbar.update()
         toolbar.grid(row=1, column=0, sticky="ew")
-        toolbar.home
+        
+        plot_frame.grid(column=0,row=0)
+        button_frame.grid(column=0,row=1)
+        
+        mainframe.pack(anchor=tk.NW,side=tk.TOP,fill=tk.BOTH,expand=True)
+        
+        
+        ax.set_title("The Laplacian Absolute Error")
+        ax.set_xlabel("X axis")
+        ax.set_ylabel("Y axis")
+        # self.ax.legend()
+        
+        resi,absresi=errors.laplaceify(self.Grid_obj,self.dx,self.dy)
+        ax.imshow(absresi)
         # Connect event for mouse clicks on the canvas
         # canvas.mpl_connect("button_press_event", self.on_click)
         
@@ -258,6 +286,9 @@ class ResultsScene(ttk.Frame):
         self.reloadButton = ttk.Button(self.treeFrame,text='Reload',command=self._reload_tree_view)
         self.newDirectoryButton = ttk.Button(self.treeFrame,text='Change Directory',command=self._pick_directory)
         self.chooseDataButton = ttk.Button(self.treeFrame,text='Choose Data',command=self._choose_data)
+        self.insightButton = ttk.Button(self.treeFrame,text='Get Insight',command=self._error_finder)
+        
+        self.insightButton.pack()
         self.reloadButton.pack()
         self.newDirectoryButton.pack()
         self.chooseDataButton.pack()
