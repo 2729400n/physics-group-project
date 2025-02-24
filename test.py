@@ -178,7 +178,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 
 
 # A default ready made but slow fitting function 
-def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray',dy:float=1.0,dx:float=1.0):
+def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray',dy:float=1.0,dx:float=1.0,xmaxfev:int=None,ymaxfev:int=None,xymaxfev:int=None,xtol:float=None,ytol:float=None,xytol:float=None):
     (m,n) = Grid.shape
     if m<1 or n<1:
         raise 'Cannot interpolate an empty grid'
@@ -192,18 +192,23 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     
     print(XPolyNomial.__signature__)
     print(YPolyNomial.__signature__)
+    params =[xmaxfev,ymaxfev,xymaxfev]
+    runtimes =[n,m,n*m]
+    xmaxfev,ymaxfev,xymaxfev = [params[i] if params[i] is not None else 999*runtimes[i] for i in range(3)]
     try:
         # Using curve fit is lazy but its better than writing a lsq function
-        xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:])
+        xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:],maxfev=xmaxfev)
         
-    except RuntimeError:
+    except RuntimeError as e:
+        print(e)
         xOptimal = np.polyfit(Xs,Grid[0,:],n-1)
     print('XOptimal=',xOptimal)
     print('XCov=',xCov) if xCov is not None else None
     try:
-        yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T)
+        yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T,maxfev=ymaxfev)
         
-    except RuntimeError:
+    except RuntimeError as e:
+        print(e)
         yOptimal = np.polyfit(Ys,Grid[:,0].T,m-1)
 
     print('YOptimal=',yOptimal)
@@ -236,9 +241,9 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
 if __name__ == '__main__':
     def PolYproduct(x,y):
         return (2*(x**2)+2*(x)+3)
-    n_ = 4
-    m_ =4
-    Ygrid,Xgrid = np.mgrid[:n_,:m_]
+    n_ = 10
+    m_ =10
+    Ygrid,Xgrid = np.mgrid[:m_,:n_]
 
     print(Xgrid,Ygrid,sep='\n\n')
     input()
