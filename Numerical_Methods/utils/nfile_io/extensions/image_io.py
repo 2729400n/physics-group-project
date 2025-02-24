@@ -1,7 +1,7 @@
 import PIL.Image as Image
 
 
-def saveImage(file,img:Image.ImageFile.ImageFile):
+def saveImage(file,img:'Image.ImageFile.ImageFile'):
     img.save(file,format='png')
     
 def openImage(filename,*args,**kwargs):
