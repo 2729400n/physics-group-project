@@ -72,21 +72,23 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
         
         # Create Vandermonde matrices for x and y.
         # Note: Using np.vander on a 1d array.
-        xs = np.vander(x, N=n, increasing=False)  # shape: (len(x), n)
-        ys = np.vander(y, N=m, increasing=False)  # shape: (len(y), m)
-        
+        xs = np.vander(x, N=n+1, increasing=False)  # shape: (len(x), n)
+        ys = np.vander(y, N=m+1, increasing=False)  # shape: (len(y), m)
+        print(x,y)
         print(xs,xs.shape)
         print(ys,ys.shape)
+        input('...')
+        coeffs=np.array(coeffs)
         # Combine the two polynomial bases. A simple approach is to use outer product for each point.
         # We assume here that coeffs has length n*m. Adjust if needed.
-        fixingProduct = np.array([
-            np.outer(xs[i], ys[i]).flatten() for i in range(len(x))
-        ])  # shape: (len(x), n*m)
+        fixingProduct = (xs.T@ys)
         
-        # If coeffs is not a numpy array, convert it.
-        coeffs = np.array(coeffs)
-        # If lengths differ, you might need to adjust dimensions.
-        fixingTerm = fixingProduct.dot(coeffs)
+        # # If lengths differ, you might need to adjust dimensions.
+        input('...')
+        print(fixingProduct)
+        print(fixingProduct.shape)
+        input('...')
+        fixingTerm = fixingProduct.flatten()*coeffs
         
         return interpolated_func + fixingTerm
 
