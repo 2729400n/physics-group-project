@@ -179,7 +179,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 
 # A default ready made but slow fitting function 
 def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray',dy:float=1.0,dx:float=1.0):
-    (n,m) = Grid.shape
+    (m,n) = Grid.shape
     XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(n-1,m-1)
     
     Xs=np.arange(x0,x1+dx,dx)
@@ -195,17 +195,17 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
         xOptimal,xCov=optimist.curve_fit(XPolyNomial,Xs,Grid[0,:])
         
     except RuntimeError:
-        xOptimal = np.polyfit(Xs,Grid[0,:],Xs.shape[0])
+        xOptimal = np.polyfit(Xs,Grid[0,:],n-1)
     print('XOptimal=',xOptimal)
     print('XCov=',xCov) if xCov is not None else None
     try:
         yOptimal,yCov=optimist.curve_fit(YPolyNomial,Ys,Grid[:,0].T)
         
     except RuntimeError:
-        yOptimal = np.polyfit(Ys,Grid[:,0].T,Ys.shape[0])
+        yOptimal = np.polyfit(Ys,Grid[:,0].T,m-1)
 
     print('YOptimal=',yOptimal)
-    print('XCov=',xOptimal) if yCov is not None else None
+    print('YCov=',xOptimal) if yCov is not None else None
     def __innerProduct(y:np.float64):
         nonlocal xOptimal,yOptimal
         def _innerProduct(x:np.float64,*args):
@@ -233,9 +233,9 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
     
     
 def PolYproduct(x,y):
-    return (2*(x**2)+2*(x)+3)*(1)
+    return (2*(x**2)+2*(x)+3)
 
-Xgrid,Ygrid = np.mgrid[:100,:100]
+Ygrid,Xgrid = np.mgrid[:4,:4]
 
 print(Xgrid,Ygrid,sep='\n\n')
 input()
@@ -244,6 +244,6 @@ grid = PolYproduct(Xgrid,Ygrid)
 print(grid)
 input('Ready ?')
 
-xopt,yopt,xyopt = InterpolateGrid(grid,0,0,99,99)
+xopt,yopt,xyopt = InterpolateGrid(grid,0,0,3,3)
 print(xopt,yopt,xyopt)
 input('Done!')
