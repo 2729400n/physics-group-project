@@ -180,6 +180,8 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 # A default ready made but slow fitting function 
 def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray',dy:float=1.0,dx:float=1.0):
     (m,n) = Grid.shape
+    if m<1 or n<1:
+        raise 'Cannot interpolate an empty grid'
     XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(n-1,m-1)
     
     Xs=np.arange(x0,x1+dx,dx)
@@ -234,8 +236,9 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
 if __name__ == '__main__':
     def PolYproduct(x,y):
         return (2*(x**2)+2*(x)+3)
-
-    Ygrid,Xgrid = np.mgrid[:4,:4]
+    n_ = 4
+    m_ =4
+    Ygrid,Xgrid = np.mgrid[:n_,:m_]
 
     print(Xgrid,Ygrid,sep='\n\n')
     input()
@@ -244,6 +247,6 @@ if __name__ == '__main__':
     print(grid)
     input('Ready ?')
 
-    xopt,yopt,xyopt = InterpolateGrid(grid,0,0,3,3)
+    xopt,yopt,xyopt = InterpolateGrid(grid,0,0,n_-1,m_-1)
     print(xopt,yopt,xyopt)
     input('Done!')
