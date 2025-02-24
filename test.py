@@ -36,8 +36,8 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
         result = 0
         
         # Evaluates each polynomial terms and adds them together
-        for i in range(1, n + dx, dx):
-            result += args[-i] * (x ** (i))
+        for i in range(0, n + dx, dx):
+            result += args[i] * (x ** (n-i))
         
         # constrain to a widely availible floating point representation
         return np.float64(result)
@@ -48,8 +48,8 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
          
         result = 0
         
-        for i in range(1, m + dy, dy):
-            result += args[-i] * (y ** (i))
+        for i in range(0, m + dy, dy):
+            result += args[i] * (y ** (m-i))
             
         return np.float64(result)
 
@@ -72,7 +72,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
                 default=0,
                 annotation=np.float64,
             )
-            for i in range(0, n, 1)
+            for i in range(0, n+1, 1)
         ]
     
     xParams  = xParam+xCoeffParams
@@ -98,7 +98,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
                 default=0,
                 annotation=np.float64,
             )
-            for i in range(0, m, 1)
+            for i in range(0, m+1, 1)
         ]
     
     yParams = yParam+yCoeffParams
@@ -180,7 +180,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 # A default ready made but slow fitting function 
 def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.ndarray',y1:'np.ndarray',dy:float=1.0,dx:float=1.0):
     (n,m) = Grid.shape
-    XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(n,m)
+    XPolyNomial,YPolyNomial,XYPolyNomial=functionMaker(n-1,m-1)
     
     Xs=np.arange(x0,x1+dx,dx)
     Ys=np.arange(y0,y1+dy,dy)
