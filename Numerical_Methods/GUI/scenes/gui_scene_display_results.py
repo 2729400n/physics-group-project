@@ -26,7 +26,7 @@ class FTYPES(Enum):
 
 class ResultsScene(ttk.Frame):
     name='Results'
-    hiden_files_regex = glob.translate('.vscode',recursive=True,)
+    # hiden_files_regex = glob.translate('.vscode',recursive=True,)
     def __init__(self,master=None,*args,**kwargs):
         
         super().__init__(master,*args,**kwargs)
