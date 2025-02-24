@@ -127,10 +127,10 @@ class ResultsScene(ttk.Frame):
         mainframe.rowconfigure(1,weight=1)
         # Embed figure into Tkinter canvas
         canvas = FigureCanvasTkAgg(fig, master=plot_frame)
-        canvas_widget = self.canvas.get_tk_widget()
+        canvas_widget = canvas.get_tk_widget()
         canvas_widget.grid(row=0, column=0, sticky="nsew")
         canvas_widget.configure(width=640,height=480)
-
+        canvas.draw()
         # Add Navigation Toolbar
         toolbar = NavigationToolbar2Tk(canvas, plot_frame,pack_toolbar=False)
         
