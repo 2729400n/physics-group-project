@@ -6,6 +6,10 @@
 *.lo
 *.o
 *.obj
+# Please Respectfully dont use .pyvenv
+# It breaks so much
+*.png
+.vscode/**
 *.pyc
 
 # Precompiled Headers
