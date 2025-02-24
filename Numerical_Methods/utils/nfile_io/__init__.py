@@ -78,7 +78,7 @@ def walkDirectory(directory:'pathlib.Path|str|bytes',extension=''):
         directory=pathlib.Path(directory)
     if isinstance(extension,(str)):
         extension = [extension]
-    tree=(directory.glob(f'**/*{ext}',recurse_symlinks=True) for ext in extension)
+    tree=(directory.glob(f'**/*{ext}') for ext in extension)
     return tree
 
 if __name__== '__main__':
