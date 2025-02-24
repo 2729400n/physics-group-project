@@ -231,19 +231,19 @@ def InterpolateGrid(Grid:'np.ndarray',x0:'np.ndarray',y0:'np.ndarray',x1:'np.nda
         
                                       
     
-    
-def PolYproduct(x,y):
-    return (2*(x**2)+2*(x)+3)
+if __name__ == '__main__':
+    def PolYproduct(x,y):
+        return (2*(x**2)+2*(x)+3)
 
-Ygrid,Xgrid = np.mgrid[:4,:4]
+    Ygrid,Xgrid = np.mgrid[:4,:4]
 
-print(Xgrid,Ygrid,sep='\n\n')
-input()
+    print(Xgrid,Ygrid,sep='\n\n')
+    input()
 
-grid = PolYproduct(Xgrid,Ygrid)
-print(grid)
-input('Ready ?')
+    grid = PolYproduct(Xgrid,Ygrid)
+    print(grid)
+    input('Ready ?')
 
-xopt,yopt,xyopt = InterpolateGrid(grid,0,0,3,3)
-print(xopt,yopt,xyopt)
-input('Done!')
+    xopt,yopt,xyopt = InterpolateGrid(grid,0,0,3,3)
+    print(xopt,yopt,xyopt)
+    input('Done!')
