@@ -68,6 +68,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
             x = point[:, 1]
             y = point[:, 0]
         # Evaluate the separable part
+        
         interpolated_func = XLin(x, *xcoeffs) * YLin(y, *ycoeffs)
         
         # Create Vandermonde matrices for x and y.
