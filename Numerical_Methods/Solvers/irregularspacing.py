@@ -70,7 +70,7 @@ def laplace_ode_solver(size: 'tuple[int,int]|np.ndarray[int,int]', fixedCondtion
 
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions: 'function' = doNothing, startingshape: 'function' = doNothing, resoultion: 'str|tuple[int,int]|np.ndarray[int,int]' = (1, 1)):
+def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions: 'function' = doNothing, startingshape: 'function' = doNothing, resoultion: 'str|tuple[int,int]|np.ndarray[int,int]' = (1.0, 1.0)):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
 
@@ -153,7 +153,7 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     BackwardVSpace_A2f = Frames[0, :-2, 1:-1]
 
     Frames[1, 1:-1, 1:-1] = (a*(ForwardHSpace_A2f +
-                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2*(a+1))
+                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2.0*(a+1))
     
     Frames[1] = fixedCondtions(Frames[1])
     indexes:np.ndarray[np.bool_] = Frames[0] != 0
