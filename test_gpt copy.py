@@ -87,20 +87,20 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
         # Note: Using np.vander on a 1d array.
         xs = np.vander(x, N=n+1, increasing=False)  # shape: (len(x), n)
         ys = np.vander(y, N=m+1, increasing=False)  # shape: (len(y), m)
-        print(x,y)
-        print(xs,xs.shape)
-        print(ys,ys.shape)
-        input('...')
+        # print(x,y)
+        # print(xs,xs.shape)
+        # print(ys,ys.shape)
+        # input('...')
         coeffs=np.array(coeffs)
         # Combine the two polynomial bases. A simple approach is to use outer product for each point.
         # We assume here that coeffs has length n*m. Adjust if needed.
         fixingProduct = (xs.T@ys)
-        
+        # print(f'VanderMonde Product = {fixingProduct}')
         # # If lengths differ, you might need to adjust dimensions.
-        input('...')
-        print(fixingProduct)
-        print(fixingProduct.shape)
-        input('...')
+        # input('...')
+        # print(fixingProduct)
+        # print(fixingProduct.shape)
+        # input('...')
         fixingTerm = fixingProduct.flatten()*coeffs
         
         return interpolated_func + fixingTerm
@@ -156,9 +156,7 @@ def InterpolateGrid(Grid: np.ndarray, x0, y0, x1, y1,
     K = (n) * (m)  # adjust to (n+1)*(m+1) if that is desired.
     
     def polyProd_fit_vector(points, *coeffs):
-        print(points.shape)
         preds = np.empty(points.shape[0])
-        print(preds.shape)
         preds = XYPolyNomial(points, xOptimal, yOptimal, *coeffs)
         return preds
     
