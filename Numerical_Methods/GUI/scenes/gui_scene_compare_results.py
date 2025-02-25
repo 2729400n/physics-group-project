@@ -18,7 +18,7 @@ import time
 import glob
 import tkinter.filedialog as fdiag
 import tkinter.messagebox as msgbox
-
+from queue import Queue,SimpleQueue
 class FTYPES(Enum):
     DIRECTORY = 'DIRECTORY'
     NPZ = 'Numpy Package File'
@@ -64,6 +64,7 @@ class ResultsScene(ttk.Frame):
         # Bind resize event for dynamic adjustments
         self.plot_frame.bind("<Configure>", self.on_resize)
         
+        self.cursel = []
         
         self.data=None
         self.Grid_obj :np.ndarray=None
@@ -93,8 +94,10 @@ class ResultsScene(ttk.Frame):
         
         if len(selection)==0:
             return
+        self.cursel.extend(selection)
+        if len(self.cursel)>2:
+            self.cursel = self.cursel[-2:None]
         
-        self.cursel=selection
     
     def _error_finder(self):
         
