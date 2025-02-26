@@ -10,18 +10,28 @@ from matplotlib.axes import Axes
 from ..task import Task
 
 class Task4(Task):
-    name="EndtoEndLine"
+    name="MWPC"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__()
         
 
-    def setup(self, height: int, width: int):
-        grid = np.zeros(shape=(height,width),dtype=np.float64)
-        self.boundaryCondition=Boundary()
-        self.grid =grid=self.boundaryCondition(Grid=grid,retoverlay=False)
+    def setup(self, x1: float, y1: float, radius: float, cx: float,
+              cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,l:float=1.0,
+              dy: float = 1.0, dx: float = 1.0,centre:bool=True,nncount:int=1):
+        x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
+        y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
+        
+        print(x0, x1, dx)
+        Xs = np.arange(x0, x1+dx, dx)
+        Ys = np.arange(y0, y1+dy, dy)
+
+        grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
+        self.boundaryCondition=Boundary(radius=radius,cx=cx,cy=cy,V=v,seperation=l,center=centre,plate_seperation=None,NNCount=nncount)
+        self.grid =grid=self.boundaryCondition(Grid=grid)
         axes = self.axes
-        axes.imshow(grid)
+        self.Image=axes.imshow(grid)
         axes.set_title('Electrostatic Potential')
+        self.cbar= self.figure.colorbar(self.Image)
         
     def _show_Efield(self):
         u_v = self.Efield*25
@@ -33,10 +43,20 @@ class Task4(Task):
         pass
 
     def run(self):
-        xs,ys,self.grid=laplace_ode_solver_continue(self.grid,self.boundaryCondition)
-        self.Xs, self.Ys = np.meshgrid(xs[:-1:5], ys[:-1:5])
-        self.Efield = findUandV(grid=self.grid)[::5,::5]
-        self.axes.imshow(self.grid)
+        Xs, Ys, self.grid = laplace_ode_solver_continue(
+            self.grid, self.boundaryCondition)
+        if self.cbar is not None:
+            self.cbar.remove()
+            self.cbar = None
+            self.figure.clear()
+            axes = self.figure.add_subplot(111)
+            self.axes = axes
+        self.Image=self.axes.imshow(self.grid)
+
+        self.figure.draw_without_rendering()
+        self.figure.colorbar(self.Image)
+
+        self.figure.canvas.draw()
 
 
     def _cleanup(self):

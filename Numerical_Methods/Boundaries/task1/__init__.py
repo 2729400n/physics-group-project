@@ -22,11 +22,6 @@ class Task1(Task):
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__()
-        self.Image: AxesImage = None
-        self.grid = None
-        self.cbar: Colorbar = None
-        self.quivers: Quiver = None
-        self.savables.update(**{'Grid': self.save_grid,'Figure':self.save_figure})
 
     def setup(self, x1: float, y1: float, r1: float, r2: float, cx: float,
               cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,

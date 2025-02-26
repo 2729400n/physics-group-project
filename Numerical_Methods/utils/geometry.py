@@ -25,7 +25,7 @@ def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: fl
         y, x = Grid.shape
         # print(x,y)
 
-    grid_x, grid_y = np.mgrid[:y, :x]
+    grid_y,grid_x = np.mgrid[:y, :x]
 
     # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius
     # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance

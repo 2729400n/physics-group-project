@@ -1,6 +1,11 @@
+import io
 import typing
 from matplotlib.axes import Axes
+from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
+from matplotlib.image import AxesImage
+from matplotlib.quiver import Quiver
+import numpy as np
 
     
 tasks:'set[Task]' = set()
@@ -27,8 +32,13 @@ class Task( typing.Protocol):
         else:
             raise TypeError(f'Got Class {figure.__class__} \r\nfigure= Must be a Figure or Axes Object')
         self.boundaryCondition = None
+        
+        self.Image: AxesImage = None
+        self.grid = None
+        self.cbar: Colorbar = None
+        self.quivers: Quiver = None
         self.exposed_methods = [self.setup,self.run,self._show_Efield]
-        self.savables:'dict[str,typing.Callable[[],tuple[str,bytes]]]'  = {}
+        self.savables:'dict[str,typing.Callable[[],tuple[str,bytes]]]'  = {'Grid': self.save_grid,'Figure':self.save_figure}
         
     def setup(self, height: int, width: int) -> None: ...
     
@@ -54,3 +64,27 @@ class Task( typing.Protocol):
         
 
     def reset(self) -> None: ...
+    
+    def save_grid(self):
+        if self.grid is None:
+            return (None,None)
+        outfile = io.BytesIO()
+        np.save(outfile,self.grid,allow_pickle=True)
+        try:
+            outfile.flush()
+        except:
+            pass
+        outfile.seek(0)
+        return 'Task1_grid.npy',outfile.read()
+    
+    def save_figure(self):
+        if self.figure is None:
+            return
+        outfile = io.BytesIO()
+        self.figure.savefig(outfile,format='png')
+        try:
+            outfile.flush()
+        except:
+            pass
+        outfile.seek(0)
+        return 'Task1_figure.png',outfile.read()
