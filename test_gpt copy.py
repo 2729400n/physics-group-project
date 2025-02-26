@@ -89,22 +89,13 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
         
         # Create Vandermonde matrices for x and y.
         # Note: Using np.vander on a 1d array.
-        xs = np.vander(x, N=n+1, increasing=False)  # shape: (len(x), n)
-        ys = np.vander(y, N=m+1, increasing=False)  # shape: (len(y), m)
-        # print(x,y)
-        # print(xs,xs.shape)
-        # print(ys,ys.shape)
-        # input('...')
+        xs = np.vander(x, N=n+1,)  # shape: (len(x), n)
+        ys = np.vander(y, N=m+1,)  # shape: (len(y), m)
+        
         coeffs=np.array(coeffs)
         # Combine the two polynomial bases. A simple approach is to use outer product for each point.
         # We assume here that coeffs has length n*m. Adjust if needed.
         fixingProduct = (xs.T@ys)
-        # print(f'VanderMonde Product = {fixingProduct}')
-        # # If lengths differ, you might need to adjust dimensions.
-        # input('...')
-        # print(fixingProduct)
-        # print(fixingProduct.shape)
-        # input('...')
         fixingTerm = fixingProduct.flatten()*coeffs
         
         return interpolated_func + fixingTerm
@@ -209,9 +200,10 @@ if __name__ == '__main__':
     
     points = np.stack((Ygrid, Xgrid), -1)  # shape: (num_points_y, num_points_x, 2)
     points = points.reshape(points.shape[0]*points.shape[1], 2)
-    err = grid-XYFunc(points,xcoeffs=xopt,ycoeffs=yopt,*xyopt)
+    err = grid-XFunc(Xgrid,*xopt).reshape(4,4)*YFunc(Ygrid,*yopt).reshape(4,4)
     
     plt.imshow(err)
+    plt.colorbar()
     plt.show(block=True)
     print("xopt:", xopt)
     print("yopt:", yopt)
