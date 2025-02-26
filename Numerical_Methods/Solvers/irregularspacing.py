@@ -146,6 +146,9 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     # Create list of distinct elements
     Xs = np.arange(x0, x1+dx, dx)
     Ys = np.arange(y0, y1+dx, dy)
+    
+    DX_s = [dx for i in range(len(Xs))]
+    DY_s = [dy for i in range(len(Ys))]
 
     ForwardHSpace_A2f = Frames[0, 1:-1, 2:]
     BackwardHSpace_A2f = Frames[0, 1:-1, :-2]
