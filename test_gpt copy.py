@@ -400,7 +400,7 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
     XYOptimal[np.abs(XYOptimal)<Unknown]=0
     # can skip errors a certain amount when polynomial is small
     # TODO : Add variable rounding scheme to the solution
-    XYOptimal=np.round(XYOptimal,1)
+    XYOptimal=np.round(XYOptimal,0)
     c=1
     if 1==1:
         print('solvable')
@@ -426,12 +426,12 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                         gcd=gcd_
                     else:
                         if gcd_ > gcd:
-                            gcd_=(gcd_/gcd)
+                            gcd_=np.round(gcd_/gcd,0)
                             diff=np.abs(np.round(gcd_,0)-gcd_)
                             if not ((diff<np.abs(np.spacing(gcd_))) or (diff<np.spacing(np.round(gcd_,0)))):
                                 gcd=1
                         elif gcd_<gcd:
-                            gcd_=(gcd/gcd_)
+                            gcd_=np.round(gcd/gcd_,0)
                             diff=np.abs(np.round(gcd_,0)-gcd_)
                             if ((diff<np.abs(np.spacing(gcd_))) or (diff<np.spacing(np.round(gcd_,0)))):
                                 gcd=gcd_
@@ -492,9 +492,9 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
 if __name__ == '__main__':
     def PolYproduct(x, y):
         # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-        return (2 * (x**2) + 2.5 * (x) + 4+8*x**3)*(y**2+2)
-    n_ = 8
-    m_ = 8
+        return (2 * (x**2) + 2 * (x) + 4.7+8*x**3+4*x**5+7*x**6)*(y**2+2)
+    n_ = 10
+    m_ = 10
     Ygrid, Xgrid = np.mgrid[:m_, :n_]
     print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
     input("Press Enter to continue...")
