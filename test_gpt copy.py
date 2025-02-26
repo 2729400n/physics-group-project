@@ -108,7 +108,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
             # print(fixingTerm)
             fixingTerms[i]=fixingTerm
         # print('error=',interpolated_func-PolYproduct(x,y))
-        print(x,y)
+        # print(x,y)
         return interpolated_func + fixingTerms
 
     polyProduct.__signature__ = inspect.Signature(fullSuiteParams, return_annotation=np.float64)
@@ -368,9 +368,10 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
     XYOptimal=np.array(XYoptimal).reshape(m,n)
     XYOptimal[XYOptimal<Unknown]=0
     c=1
-    if np.linalg.det(XYOptimal)<np.spacing(np.max(np.abs(XYOptimal))):
+    if 1==1 or (np.linalg.det(XYOptimal)<np.spacing(np.max(np.abs(XYOptimal)))*m*n):
         print('solvable')
         print('solving slowly')
+        print(XYOptimal)
         pivot = None
         for i in XYOptimal:
             if np.sum(np.abs(i)) !=0 :
@@ -403,6 +404,7 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                                 gcd=gcd_
             if gcd is not None:
                 pivot=pivot/gcd
+                c=gcd
                 xOptimal[:]=pivot[:]
                 for i in range(XYOptimal.shape[0]):
                     # TODO: SETUP RIGOROUS METHOD TO SOLVE FOR Computer errors
@@ -435,27 +437,27 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                     guess[0,1:] = 1
                 if (yOptimal==0).all():
                     guess[1:,0] = 1
-                print('guess=',guess)
                 guess = guess.flatten()
-                print('guess=',guess)
                 # Now call curve_fit with our wrapper
                 XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev,p0=guess,ftol=np.spacing(0.1),xtol=np.spacing(1))
             else:
                 print('gcd Inchoherent')
+                input('...')
                       
     else:
         print('determinant',np.linalg.det(XYOptimal))
+        print('...')
     print(XYOptimal)
     print('XYCov',XYcov)
     input('...')
     if savefunc:
-        return xOptimal,yOptimal,XYoptimal,(XPolyNomial,YPolyNomial,XYPolyNomial)
+        return c,xOptimal,yOptimal,XYoptimal,(XPolyNomial,YPolyNomial,XYPolyNomial)
     return xOptimal,yOptimal,XYoptimal
     
 if __name__ == '__main__':
     def PolYproduct(x, y):
         # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-        return (2 * (x**2) + 2 * (x) + 4)*(y**2+2)
+        return (2 * (x**2) + 2 * (x) + 8)*(y**2+2)
     n_ = 4
     m_ = 4
     Ygrid, Xgrid = np.mgrid[:m_, :n_]
@@ -466,7 +468,7 @@ if __name__ == '__main__':
     print("Grid:\n", grid)
     input('Ready ?')
     
-    xopt, yopt, xyopt,(XFunc,YFunc,XYFunc) = InterpolateGrid_fastest(grid, 0, 0, n_ - 1, m_ - 1,savefunc=True)
+    c,xopt, yopt, xyopt,(XFunc,YFunc,XYFunc) = InterpolateGrid_fastest(grid, 0, 0, n_ - 1, m_ - 1,savefunc=True)
     
     points = np.stack((Ygrid, Xgrid), -1)  # shape: (num_points_y, num_points_x, 2)
     points = points.reshape(points.shape[0]*points.shape[1], 2)
@@ -477,9 +479,22 @@ if __name__ == '__main__':
     print("yopt:", yopt)
     print("xyopt:", xyopt)
     input('...')
-    err = grid-XYFunc(points,xopt,yopt,*xyopt).reshape(4,4)
-    plt.imshow(err)
+    err = grid-XYFunc(points,xopt,yopt,*xyopt).reshape(m_,n_)
+    print(err)
+    # fig,[[a,b],[e,f]]=plt.subplots(2,2,figsize=(18,18))
+    imga=plt.imshow(err)
     plt.colorbar()
+    plt.tight_layout()
+    plt.show(block=True)
+    
+    plt.imshow(grid)
+    plt.colorbar()
+    plt.tight_layout()
+    plt.show(block=True)
+    
+    plt.imshow(XYFunc(points,xopt,yopt,*xyopt).reshape(m_,n_))
+    plt.colorbar()
+    plt.tight_layout()
     plt.show(block=True)
     input('Done!')
    
