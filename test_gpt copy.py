@@ -108,7 +108,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
             # print(fixingTerm)
             fixingTerms[i]=fixingTerm
         # print('error=',interpolated_func-PolYproduct(x,y))
-        # print(x,y)
+        print(x,y)
         return interpolated_func + fixingTerms
 
     polyProduct.__signature__ = inspect.Signature(fullSuiteParams, return_annotation=np.float64)
@@ -364,14 +364,13 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
     # Now call curve_fit with our wrapper
     XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev,ftol=np.spacing(0.1),xtol=np.spacing(1))
     # XYoptimal[np.abs(XYoptimal)<1e-12]=0.0
-    
+    Unknown = np.spacing(np.float64(2**(n*m)-1))
     XYOptimal=np.array(XYoptimal).reshape(m,n)
     XYOptimal[XYOptimal<Unknown]=0
     c=1
-    if 1==1 or (np.linalg.det(XYOptimal)<np.spacing(np.max(np.abs(XYOptimal)))*m*n):
+    if 1==1:
         print('solvable')
         print('solving slowly')
-        print(XYOptimal)
         pivot = None
         for i in XYOptimal:
             if np.sum(np.abs(i)) !=0 :
@@ -437,16 +436,16 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                     guess[0,1:] = 1
                 if (yOptimal==0).all():
                     guess[1:,0] = 1
+                print('guess=',guess)
                 guess = guess.flatten()
+                print('guess=',guess)
                 # Now call curve_fit with our wrapper
                 XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev,p0=guess,ftol=np.spacing(0.1),xtol=np.spacing(1))
             else:
                 print('gcd Inchoherent')
-                input('...')
                       
     else:
         print('determinant',np.linalg.det(XYOptimal))
-        print('...')
     print(XYOptimal)
     print('XYCov',XYcov)
     input('...')
@@ -457,9 +456,9 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
 if __name__ == '__main__':
     def PolYproduct(x, y):
         # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-        return (2 * (x**2) + 2 * (x) + 8)*(y**2+2)
-    n_ = 4
-    m_ = 4
+        return (2 * (x**2) + 2 * (x) + 4+8*x**3)*(y**2+2)
+    n_ = 8
+    m_ = 8
     Ygrid, Xgrid = np.mgrid[:m_, :n_]
     print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
     input("Press Enter to continue...")
@@ -480,21 +479,8 @@ if __name__ == '__main__':
     print("xyopt:", xyopt)
     input('...')
     err = grid-XYFunc(points,xopt,yopt,*xyopt).reshape(m_,n_)
-    print(err)
-    # fig,[[a,b],[e,f]]=plt.subplots(2,2,figsize=(18,18))
-    imga=plt.imshow(err)
+    plt.imshow(err)
     plt.colorbar()
-    plt.tight_layout()
-    plt.show(block=True)
-    
-    plt.imshow(grid)
-    plt.colorbar()
-    plt.tight_layout()
-    plt.show(block=True)
-    
-    plt.imshow(XYFunc(points,xopt,yopt,*xyopt).reshape(m_,n_))
-    plt.colorbar()
-    plt.tight_layout()
     plt.show(block=True)
     input('Done!')
    
