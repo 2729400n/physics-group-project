@@ -108,7 +108,7 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
             # print(fixingTerm)
             fixingTerms[i]=fixingTerm
         # print('error=',interpolated_func-PolYproduct(x,y))
-        print(x,y)
+        # print(x,y)
         return interpolated_func + fixingTerms
 
     polyProduct.__signature__ = inspect.Signature(fullSuiteParams, return_annotation=np.float64)
@@ -334,10 +334,39 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
     # Here we assume XYPolyNomial uses (n+1)*(m+1) coefficients.
     # Adjust K as needed.
     K = (n) * (m)  # adjust to (n+1)*(m+1) if that is desired.
+    guess=np.full((m,n),np.spacing(0))
     
+    try:
+        xOpti, xCov = optimist.curve_fit(XPolyNomial, Xs, Grid[0, :], maxfev=xmaxfev)
+        
+        if  np.logical_or(np.abs(xOpti-1)<1e-12, np.logical_not(np.isfinite(xOpti))).all():
+            raise RuntimeError('Not a good looking polynomial')
+        print('XCov=', xCov)
+    except (RuntimeError,TypeError) as e:
+        print("X curve_fit failed:", e)
+        xOpti = np.polyfit(Xs, Grid[0, :], n - 1)
+    print('XOpti=', xOpti)
+    
+    
+    try:
+        yOpti, yCov = optimist.curve_fit(YPolyNomial, Ys, Grid[:, 0].T, maxfev=ymaxfev)
+        if  np.logical_or(np.abs(yOpti-1)<1e-12, np.logical_not(np.isfinite(yOpti))).all():
+            raise RuntimeError('Not a good looking polynomial')
+        
+        print('YCov=', yCov)
+    except (RuntimeError,TypeError) as e:
+        print("Y curve_fit failed:", e)
+        yOpti = np.polyfit(Ys, Grid[:, 0].T, m - 1)
+    print('YOpti=', yOpti)
+    # yOptimal[np.abs(yOptimal)<1e-12]=0.0
+    
+    guess[-1,:] = xOpti[:]
+    guess[:,-1] = yOpti[:]
     
     xOptimal = np.zeros((n,),dtype=np.float64)
     yOptimal = np.zeros_like(xOptimal)
+    
+    
     
     def polyProd_fit_vector(points, *coeffs):
         preds = np.empty(points.shape[0])
@@ -362,11 +391,16 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
     wrapper.__signature__ = inspect.Signature(params_list, return_annotation=np.float64)
     
     # Now call curve_fit with our wrapper
-    XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev,ftol=np.spacing(0.1),xtol=np.spacing(1))
+    XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(),p0=guess.flatten(), maxfev=xymaxfev)
     # XYoptimal[np.abs(XYoptimal)<1e-12]=0.0
-    Unknown = np.spacing(np.float64(2**(n*m)-1))
+    Unknown = 0.5#np.spacing(np.float64(2**(16)-1))*1e2
     XYOptimal=np.array(XYoptimal).reshape(m,n)
-    XYOptimal[XYOptimal<Unknown]=0
+    print(np.min(np.abs(XYOptimal)))
+    # input('...')
+    XYOptimal[np.abs(XYOptimal)<Unknown]=0
+    # can skip errors a certain amount when polynomial is small
+    # TODO : Add variable rounding scheme to the solution
+    XYOptimal=np.round(XYOptimal,1)
     c=1
     if 1==1:
         print('solvable')
@@ -409,7 +443,7 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                     # TODO: SETUP RIGOROUS METHOD TO SOLVE FOR Computer errors
                     y_i=XYOptimal[i]/pivot
                     yOptimal[i] = np.round(np.mean(y_i,where=(np.isfinite(y_i))))
-                    
+                    pass
                 def polyProd_fit_vector(points, *coeffs):
                     preds = np.empty(points.shape[0])
                     preds = XYPolyNomial(points, xOptimal, yOptimal, *coeffs)
@@ -431,16 +465,18 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                         inspect.Parameter(f"c_{i}", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=np.float64)
                     )
                 wrapper.__signature__ = inspect.Signature(params_list, return_annotation=np.float64)
-                guess=np.full((m,n),np.spacing(0))
+                guess[:,:]=np.spacing(0)
+                ftol0=True
                 if (xOptimal==0).all():
                     guess[0,1:] = 1
+                    ftol0=False
                 if (yOptimal==0).all():
                     guess[1:,0] = 1
+                    ftol0=False
                 print('guess=',guess)
                 guess = guess.flatten()
-                print('guess=',guess)
                 # Now call curve_fit with our wrapper
-                XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev,p0=guess,ftol=np.spacing(0.1),xtol=np.spacing(1))
+                XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev,p0=guess)
             else:
                 print('gcd Inchoherent')
                       
@@ -456,7 +492,7 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
 if __name__ == '__main__':
     def PolYproduct(x, y):
         # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-        return (2 * (x**2) + 2 * (x) + 4+8*x**3)*(y**2+2)
+        return (2 * (x**2) + 2.5 * (x) + 4+8*x**3)*(y**2+2)
     n_ = 8
     m_ = 8
     Ygrid, Xgrid = np.mgrid[:m_, :n_]
