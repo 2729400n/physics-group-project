@@ -1,4 +1,5 @@
 import inspect
+from matplotlib import pyplot as plt
 import numpy as np
 import scipy.optimize as optimist
 import numpy.linalg as linalg
@@ -59,16 +60,27 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
     ]
     fullSuiteParams = mixedParam + mixedParams
 
-    def polyProduct(point: np.ndarray, xcoeffs: list = None, ycoeffs: list = None, *coeffs):
-        # Extract x and y from point array. Expecting last dimension size 2.
-        if point.ndim == 3:
-            x = point[:, :, 1]
-            y = point[:, :, 0]
-        else:
-            x = point[:, 1]
-            y = point[:, 0]
-        # Evaluate the separable part
+    def polyProduct(point: np.ndarray, xcoeffs: list = None, ycoeffs: list = None, *coeffs,**kwargs):
         
+        
+        x=kwargs.get('x')
+        y=kwargs.get('y')
+        
+        if (x is None) or (y is None):
+            if((point is  None)):
+                raise ValueError('Point is not defined')
+            # Extract x and y from point array. Expecting last dimension size 2.
+            if point.ndim == 3:
+                x = point[:, :, 1]
+                y = point[:, :, 0]
+            else:
+                x = point[:, 1]
+                y = point[:, 0]
+        # Evaluate the separable part
+        xycoeffs = kwargs.get('xycoeffs',None)
+        if xycoeffs is not None:
+            coeffs = xycoeffs
+            
         interpolated_func = XLin(x, *xcoeffs) * YLin(y, *ycoeffs)
         
         # Create Vandermonde matrices for x and y.
@@ -101,7 +113,8 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
 def InterpolateGrid(Grid: np.ndarray, x0, y0, x1, y1,
                     dy: float = 1.0, dx: float = 1.0,
                     xmaxfev: int = None, ymaxfev: int = None, xymaxfev: int = None,
-                    xtol: float = None, ytol: float = None, xytol: float = None):
+                    xtol: float = None, ytol: float = None, xytol: float = None,
+                    savefunc:bool=True):
     (m, n) = Grid.shape
     if m < 1 or n < 1:
         raise ValueError('Cannot interpolate an empty grid')
@@ -170,7 +183,9 @@ def InterpolateGrid(Grid: np.ndarray, x0, y0, x1, y1,
     # Now call curve_fit with our wrapper
     XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev)
     
-    return xOptimal, yOptimal, XYoptimal
+    if savefunc:
+        return xOptimal,yOptimal,XYoptimal,(XPolyNomial,YPolyNomial,XYPolyNomial)
+    return xOptimal,yOptimal,XYoptimal
 
 
 
@@ -189,7 +204,14 @@ if __name__ == '__main__':
     print("Grid:\n", grid)
     input('Ready ?')
     
-    xopt, yopt, xyopt = InterpolateGrid(grid, 0, 0, n_ - 1, m_ - 1)
+    xopt, yopt, xyopt,(XFunc,YFunc,XYFunc) = InterpolateGrid(grid, 0, 0, n_ - 1, m_ - 1,savefunc=True)
+    
+    points = np.stack((Ygrid, Xgrid), -1)  # shape: (num_points_y, num_points_x, 2)
+    points = points.reshape(points.shape[0]*points.shape[1], 2)
+    err = grid-XYFunc(points,xcoeffs=xopt,ycoeffs=yopt,*xyopt)
+    
+    plt.imshow(err)
+    plt.show(block=True)
     print("xopt:", xopt)
     print("yopt:", yopt)
     print("xyopt:", xyopt)
