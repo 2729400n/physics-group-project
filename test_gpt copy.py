@@ -21,11 +21,13 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
         # Initialize result to zero
         result = 0
         # Evaluate polynomial: assume args has length n+1 (coefficient for x^n ... x^0)
-        for i in range(0, n + 1, dx):
+        for i in range(0, n + dx, dx):
             result += args[i] * (x ** (n - i))
+        # Constrain to a widely availible floating point representation
         return np.float64(result)
 
     # Defines a polynomial function dependent only on y given m parameters
+    # Does the same thing that the XLin does
     def YLin(y, *args):
         result = 0
         for i in range(0, m + 1, dy):
@@ -58,6 +60,8 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
         inspect.Parameter(f"c_{i}", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=np.float64)
         for i in range(0, (n+1)*(m+1))
     ]
+    
+        # Join the parameters
     fullSuiteParams = mixedParam + mixedParams
 
     def polyProduct(point: np.ndarray, xcoeffs: list = None, ycoeffs: list = None, *coeffs,**kwargs):
@@ -87,20 +91,20 @@ def functionMaker(n: int, m: int, dx: int = 1, dy: int = 1):
         # Note: Using np.vander on a 1d array.
         xs = np.vander(x, N=n+1, increasing=False)  # shape: (len(x), n)
         ys = np.vander(y, N=m+1, increasing=False)  # shape: (len(y), m)
-        print(x,y)
-        print(xs,xs.shape)
-        print(ys,ys.shape)
-        input('...')
+        # print(x,y)
+        # print(xs,xs.shape)
+        # print(ys,ys.shape)
+        # input('...')
         coeffs=np.array(coeffs)
         # Combine the two polynomial bases. A simple approach is to use outer product for each point.
         # We assume here that coeffs has length n*m. Adjust if needed.
         fixingProduct = (xs.T@ys)
-        
+        # print(f'VanderMonde Product = {fixingProduct}')
         # # If lengths differ, you might need to adjust dimensions.
-        input('...')
-        print(fixingProduct)
-        print(fixingProduct.shape)
-        input('...')
+        # input('...')
+        # print(fixingProduct)
+        # print(fixingProduct.shape)
+        # input('...')
         fixingTerm = fixingProduct.flatten()*coeffs
         
         return interpolated_func + fixingTerm
@@ -156,9 +160,7 @@ def InterpolateGrid(Grid: np.ndarray, x0, y0, x1, y1,
     K = (n) * (m)  # adjust to (n+1)*(m+1) if that is desired.
     
     def polyProd_fit_vector(points, *coeffs):
-        print(points.shape)
         preds = np.empty(points.shape[0])
-        print(preds.shape)
         preds = XYPolyNomial(points, xOptimal, yOptimal, *coeffs)
         return preds
     
@@ -179,7 +181,6 @@ def InterpolateGrid(Grid: np.ndarray, x0, y0, x1, y1,
         )
     wrapper.__signature__ = inspect.Signature(params_list, return_annotation=np.float64)
     
-    print(points.shape)
     # Now call curve_fit with our wrapper
     XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev)
     
