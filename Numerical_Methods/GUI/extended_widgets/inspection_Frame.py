@@ -276,6 +276,36 @@ class InspectFrame(Frame):
             self.jobRunning=False
             self.job=None
         return 
+    
+    def callInterpolateSplines(self,m,n):
+        
+        try:
+            height=self.Grid_obj.shape[0]
+            width = self.Grid_obj.shape[1]
+            leftoversheight = height%m
+            leftoverswidth = width%n
+            subviews = np.array(np.split(self.Grid_obj[:,:(-leftoverswidth or None)],n,-1))
+            subviews_real = np.array(np.split(subviews[:(-leftoversheight or None),:],m,-2))
+            print(subviews_real)
+            self
+            
+            
+            c,xopt,yopt,XYOpt,*funcs =errors.InterpolateGrid_fastest(self.Grid_obj,self.Xs[0],self.Ys[0],self.Xs[1],self.Ys[1],
+                                                self.dy,self.dx, savefunc=True,Xs=self.Xs,Ys=self.Ys)
+            region_text = f'Region = ({self.Xs[0],self.Ys[0]})=>({self.Xs[1],self.Ys[1]})'
+            message = f'c={c}\nxPoly={xopt}\nYpoly={yopt}\nXYPoly={XYOpt}\n{region_text}'
+            # Schedule the message box on the main thread
+            while True:
+                try:
+                    self.jobqueue.put_nowait(self.showAndOfferSavePolyNomial(message,xopt=xopt,yopt=yopt,XYOpt=XYOpt,Xs=self.Xs,Ys=self.Ys) )
+                    break
+                except Full:
+                    pass
+        finally:
+            self.jobRunning=False
+            self.job=None
+        return
+    
     def calculatePolyNomial(self):
         if(self.jobRunning):
             msgbox.showwarning(message="You Must Wait till the last job Finishes Before creating a new one",title="Warning")

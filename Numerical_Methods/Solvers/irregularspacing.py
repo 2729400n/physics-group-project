@@ -4,6 +4,7 @@
 
 # Load modules and imports neceasasary
 
+from typing import Literal
 import numpy as np
 
 # we will be using 64bit floating point representation
@@ -116,7 +117,8 @@ def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixe
 def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
                             fixedCondtions: 'function' = doNothing, startingshape: 'function' = doNothing,
                             dx: float = 1.0, dy: float = 1.0, x0: float = 0.0, y0: float = 0.0,
-                            rel_tol: np.float64 = 1e-3, abs_tol: np.float64 = 1e-10):
+                            rel_tol: np.float64 = 1e-3, abs_tol: np.float64 = 1e-10,stencil:int=5,gamma:float=1.0,
+                            wrap:bool=False,wrap_direction:Literal['both','x','y','none']='none',):
     # TODO: Fix docstrings adding more detail to params
     """
     Solves the Laplace equation using a finite difference scheme.
@@ -134,6 +136,9 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     # Calculate x and y propotionality constant
     sqrt_a = dy/dx
     a = sqrt_a**2
+    
+    b = dy**2+dx**2
+    sqrt_b = np.sqrt(b)
 
     # Create a frame Array to hold the current Frame and next Frame
     Frames = np.zeros((2, *Grid.shape), dtype=np.float64, order='C')
@@ -149,6 +154,15 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     
     DX_s = [dx for i in range(len(Xs))]
     DY_s = [dy for i in range(len(Ys))]
+    
+    if stencil == 9:
+        diagamult = gamma*(1/8)
+        adjacentmult = (1-gamma*(1/2))/4
+    elif stencil == 5:
+        diagamult = 0
+        adjacentmult = 0.25
+    else:
+        raise ValueError(f'Cannot use a {stencil}-point stencil')
     
     shrinker = np.full((Grid.shape[0]-1,Grid.shape[1]-1),False,dtype=np.bool_)
     
@@ -200,7 +214,25 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
             p-=1
         p+=1
         
-    for  i in range(shrinker.shape[0]-1):
+    for  i in range(shrinker.shape[-2]-1):
+        slice_ = shrinker[i,:]
+        
+        if slice_.all() == True:
+            geomslice = interstingPart[nonZeroHForward[p,:-1]]
+            arithmeticslice = interstingPart[ZeroHForward[p,:-1]]
+            
+            geomslice = np.sqrt(geomslice* interstingPart[nonZeroHForward[p+1,:-1]])
+            arithmeticslice=(arithmeticslice+interstingPart[ZeroHForward[p+1,:-1]])/2
+            
+            interstingPart[nonZeroHForward[p,:-1]]=geomslice
+            interstingPart[ZeroHForward[p,:-1]]=arithmeticslice
+            
+            newGrid = np.delete(newGrid,p,axis=1)
+            interstingPart = newGrid[1:-1,1:-1]
+            p-=1
+        p+=1
+        
+    for  i in range(shrinker.shape[-1]-1):
         slice_ = shrinker[i,:]
         
         if slice_.all() == True:
@@ -225,11 +257,47 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     BackwardHSpace_A2f = Frames[0, 1:-1, :-2]
     ForwardVSpace_A2f = Frames[0, 2:, 1:-1]
     BackwardVSpace_A2f = Frames[0, :-2, 1:-1]
+
+    DiagForwardUp = Frames[0, 2:, 2:]
+    DiagForwardDown = Frames[0, :-2, 2:]
+    DiagBackUp = Frames[0, 2:, :-2]
+    DiagBackDown = Frames[0, :-2, :-2]
     
     
     
-    Frames[1, 1:-1, 1:-1] = (a*(ForwardHSpace_A2f +
-                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2.0*(a+1))
+    Frames[1, 1:-1, 1:-1] = adjacentmult*((a*(ForwardHSpace_A2f +
+                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2.0*(a+1)))+diagamult*(DiagBackUp+DiagBackDown+DiagForwardDown+DiagForwardUp)/b
+    
+    
+    if wrap:
+            if wrap_direction in ['both', 'y']:
+                ForwardHSpace_A2f = Frames[0, (0, -1), 2:]
+                BackwardHSpace_A2f = Frames[0, (0, -1), :-2]
+                ForwardVSpace_A2f = Frames[0, (-1, -2), 1:-1]
+                BackwardVSpace_A2f = Frames[0, (1, 0), 1:-1]
+
+                DiagForwardUp = Frames[0, (1, 0), 2:]
+                DiagForwardDown = Frames[0, (-1, -2), 2:]
+                DiagBackUp = Frames[0, (1, 0), :-2]
+                DiagBackDown = Frames[0, (-1, -2), :-2]
+
+                Frames[1,(0, -1), 1:-1] = adjacentmult*((a*(ForwardHSpace_A2f +
+                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2.0*(a+1)))+diagamult*(DiagBackUp+DiagBackDown+DiagForwardDown+DiagForwardUp)/b
+            if wrap_direction in ['both', 'x']:
+                ForwardHSpace_A2f = Frames[0, 1:-1, (-1, -2)]
+                BackwardHSpace_A2f = Frames[0, 1:-1, (1, 0)]
+                ForwardVSpace_A2f = Frames[0, 2:, (0, -1)]
+                BackwardVSpace_A2f = Frames[0, :-2, (0, -1)]
+
+                DiagForwardUp = Frames[0, :-2, (-1, -2)]
+                DiagForwardDown = Frames[0, 2:, (-1, -2)]
+                DiagBackUp = Frames[0, :-2, :(1, 0)]
+                DiagBackDown = Frames[0, 2:, :(1, 0)]
+
+                Frames[1, 1:-1,(0, -1)] = adjacentmult*((a*(ForwardHSpace_A2f +
+                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2.0*(a+1)))+diagamult*(DiagBackUp+DiagBackDown+DiagForwardDown+DiagForwardUp)/b
+                
+    Frames[1] = fixedCondtions(Frames[1])
     
     Frames[1] = fixedCondtions(Frames[1])
     indexes:np.ndarray[np.bool_] = Frames[0] != 0
@@ -251,7 +319,4 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     except *(RuntimeError,ValueError):
         shouldStop=True
     
-
-    
-
     return (*retvals,shouldStop)
