@@ -1,7 +1,7 @@
 *.dat
 **/__pycache__/
 # *.png
-.vscode/**
+**/.vscode
 **/*.dat
 BoxInBox.png
 Numerical_Methods/Conf/settings.py
