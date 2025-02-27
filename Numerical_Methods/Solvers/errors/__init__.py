@@ -1,6 +1,6 @@
 import numpy as np
 
-
+from .interpolation_stuff import functionMaker,InterpolateGrid_fastest
 
 def laplaceify(grid:'np.ndarray[np.ndarray[np.float64]]',dx,dy,wrap=False):
     errors = np.zeros_like(grid)

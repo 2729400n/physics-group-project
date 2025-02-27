@@ -18,6 +18,7 @@ import time
 import glob
 import tkinter.filedialog as fdiag
 import tkinter.messagebox as msgbox
+from ..extended_widgets import InspectFrame
 
 class FTYPES(Enum):
     DIRECTORY = 'DIRECTORY'
@@ -101,57 +102,11 @@ class ResultsScene(ttk.Frame):
         if self.Grid_obj is None:
             msgbox.showerror(message="Make sure you have selected an insightable file.")
             return
-        
-        fig = Figure(figsize=(8, 8),)
-        ax = fig.add_subplot(111)
-        
-        
-        newErrorWindow =tk.Toplevel(self,)
-        mainframe = ttk.Frame(newErrorWindow)
-        plot_frame = ttk.Frame(mainframe)
-        button_frame = ttk.Frame(mainframe)
-        
-        newErrorWindow.propagate(True)
-        mainframe.propagate(True)
-        plot_frame.propagate(True)
-        button_frame.propagate(True)
-        
-        plot_frame.columnconfigure(0,weight=1)
-        plot_frame.rowconfigure(0,weight=1)
-        plot_frame.columnconfigure(0,weight=1)
-        plot_frame.rowconfigure(1,weight=1)
-        # Plot data
-        mainframe.columnconfigure(0,weight=1)
-        mainframe.rowconfigure(0,weight=1)
-        mainframe.columnconfigure(0,weight=1)
-        mainframe.rowconfigure(1,weight=1)
-        # Embed figure into Tkinter canvas
-        canvas = FigureCanvasTkAgg(fig, master=plot_frame)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.grid(row=0, column=0, sticky="nsew")
-        canvas_widget.configure(width=640,height=480)
-        canvas.draw()
-        # Add Navigation Toolbar
-        toolbar = NavigationToolbar2Tk(canvas, plot_frame,pack_toolbar=False)
-        
-        toolbar.update()
-        toolbar.grid(row=1, column=0, sticky="ew")
-        
-        plot_frame.grid(column=0,row=0)
-        button_frame.grid(column=0,row=1)
-        
-        mainframe.pack(anchor=tk.NW,side=tk.TOP,fill=tk.BOTH,expand=True)
-        
-        
-        ax.set_title("The Laplacian Absolute Error")
-        ax.set_xlabel("X axis")
-        ax.set_ylabel("Y axis")
-        # self.ax.legend()
-        
-        resi,absresi=errors.laplaceify(self.Grid_obj,self.dx,self.dy)
-        ax.imshow(absresi)
-        # Connect event for mouse clicks on the canvas
-        # canvas.mpl_connect("button_press_event", self.on_click)
+        mroot = tk.Toplevel(self)
+        mroot.wm_title('Insight Finder')
+        mroot.propagate(True)
+        iframe =InspectFrame(mroot,self.Grid_obj,self.dx,self.dy,"Field Data","Width","Height",dpi=80)
+        iframe.pack(expand=True,fill=tk.BOTH,side=tk.TOP,anchor=tk.NW)
         
     def _choose_data(self):
         cursel = self.cursel
