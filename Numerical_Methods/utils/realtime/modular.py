@@ -17,7 +17,7 @@ def update_modules():
     """
     global should_run_rt_loader
     module_timestamps = {}
-    excluded_modules = set()
+    excluded_modules = {__name__}
 
     while should_run_rt_loader:
         for module_name, module in list(sys.modules.items()):
