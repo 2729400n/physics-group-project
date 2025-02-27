@@ -70,7 +70,7 @@ def laplace_ode_solver(size: 'tuple[int,int]|np.ndarray[int,int]', fixedCondtion
 
 
 # We gonna solve this in a suitably fashion guys ☺
-def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions: 'function' = doNothing, startingshape: 'function' = doNothing, resoultion: 'str|tuple[int,int]|np.ndarray[int,int]' = (1, 1)):
+def laplace_ode_solver_continue(Grid: 'np.ndarray[np.ndarray[np.float64]]', fixedCondtions: 'function' = doNothing, startingshape: 'function' = doNothing, resoultion: 'str|tuple[int,int]|np.ndarray[int,int]' = (1.0, 1.0),):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
 
@@ -146,14 +146,90 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     # Create list of distinct elements
     Xs = np.arange(x0, x1+dx, dx)
     Ys = np.arange(y0, y1+dx, dy)
+    
+    DX_s = [dx for i in range(len(Xs))]
+    DY_s = [dy for i in range(len(Ys))]
+    
+    shrinker = np.full((Grid.shape[0]-1,Grid.shape[1]-1),False,dtype=np.bool_)
+    
+    newGrid = Grid.copy()
+    interstingPart = newGrid[1:-1,1:-1]
+    
+    ForwardHSpace_A1f = Grid[1:-1, 1:]
+    ForwardVSpace_A1f = Grid[1:, 1:-1]
+    BackwardHSpace_A1f = Grid[1:-1, :-1]
+    BackwardVSpace_A1f = Grid[:-1, 1:-1]
+    
+    nonZeroHForward=(ForwardHSpace_A1f>np.spacing(BackwardHSpace_A2f))
+    nonZeroVForward=(ForwardVSpace_A1f>np.spacing(BackwardVSpace_A1f))
+    
+    ZeroHForward=np.logical_not(nonZeroHForward)
+    ZeroVForward=np.logical_not(nonZeroVForward)
+    
+    
+    
+    hdiff = np.abs(ForwardHSpace_A1f-BackwardHSpace_A1f)
+    vdiff = np.abs(ForwardVSpace_A1f-BackwardVSpace_A1f)
+    
+    
+    # Have to use geometric mean 
+    
+    shrinker[nonZeroHForward] = np.abs((hdiff[nonZeroHForward])/(ForwardHSpace_A1f[nonZeroHForward]))<=rel_tol
+    shrinker[ZeroHForward] = hdiff[ZeroHForward]<=abs_tol
+    
+    shrinker[nonZeroVForward] = np.abs((vdiff[nonZeroVForward])/(ForwardHSpace_A1f[nonZeroVForward]))<=rel_tol
+    shrinker[ZeroVForward] = vdiff[ZeroVForward]<=abs_tol
+    
+    i=0
+    p=0
+    for  i in range(shrinker.shape[0]-1):
+        slice_ = shrinker[i,:]
+        
+        if slice_.all() == True:
+            geomslice = interstingPart[nonZeroHForward[p,:-1]]
+            arithmeticslice = interstingPart[ZeroHForward[p,:-1]]
+            
+            geomslice = np.sqrt(geomslice* interstingPart[nonZeroHForward[p+1,:-1]])
+            arithmeticslice=(arithmeticslice+interstingPart[ZeroHForward[p+1,:-1]])/2
+            
+            interstingPart[nonZeroHForward[p,:-1]]=geomslice
+            interstingPart[ZeroHForward[p,:-1]]=arithmeticslice
+            
+            newGrid = np.delete(newGrid,p,axis=1)
+            interstingPart = newGrid[1:-1,1:-1]
+            p-=1
+        p+=1
+        
+    for  i in range(shrinker.shape[0]-1):
+        slice_ = shrinker[i,:]
+        
+        if slice_.all() == True:
+            geomslice = interstingPart[nonZeroHForward[p,:-1]]
+            arithmeticslice = interstingPart[ZeroHForward[p,:-1]]
+            
+            geomslice = np.sqrt(geomslice* interstingPart[nonZeroHForward[p+1,:-1]])
+            arithmeticslice=(arithmeticslice+interstingPart[ZeroHForward[p+1,:-1]])/2
+            
+            interstingPart[nonZeroHForward[p,:-1]]=geomslice
+            interstingPart[ZeroHForward[p,:-1]]=arithmeticslice
+            
+            newGrid = np.delete(newGrid,p,axis=1)
+            interstingPart = newGrid[1:-1,1:-1]
+            p-=1
+        p+=1
+    
+    
+    
 
     ForwardHSpace_A2f = Frames[0, 1:-1, 2:]
     BackwardHSpace_A2f = Frames[0, 1:-1, :-2]
     ForwardVSpace_A2f = Frames[0, 2:, 1:-1]
     BackwardVSpace_A2f = Frames[0, :-2, 1:-1]
-
+    
+    
+    
     Frames[1, 1:-1, 1:-1] = (a*(ForwardHSpace_A2f +
-                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2*(a+1))
+                                        BackwardHSpace_A2f)+(ForwardVSpace_A2f+BackwardVSpace_A2f))/(2.0*(a+1))
     
     Frames[1] = fixedCondtions(Frames[1])
     indexes:np.ndarray[np.bool_] = Frames[0] != 0
