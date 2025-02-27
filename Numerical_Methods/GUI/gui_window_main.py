@@ -2,54 +2,60 @@ import tkinter as tk
 
 
 class NumericalDisplay(tk.Tk):
-
-    def decorateWindow(self):
-        self.title('Eletrostatic Project')
-
-    def populateWindow(self):
-        pass
+    """
+    Base class for numerical display GUI.
+    """
 
     def __init__(self, master=None, baseName=None, className="Tk", useTk=True,
                  sync=False, use=None, **kw):
+        super().__init__(master, baseName, className, useTk, sync, use, **kw)
+        self.decorate_window()
+        self.populate_window()
 
-        tk.Tk.__init__(self, None, baseName, className=className,
-                       useTk=useTk, sync=sync, use=use, **kw)
-        self.decorateWindow()
-        self.populateWindow()
-        self.propagate(True)
+    def decorate_window(self):
+        """Sets up the window title and appearance."""
+        self.title('Electrostatic Project')
+
+    def populate_window(self):
+        """Placeholder for UI elements."""
+        pass
 
 
 class DefaultNumericalDisplay(NumericalDisplay):
-    def __init__(self, screenName=None, baseName=None, className="Tk",
-                 useTk=True, sync=False, use=None):
-        super().__init__(screenName, baseName, className, useTk, sync, use)
+    """
+    Default GUI window with a menu bar.
+    """
 
-    def setupMenuBar(self):
+    def __init__(self, screenName=None, baseName=None, className="Tk",
+                 useTk=True, sync=False, use=None, **kw):
+        super().__init__(screenName, baseName, className, useTk, sync, use, **kw)
+        self.setup_menu_bar()
+
+    def setup_menu_bar(self):
+        """Creates and configures the menu bar."""
         self.winfo_toplevel().option_add('*tearOff', False)
         self.mbar = tk.Menu(self)
 
-        # A File Menu
+        # File Menu
         self.file_menu = tk.Menu(self.mbar, name='file_menu')
         self.mbar.add_cascade(menu=self.file_menu, label='File')
-        self.mbar.add_separator()
 
+        # Edit Menu
         self.edit_menu = tk.Menu(self.mbar, name='edit_menu')
         self.mbar.add_cascade(menu=self.edit_menu, label='Edit')
-        self['menu'] = self.mbar
 
-    def populateWindow(self):
-        self.setupMenuBar()
+        # Assign to the root menu
+        self.config(menu=self.mbar)
 
 
-def testProd():
-    # import sys
-
+def test_prod():
+    """
+    Runs the GUI in standalone mode.
+    """
     root = DefaultNumericalDisplay()
-
-    root.wm_protocol("WM_DELETE_WINDOW", lambda: root.destroy())
-
+    root.protocol("WM_DELETE_WINDOW", root.destroy)
     root.mainloop()
 
 
 if __name__ == '__main__':
-    testProd()
+    test_prod()

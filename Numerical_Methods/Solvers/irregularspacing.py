@@ -157,7 +157,7 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
     
     if stencil == 9:
         diagamult = gamma*(1/8)
-        adjacentmult = (1-gamma*(1/2))/4
+        adjacentmult = (1-gamma)/4
     elif stencil == 5:
         diagamult = 0
         adjacentmult = 0.25

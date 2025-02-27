@@ -7,26 +7,27 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from ..task import Task
 import io
-from PIL import Image
-
-
 
 class Task1(Task):
     '''
         Task1:
             description: Task one is the first task given to solve the anulus situation.
-            The class defines the standard task inteface methods.
+            The class defines the standard task interface methods.
     '''
     
     name = "Anulus"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__()
+        super().__init__(axes=axes, *args, **kwargs)
+        self._Image = None
+        self._quivers = None
+        self._cbar = None
+        self.grid = None
 
     def setup(self, x1: float, y1: float, r1: float, r2: float, cx: float,
               cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,
               dy: float = 1.0, dx: float = 1.0):
-
+        '''Setup the grid and boundary condition, display the initial potential.'''
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
         
@@ -36,89 +37,104 @@ class Task1(Task):
 
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
         self.boundaryCondition = Boundary(v, r1, r2, cx, cy)
-        self.cbar: Colorbar = None
-        self.quivers: Quiver = None
         self.grid = grid = self.boundaryCondition(Grid=grid, retoverlay=False)
         self.Xs, self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]
         self.resXs = Xs
         self.resYs = Ys
         self.resdx = dx
         self.resdy = dy
-        axes = self.axes
 
-        axes.imshow(grid)
+        # Remove old image if it exists
+        if self._Image:
+            self._Image.remove()
+
+        axes = self.axes
+        self._Image = axes.imshow(grid, cmap='viridis', interpolation='nearest')
+        self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
         axes.set_title('Electrostatic Potential')
-        self.figure.canvas.figure = None
-        self.figure.canvas.figure = self.figure
+
+        # Update the figure canvas to reflect changes
         self.figure.canvas.draw_idle()
 
     def redraw(self):
-        if (self.grid) is not None:
+        '''Redraw the grid and other plot elements.'''
+        if self.grid is None:
             return
         self.axes.clear()
-        # img = self.axes.imshow(self.grid)
-        return
+        self._Image = self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
+        self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _show_Efield(self):
-        u_v = findUandV(grid=self.grid)[::5, ::5]*25
+        '''Display the electric field as quivers.'''
+        u_v = findUandV(grid=self.grid)[::5, ::5]
         axes = self.axes
-        Xs = self.Xs[::5, ::5]
-        Ys = self.Ys[::5, ::5]
-        if self.quivers is not None:
-            self.quivers.set_visible(False)
-            self.quivers.remove()
-            self.quivers = None
-        quiv = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b',
-                           scale=0.1, scale_units='xy')
-        self.quivers = quiv
+        Xs, Ys = self.Xs[::5, ::5], self.Ys[::5, ::5]
+        
+        # Remove previous quivers if they exist
+        if self._quivers:
+            self._quivers.remove()
+
+        # Draw new quivers
+        self._quivers = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b', scale=1, scale_units='xy')
 
     def run(self):
-        Xs, Ys, self.grid = laplace_ode_solver_continue(
-            self.grid, self.boundaryCondition)
-        if self.cbar is not None:
-            self.cbar.remove()
-            self.cbar = None
-            self.figure.clear()
-            axes = self.figure.add_subplot(111)
-            self.axes = axes
-        self.axes.imshow(self.grid)
+        '''Solve the Laplace equation and update the grid and electric field.'''
+        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition)
+        
+        # Remove the previous colorbar and reset it
+        if self._cbar:
+            self._cbar.remove()
 
-        self.figure.draw_without_rendering()
-        self.figure.colorbar(self.axes.images[0])
+        self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
+        self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
 
         self.figure.canvas.draw()
 
     def _cleanup(self):
-        self.Image: AxesImage = None
-        self.grid: np.ndarray = None
-        self.cbar: Colorbar = None
-        self.quivers: Quiver = None
+        '''Remove all artists from the axes and reset class attributes.'''
+        if self._Image:
+            self._Image.remove()
+        if self._quivers:
+            self._quivers.remove()
+        if self._cbar:
+            self._cbar.remove()
+
+        self._Image = None
+        self._quivers = None
+        self._cbar = None
+        self.grid = None
 
     def reset(self):
+        '''Reset the grid and boundary condition to initial state.'''
         if self.grid is not None:
-            self.grid[:,:] = 0
-            
+            self.grid[:, :] = 0
+        self.setup(self.resXs[0], self.resYs[0], self.resXs[-1], self.resYs[-1], 
+                   self.boundaryCondition.r1, self.boundaryCondition.r2, self.boundaryCondition.cx, 
+                   self.boundaryCondition.cy)
+
     def save_grid(self):
+        '''Save the grid to a file.'''
         if self.grid is None:
-            return (None,None)
+            return (None, None)
         outfile = io.BytesIO()
-        np.save(outfile,self.grid,allow_pickle=True)
+        np.save(outfile, self.grid, allow_pickle=True)
         try:
             outfile.flush()
         except:
             pass
         outfile.seek(0)
-        return 'Task1_grid.npy',outfile.read()
-    
+        return 'Task1_grid.npy', outfile.read()
+
     def save_figure(self):
+        '''Save the current figure to a file.'''
         if self.figure is None:
             return
         outfile = io.BytesIO()
-        self.figure.savefig(outfile,format='png')
+        self.figure.savefig(outfile, format='png')
         try:
             outfile.flush()
         except:
             pass
         outfile.seek(0)
-        return 'Task1_figure.png',outfile.read()
+        return 'Task1_figure.png', outfile.read()
 

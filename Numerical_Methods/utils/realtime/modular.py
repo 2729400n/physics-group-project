@@ -1,108 +1,103 @@
 import sys
-import os.path as pth
-from importlib import reload
+import os
 import threading
-import pathlib as pthlib
+from importlib import reload
 from os import kill
-from signal import SIGTERM,SIGABRT,SIGBREAK
+from signal import SIGTERM, SIGABRT
+from typing import Optional
 
 
-shouldRunRTLoader = False
-rtLoaderThread:threading.Thread = None
+should_run_rt_loader = False
+rt_loader_thread: Optional[threading.Thread] = None
 
 
-def updateModules():
-    global shouldRunRTLoader
-    iptime = {}
-    notSpeced = []
-    copydict = {}
-    while shouldRunRTLoader:
-        copydict = sys.modules.copy()
-        for i in copydict:
-            if i in notSpeced:
+def update_modules():
+    """
+    Monitor and reload modified Python modules in real-time.
+    """
+    global should_run_rt_loader
+    module_timestamps = {}
+    excluded_modules = set()
+
+    while should_run_rt_loader:
+        for module_name, module in list(sys.modules.items()):
+            if module_name in excluded_modules:
                 continue
-            mod = sys.modules.get(i)
-            
-            if mod is None:
+
+            if module is None or not hasattr(module, "__spec__"):
+                excluded_modules.add(module_name)
                 continue
-            try:
-                modspec = mod.__spec__
-            except Exception as e:
-                notSpeced.append(i)
-                print(e)
+
+            spec = module.__spec__
+            if spec is None or spec.origin is None or not os.path.exists(spec.origin):
+                excluded_modules.add(module_name)
                 continue
-            if modspec is None:
-                if i in notSpeced:
+
+            module_mtime = os.path.getmtime(spec.origin)
+
+            # Handle compiled cache
+            if spec.cached and os.path.exists(spec.cached):
+                cache_mtime = os.path.getmtime(spec.cached)
+                if cache_mtime >= module_mtime:
                     continue
-                notSpeced.append(i)
-                print(i)
-                continue
-            if modspec.origin is None:
-                continue
-            if not pth.exists(modspec.origin):
-                continue
-            modtime = pth.getmtime(modspec.origin)
-            if modspec.cached:
-                if pth.exists(modspec.cached):
-                    mtimecache = pth.getmtime(modspec.cached)
-                    if mtimecache < modtime:
-                        print(f'Reloaded {i}')
-                        reload(mod)
-                        continue
-                    else:
-                        continue
 
-            imptime = iptime.get(i)
-            if imptime is None:
-                iptime[i] = modtime
-                continue
-            if imptime < modtime:
-                print(f'reloaded {i}')
+            # Reload if modified
+            if module_name not in module_timestamps or module_timestamps[module_name] < module_mtime:
+                print(f"Reloading {module_name}")
                 try:
-                    reload(mod)
-                except (SyntaxError,ImportError):
-                    pass
-                iptime[i] = modtime
-    return None
+                    reload(module)
+                    module_timestamps[module_name] = module_mtime
+                except (SyntaxError, ImportError) as e:
+                    print(f"Failed to reload {module_name}: {e}")
+    pass
 
 
-def init_realtime_module():
-    global rtLoaderThread
-    if(rtLoaderThread is not None):
-        return rtLoaderThread
-    rtLoaderThread = threading.Thread(target=updateModules)
-
-    return rtLoaderThread
-
+def init_realtime_module() -> threading.Thread:
+    """
+    Initialize the real-time reloading thread.
+    """
+    global rt_loader_thread
+    if rt_loader_thread is None:
+        rt_loader_thread = threading.Thread(target=update_modules, daemon=True)
+    return rt_loader_thread
 
 
 def start_realtime_module():
-    global shouldRunRTLoader,rtLoaderThread
-    if rtLoaderThread is None:
-        rtLoaderThread = init_realtime_module()
-    
-    shouldRunRTLoader = True
-    rtLoaderThread.start()
-    
+    """
+    Start the real-time module reloader.
+    """
+    global should_run_rt_loader, rt_loader_thread
+    if rt_loader_thread is None or not rt_loader_thread.is_alive():
+        rt_loader_thread = init_realtime_module()
 
-def stop_realtime_module(timeout=0.5):
-    global shouldRunRTLoader,rtLoaderThread
-    shouldRunRTLoader = False
-    if rtLoaderThread is not None:
-        rtLoaderThread.join(timeout=timeout)
-        if rtLoaderThread.is_alive():
+    should_run_rt_loader = True
+    if not rt_loader_thread.is_alive():
+        rt_loader_thread.start()
+
+
+def stop_realtime_module(timeout=0.5) -> bool:
+    """
+    Stop the real-time module reloader gracefully.
+    """
+    global should_run_rt_loader, rt_loader_thread
+    should_run_rt_loader = False
+
+    if rt_loader_thread is not None:
+        rt_loader_thread.join(timeout=timeout)
+        if rt_loader_thread.is_alive():
             try:
-                kill(rtLoaderThread.native_id,SIGTERM)
-            except:
+                kill(rt_loader_thread.native_id, SIGTERM)
+            except ProcessLookupError:
                 pass
-            rtLoaderThread.join(timeout=timeout)
-            if rtLoaderThread.is_alive():
+            rt_loader_thread.join(timeout=timeout)
+            if rt_loader_thread.is_alive():
                 try:
-                    kill(rtLoaderThread.native_id,SIGABRT)
-                except:
+                    kill(rt_loader_thread.native_id, SIGABRT)
+                except ProcessLookupError:
                     pass
-                rtLoaderThread.join(timeout=timeout)
-                if rtLoaderThread.is_alive():
+                rt_loader_thread.join(timeout=timeout)
+                if rt_loader_thread.is_alive():
                     return False
-    rtLoaderThread = None
+
+    rt_loader_thread = None
     return True
