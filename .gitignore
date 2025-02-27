@@ -1,6 +1,6 @@
-# Please Respectfully dont use .pyvenv
-# It breaks so much
-*.png
-.vscode/**
-*.pyc
+*.dat
 **/__pycache__/
+# *.png
+.vscode/**
+**/*.dat
+BoxInBox.png
