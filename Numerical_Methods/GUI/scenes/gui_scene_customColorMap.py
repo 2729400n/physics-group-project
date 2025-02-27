@@ -42,8 +42,10 @@ class CMapper(tk.Frame):
         self.key = None  # Ensure self.key is retained
         
         tk.Frame.__init__(self, master)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=2)
+        self.rowconfigure(1, weight=1)
         self.createWidgets()
-        self.pack(anchor=tk.NW, fill=tk.BOTH, expand=True)
         self.propagate(True)
 
     def getAvailableCMaps(self):
@@ -97,13 +99,14 @@ class CMapper(tk.Frame):
         button.grid_propagate(True)
         button.grid_columnconfigure(0)
 
-        labelframe.grid(row=1, sticky='NW', padx=5)
+        labelframe.grid(row=1,column=0, sticky='NW', padx=5)
 
         self.example_heatmap = matplotlib.figure.Figure(figsize=(3, 3), dpi=64, tight_layout=True)
         self.test_axes = None
         self.example_display = mb_tkagg.FigureCanvasTkAgg(self.example_heatmap, master=self)
         self.example_canvas = self.example_display.get_tk_widget()
-        self.example_canvas.grid(row=1, column=1, sticky='NE', padx=5, pady=5)
+        self.example_canvas.grid(row=1, column=1, sticky='NE', padx=5, pady=5,rowspan=2,columnspan=2)
+        
         self.example_display.draw()
 
         self.test_grid, _ = np.mgrid[:1024, :100]

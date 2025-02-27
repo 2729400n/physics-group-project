@@ -263,7 +263,7 @@ class CompareScene(ttk.Frame):
 
     def create_tree(self):
         """Create the Treeview widget and set up buttons."""
-        self.treeView = ttk.Treeview(self.treeFrame, columns=('Type', 'Size', 'Age', "Path"), selectmode=tk.BROWSE)
+        self.treeView = ttk.Treeview(self.treeFrame, columns=('Type', 'Size', 'Age', "Path"), selectmode=tk.EXTENDED)
         self.treeView.column('#0', width=100, minwidth=100, stretch=tk.NO)
         self.treeView.heading('#0', text="Name")
 
