@@ -1,4 +1,4 @@
-from tkinter import Canvas,Text
+from tkinter import Canvas,Text,Event,EventType
 from tkinter.ttk import Frame,Button
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -103,7 +103,7 @@ class InspectFrame(Frame):
         toolbar.grid(row=1, column=0, sticky="ew")
         
         
-        self.calculatePolyNomial
+        
         
         
         plot_frame.grid(column=1,row=0)
@@ -122,6 +122,9 @@ class InspectFrame(Frame):
         ax.imshow(Grid_obj)
     
     def select_Smallgrid(self,evt):
+        pass
+    
+    def calculatePolyNomial(self, event:Event):
         pass
         
 
