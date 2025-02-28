@@ -6,6 +6,7 @@ from matplotlib.figure import Figure
 from matplotlib.image import AxesImage
 from matplotlib.quiver import Quiver
 import numpy as np
+from ..Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
 
     
 tasks:'set[Task]' = set()
@@ -42,6 +43,7 @@ class Task(typing.Protocol):
         self._quivers: Quiver = None
         self.exposed_methods = [self.setup, self.run, self._show_Efield,self.adjust_plot]
         self.savables: 'dict[str,typing.Callable[[],tuple[str,bytes]]]' = {'Grid': self.save_grid, 'Figure': self.save_figure}
+        
 
     def setup(self, height: int, width: int) -> None: ...
     
@@ -56,7 +58,17 @@ class Task(typing.Protocol):
     def redraw(self) -> None:
         pass
 
-    def _show_Efield(self) -> None: ...
+    def _find_Efield(self) ->None:
+        '''Display the electric field as quivers.'''
+        u_v=self.Efield = findUandV(grid=self.grid)
+        axes = self.axes
+        
+        
+        # Remove previous quivers if they exist
+        if self._quivers:
+            self._quivers.remove()
+    
+    def _show_Efield(self)->None:...
 
     def run(self) -> None: ...
 
