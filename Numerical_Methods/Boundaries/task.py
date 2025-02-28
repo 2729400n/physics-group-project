@@ -103,7 +103,12 @@ class Task(typing.Protocol):
                 self._Image.remove()
             except:
                 pass
-        self._Image = self.axes.imshow(img_data)
+        if isinstance(img_data, (list,tuple,np.ndarray)):
+            img_data = np.array(img_data)
+        if isinstance(img_data,np.ndarray):
+            self._Image = self.axes.imshow(img_data)
+        elif isinstance(img_data,AxesImage):
+            self._Image=img_data
 
     @property
     def cbar(self) -> Colorbar:

@@ -1,5 +1,5 @@
 
-from .boundary import geometryFactory as Boundary
+from .boundary import GeometryFactory as Boundary
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 import numpy as np
@@ -15,7 +15,7 @@ class Task4(Task):
         super().__init__()
         
 
-    def setup(self, x1: float, y1: float, radius: float, cx: float,
+    def setup(self, x1: float, y1: float, a: float, cx: float,
               cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,l:float=1.0,
               dy: float = 1.0, dx: float = 1.0,centre:bool=True,nncount:int=1):
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
@@ -26,7 +26,7 @@ class Task4(Task):
         Ys = np.arange(y0, y1+dy, dy)
 
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
-        self.boundaryCondition=Boundary(radius=radius,cx=cx,cy=cy,V=v,seperation=l,center=centre,plate_seperation=None,NNCount=nncount)
+        self.boundaryCondition=Boundary(radius=a,cx=cx,cy=cy,V=v,seperation=l,center=centre,plate_seperation=l,NNCount=nncount)
         self.grid =grid=self.boundaryCondition(Grid=grid)
         axes = self.axes
         self.Image=axes.imshow(grid)
