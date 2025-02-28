@@ -111,7 +111,7 @@ def annulus(cx, cy, r1, r2, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid: 
     return pixelated_annulus
 
 
-def rectangle(x0:np.float64, y0:np.float64, x1:np.float64, y1:np.float64, dx:float=1.0, dy:float=1.0, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None, blocking=False, thickness=1):
+def rectangle_smooth(x0:np.float64, y0:np.float64, x1:np.float64, y1:np.float64, dx:float=1.0, dy:float=1.0, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None, blocking=False, thickness=1):
 
     if y1 < y0:
         y0, y1 = y1, y0
@@ -196,13 +196,13 @@ def rectangle(x0:np.float64, y0:np.float64, x1:np.float64, y1:np.float64, dx:flo
 # A wrapper function for Rectangle
 
 
-def rectangle_w_h(x, y, w, h, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
+def rectangle_w_h_smooth(x, y, w, h, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
 
     x0 = x
     x1 = x+w
     y0 = y
     y1 = y+h
-    return rectangle(x0=x0, x1=x1, y0=y0, y1=y1, dx=dx, dy=dy, val=val, fill=fill, clear=clear, Grid=Grid)
+    return rectangle_smooth(x0=x0, x1=x1, y0=y0, y1=y1, dx=dx, dy=dy, val=val, fill=fill, clear=clear, Grid=Grid)
 
 
 def rectangle_gpt(x0: float, y0: float, x1: float, y1: float, dx: float = 1.0, dy: float = 1.0, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
@@ -244,6 +244,124 @@ def rectangle_w_h_gpt(x: float, y: float, w: float, h: float, dx=1, dy=1, val=1.
     return rectangle(x, y, x + w, y + h, dx, dy, val, fill, clear, Grid)
 
 
+
+def rectangle(x0, y0, x1, y1, dx=1, dy=1, val:float=1.0, fill:bool=False, clear:bool=False, Grid:'np.ndarray[np.ndarray[np.float64]]'=None,blocking=False,thickness=1):
+    
+    if y1<y0:
+        y0,y1 = y1,y0
+    if x1<x0:
+        x0,x1 = x1,x0
+        
+    grid_class = type(Grid)
+    
+    if type(Grid) == tuple:
+        Grid = np.full(Grid,1)
+    
+    if Grid is not None:
+        y,x = Grid.shape
+        
+    if not blocking:
+        x1 = None if x1 > x else x1
+        x0 = None if x0 < 0 else x0
+
+        y1 = None if y1 > y else y1
+        y0 = None if y0 < 0 else y0
+    else:
+        x1 = min(max(x-1,0),x1)
+        x0 = max(0,x0)
+
+        y1 = min(max(y-1,0),y1)
+        y0 = max(0,y0)
+    
+    mul_mask = np.full_like(Grid,1)
+    
+    if fill:
+        mul_mask[y0:y1,x0:x1] = 0 if clear else 1
+    else:
+        
+        mul_mask[tuple( [i for i in (y0,y1) if i is not None]  ),x0:x1] = mul_mask[y0:y1, tuple( [i for i in (x0,x1) if i is not None]  )] = 0 if clear else 1
+    if Grid is not  None:
+        if(grid_class!=tuple):
+            return Grid*mul_mask
+    
+    return mul_mask
+
+# A wrapper function for Rectangle 
+def rectangle_w_h(x,y,w,h,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
+    
+    x0=x
+    x1=x+w
+    y0 = y
+    y1 =y+h
+    return rectangle(x0=x0, x1=x1, y0=y0, y1=y1, dx=dx, dy=dy,val=val,fill=fill,clear=clear,Grid=Grid) 
+
+
+def rectangle_bool(x0, y0, x1, y1, dx=1, dy=1, val:float=1.0, fill:bool=False, clear:bool=False, Grid:'np.ndarray[np.ndarray[np.float64]]'=None,blocking=False,thickness=1):
+    
+    if y1 < y0:
+        y0, y1 = y1, y0
+    if x1 < x0:
+        x0, x1 = x1, x0
+
+    grid_class = type(Grid)
+
+    if type(Grid) == tuple:
+        Grid = np.full(Grid, 1)
+
+    if Grid is not None:
+        y, x = Grid.shape
+    
+    y0=y0/dy
+    y1=y1/dy
+    x0=x0/dx
+    x1=x1/dx
+
+    if (not blocking) and (not fill):
+        x1 = None if x1 > x else x1
+        x0 = None if x0 < 0 else x0
+
+        y1 = None if y1 > y else y1
+        y0 = None if y0 < 0 else y0
+    else:
+        x1 = min(max(x-1, 0), x1)
+        x0 = max(0, x0)
+
+        y1 = min(max(y-1, 0), y1)
+        y0 = max(0, y0)
+        
+    sets_masks = [np.full_like(Grid,False,dtype=bool),np.ones_like(Grid,dtype=np.float64)]
+    
+    
+    if fill:
+        
+        # print([y0,y1,x0,x1])
+        y0_ceil,y1_ceil,x0_ceil,x1_ceil =[int(np.ceil(i)) for i in [y0,y1,x0,x1]]
+        y0_floor,y1_floor,x0_floor,x1_floor=[int(np.floor(i)) for i in [y0,y1,x0,x1]]
+        
+        sets_masks[0][y0_ceil:y1_ceil, x0_floor:x1_ceil] = False if clear else True
+        sets_masks[0][y0_floor:y1_ceil, x0_floor:x1_ceil] = False  if clear else True 
+        
+        # sets_masks[0][(y0_floor,y1_ceil), x0_floor:x1_ceil+1] = True 
+        # sets_masks[0][y0_floor:y1_ceil+1, (x0_floor,x1_ceil)] = True
+        
+    else:
+
+        sets_masks[:,tuple([i for i in (y0, y1) if i is not None]), x0:x1] = sets_masks[:,y0:y1, tuple(
+            [i for i in (x0, x1) if i is not None])] = False if clear else True
+    
+    sets_masks[0]= sets_masks[0]==True
+    
+    return sets_masks[0]
+
+ 
+def rectangle_w_h_bool(x,y,w,h,dx=1,dy=1,val=1.0,fill=False,clear=False,Grid:'np.ndarray[np.ndarray[np.float64]]'=None):
+    
+    x0=x
+    x1=x+w
+    y0 = y
+    y1 =y+h
+    return rectangle_bool(x0=x0, x1=x1, y0=y0, y1=y1, dx=dx, dy=dy,val=val,fill=fill,clear=clear,Grid=Grid) 
+
 def identityOverlay(Grid: np.ndarray):
     """Returns an identity overlay for the given grid."""
     return np.full_like(Grid, 1)
@@ -266,7 +384,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     grid = np.zeros((100, 100))
     grid[:, :] = 1
-    circ = rectangle_w_h(1.5, 7.89, 79.83323, 20.332, fill=True,
+    circ = rectangle_w_h_smooth(1.5, 7.89, 79.83323, 20.332, fill=True,
                          clear=True, Grid=grid)
     plt.imshow(circ, cmap='gray')
     plt.colorbar()

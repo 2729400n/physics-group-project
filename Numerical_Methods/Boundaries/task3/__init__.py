@@ -24,8 +24,9 @@ class Task3(Task):
         self._cbar = None
         self.grid = None
 
-    def setup(self, x1: float, y1: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,
-              dy: float = 1.0, dx: float = 1.0):
+    def setup(self, x1: float, y1: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,pad_w: int = 30, pad_h: int = 30, gap: int = 40,
+
+              dy: float = 1.0, dx: float = 1.0, nncount: int = 1):
         '''Setup the grid and boundary condition, display the initial potential.'''
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
@@ -35,7 +36,7 @@ class Task3(Task):
         Ys = np.arange(y0, y1+dy, dy)
 
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
-        self.boundaryCondition = Boundary(val=v,relative=True)
+        self.boundaryCondition = Boundary(val=v,relative=True,pad_w=pad_w,pad_h=pad_h,gap=gap,NNCount=nncount)
         self.grid = grid = self.boundaryCondition(Grid=grid, retoverlay=False)
         self.Xs, self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]
         self.resXs = Xs
@@ -50,7 +51,7 @@ class Task3(Task):
         axes = self.axes
         self._Image = axes.imshow(grid, cmap='viridis')
         # self._Image.set_clim(vmin=np.min(0), vmax=np.max(self.grid))  # Set color limits
-        self.cbar = self.figure.colorbar(self._Image, ax=axes)
+        self.cbar = self.figure.colorbar(self._Image,None,None)
         axes.set_title('Electrostatic Potential')
 
         # Update the figure canvas to reflect changes
@@ -77,9 +78,9 @@ class Task3(Task):
         # Draw new quivers
         self._quivers = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b', scale=1, scale_units='xy')
 
-    def run(self):
+    def run(self,maxruns:int=100):
         '''Solve the Laplace equation and update the grid and electric field.'''
-        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition)
+        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns)
         
         # Remove the previous colorbar and reset it
         if self._cbar is not None:
@@ -89,7 +90,8 @@ class Task3(Task):
                 pass
 
         self.axes.imshow(self.grid, cmap='viridis')
-        self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
+        self._cbar = self.figure.colorbar(self._Image,None,None)
+        self.axes.set_title('Electrostatic Potential')
 
         self.figure.canvas.draw()
 
