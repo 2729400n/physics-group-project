@@ -492,14 +492,14 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
 if __name__ == '__main__':
     def PolYproduct(x, y):
         # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-        return (2 * (x**2) + 2 * (x) + 4.7+8*x**3+4*x**5)*(y**2+2)
+        return (2 * (x**2) + 2 * (x) + 4+8*x**3+4*x**5)*(y**2+2)
     n_ = 10
     m_ = 10
     Ygrid, Xgrid = np.mgrid[:m_, :n_]
     print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
     input("Press Enter to continue...")
     
-    grid = PolYproduct(Xgrid, Ygrid)
+    grid = PolYproduct(Xgrid, Ygrid)#+np.random.random((m_,n_))
     print("Grid:\n", grid)
     input('Ready ?')
     

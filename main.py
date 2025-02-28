@@ -36,9 +36,9 @@ if __name__ == "__main__":
     )
     
     if caching:
-        sys.dont_write_bytecode=True
-    else:
         sys.dont_write_bytecode=False
+    else:
+        sys.dont_write_bytecode=True
     
     
     enable_rtloader = check_user_approval.wouldYouLike(

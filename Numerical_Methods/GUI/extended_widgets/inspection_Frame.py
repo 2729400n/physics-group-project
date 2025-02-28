@@ -330,19 +330,34 @@ class InspectFrame(Frame):
                 self.jobRunning=False
         
     def findLaplacian(self):
+        
+        smdiag= simple_diag.SimpleDialog(self,text="What would you like to take the laplacian of?",
+                                 buttons=["Full Area","Zoomed Area"],default=0,cancel=0,title="Laplacian")
+        opt =smdiag.go()
+        match opt:
+            case 1:
+                grd = self.zoomedArea
+            
+            case _:
+                grd = self.Grid_obj
+            
+        
         smdiag= simple_diag.SimpleDialog(self,text="Would you like to wrap the sides",
                                  buttons=["No","Only_X","Only_Y","Both"],default=0,cancel=0,title="Wrapping")
         opt =smdiag.go()
         match opt:
-            case 0:
-                lastfield = (False,'none')
+            
             case 1:
                 lastfield = (True,'x')
             case 2:
                 lastfield = (True,'y')
             case 3:
                 lastfield = (True,'both')
-        error,abserr=errors.laplaceify(grid=self.Grid_obj,dx=self.dx,dy=self.dy,wrap=lastfield[0],wrap_direction=lastfield[1])
+            case _:
+                lastfield = (False,'none')
+                
+        
+        error,abserr=errors.laplaceify(grid=grd,dx=self.dx,dy=self.dy,wrap=lastfield[0],wrap_direction=lastfield[1])
         
         absroot = tk.Toplevel(self)
         errroot = tk.Toplevel(self)

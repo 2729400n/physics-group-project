@@ -2,6 +2,7 @@ from enum import Enum
 import tkinter as tk
 import tkinter.ttk as ttk
 from typing import Generator
+import typing
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -127,16 +128,36 @@ class CompareScene(ttk.Frame):
         self._results_dir = value
         self._reload_tree_view()
 
+    # TODO : Fix the tree handling
     def _on_tree_item_selected(self, evt: tk.Event):
-        selection = self.treeView.selection()
+        
+        cursel =self.treeView.selection()
+        for i in cursel:
+            if i not in self.cursel:
+                break
+        else:
+            return
+        selection =[]
+        for i in cursel:
+            print(i)
+            item_type=self.treeView.item(i).get('values',['UNK'])[0]
+            if 'DIRECTORY'==item_type.upper().strip():
+                continue
+            selection.append(i)
+            
         if selection is None:
             return None
+        
 
         if len(selection) == 0:
             return
+        
         self.cursel.extend(selection)
         if len(self.cursel) > 2:
             self.cursel = self.cursel[-2:]
+            print(self.cursel)
+            self.treeView.selection_set(self.cursel)
+
 
         if len(self.cursel) == 2:
             self.show_comparison_buttons()
@@ -159,9 +180,44 @@ class CompareScene(ttk.Frame):
         if self.first_file is None or self.second_file is None:
             msgbox.showerror(message="Please select two files for comparison.")
             return
+        f1:np.ndarray = self.first_file
+        f2:np.ndarray = self.second_file
 
+        if not (isinstance(f1,(np.ndarray,typing.Iterable,typing.Collection,list,tuple)) and isinstance(f2,(np.ndarray,typing.Iterable,typing.Collection,list,tuple))):
+            msgbox.showerror(message="Files cannot be arrayified.")
+            return
+        
+        
+        f1:np.ndarray = np.array(f1)
+        f2:np.ndarray = np.array(f2)
+        
+            # Ensure same number of dimensions by padding the smaller array
+        while f1.ndim < f2.ndim:
+            f1 = f1.reshape((1,) + f1.shape)
+        while f2.ndim < f1.ndim:
+            f2 = f2.reshape((1,) + f2.shape)
+
+        # Adjust shapes explicitly for each dimension
+        if f1.shape != f2.shape:
+            for i in range(f1.ndim):
+                if f1.shape[i] == f2.shape[i]:
+                    continue
+
+                if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
+                    repeats = f2.shape[i] // f1.shape[i]  # Full repeats
+                    remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
+                    f1 = np.tile(f1, (repeats + (1 if remainder else 0),) + (1,) * (f1.ndim - i - 1))
+                    f1 = f1[:f2.shape[i]]  # Trim excess from the end
+
+                elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
+                    repeats = f1.shape[i] // f2.shape[i]
+                    remainder = f1.shape[i] % f2.shape[i]
+                    f2 = np.tile(f2, (repeats + (1 if remainder else 0),) + (1,) * (f2.ndim - i - 1))
+                    f2 = f2[:f1.shape[i]]  # Trim excess from the end
+
+        
         # Compare absolute difference
-        diff = np.abs(self.first_file - self.second_file)
+        diff = np.abs(f1-f2)
         self.plot_comparison(diff, title="Absolute Difference")
 
     def compare_relative_difference(self):
@@ -202,6 +258,7 @@ class CompareScene(ttk.Frame):
 
     def load_file(self, file_path):
         """Loads a file (npy or npz) into a numpy array."""
+        print(file_path)
         try:
             file_path = pathlib.Path(file_path)
             if file_path.suffix == '.npy':
