@@ -7,6 +7,7 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from ..task import Task
 import io
+import matplotlib.colors as mcolors
 
 class Task1(Task):
     '''
@@ -66,16 +67,28 @@ class Task1(Task):
 
     def _show_Efield(self):
         '''Display the electric field as quivers.'''
-        u_v = findUandV(grid=self.grid)[::5, ::5]
+        u_v=self.Efield = findUandV(grid=self.grid)
         axes = self.axes
-        Xs, Ys = self.Xs[::5, ::5], self.Ys[::5, ::5]
+        Xs, Ys = self.Xs, self.Ys
         
         # Remove previous quivers if they exist
         if self._quivers:
             self._quivers.remove()
 
-        # Draw new quivers
-        self._quivers = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b', scale=1, scale_units='xy')
+        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[::5, ::5, 0], u_v[::5, ::5, 1])
+            
+        # Compute the magnitude of the vectors
+        M = np.sqrt(U**2 + V**2)
+
+        # Normalize the vectors (avoid division by zero)
+        U_norm = U / (M + 1e-10)
+        V_norm = V / (M + 1e-10)
+
+        # Create a color map based on the magnitudes
+        norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
+                    
+        # Plot the quiver with normalized vectors and colored by magnitude
+        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy', cmap='plasma', norm=norm)
 
     def run(self):
         '''Solve the Laplace equation and update the grid and electric field.'''
