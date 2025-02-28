@@ -43,12 +43,13 @@ class GeometryFactory(typing.Callable):
             cx_s=cx+np.array([center_distance*i for i in range(-self.NNCount,1+self.NNCount,1)])
             
             for cx_i in cx_s:
-                c1 = geometry.circle_bool(cx_i, cy, self.radius, 1.0, 1.0, fill=True, clear=True,Grid=tuple(grid.shape))
+                c1 = geometry.circle_bool(cx_i, cy, self.radius, 1.0, 1.0, fill=True, clear=False,Grid=tuple(grid.shape))
                 self.circles.append(c1)
                 grid[c1]=0
         else:
             for i in self.circles:
                 grid[i]=0
+                
         midy=(grid.shape[0]/2)*self.dy
         # midx=(grid.shape[1]/2)*self.dx
         eachsep = (self.plate_seperation/2)*self.dy
