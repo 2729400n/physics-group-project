@@ -80,7 +80,7 @@ class Task3(Task):
 
     def run(self,maxruns:int=100):
         '''Solve the Laplace equation and update the grid and electric field.'''
-        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns)
+        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns,wrap=True,wrap_direction='x')
         
         # Remove the previous colorbar and reset it
         if self._cbar is not None:

@@ -13,7 +13,7 @@ class Task2(Task):
         super().__init__()
         
 
-    def setup(self, height: int, width: int):
+    def setup(self, height: float, width: float,v,r):
         grid = np.zeros(shape=(height,width),dtype=np.float64)
         self.boundaryCondition=Boundary()
         self.grid =grid=self.boundaryCondition(Grid=grid,retoverlay=False)
