@@ -35,7 +35,10 @@ if __name__ == "__main__":
         "Would you like to enable Python caching? It makes for speedy re runs!"
     )
     
-    sys.dont_write_bytecode=caching
+    if caching:
+        sys.dont_write_bytecode=True
+    else:
+        sys.dont_write_bytecode=False
     
     
     enable_rtloader = check_user_approval.wouldYouLike(
