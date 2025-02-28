@@ -49,7 +49,7 @@ class Task1(Task):
             self._Image.remove()
 
         axes = self.axes
-        self._Image = axes.imshow(grid, cmap='viridis', interpolation='nearest')
+        self._Image = axes.imshow(grid, cmap='viridis')
         self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
         axes.set_title('Electrostatic Potential')
 
@@ -61,7 +61,7 @@ class Task1(Task):
         if self.grid is None:
             return
         self.axes.clear()
-        self._Image = self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
+        self._Image = self.axes.imshow(self.grid, cmap='viridis')
         self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _show_Efield(self):
@@ -85,7 +85,7 @@ class Task1(Task):
         if self._cbar:
             self._cbar.remove()
 
-        self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
+        self.axes.imshow(self.grid, cmap='viridis')
         self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
 
         self.figure.canvas.draw()
@@ -108,9 +108,6 @@ class Task1(Task):
         '''Reset the grid and boundary condition to initial state.'''
         if self.grid is not None:
             self.grid[:, :] = 0
-        self.setup(self.resXs[0], self.resYs[0], self.resXs[-1], self.resYs[-1], 
-                   self.boundaryCondition.r1, self.boundaryCondition.r2, self.boundaryCondition.cx, 
-                   self.boundaryCondition.cy)
 
     def save_grid(self):
         '''Save the grid to a file.'''

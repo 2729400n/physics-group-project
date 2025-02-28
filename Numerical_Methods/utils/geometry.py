@@ -29,9 +29,10 @@ def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: fl
 
     # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius
     # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
-
+    tolerance = r  # Ensure tolerance does not dominate
+    print(r)
     circle_mask = operations[bool(fill)][bool(clear)](
-        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, r)
+        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, tolerance)
     # Apply anti-aliasing using Gaussian blur
     # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
     vals = (val,0) if not isinstance(val,bool) else (val,not val)
@@ -51,9 +52,7 @@ def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, va
         x-y) <= z]*2, [lambda x, y, z:x <= y, lambda x, y, z:x >= y]]
     grid_class = type(Grid)
 
-    # if all we want is a  circle
-    x = 2*int(r//dx)+5
-    y = 2*int(r//dy)+5
+    
 
     if type(Grid) == tuple:
         Grid = np.full(Grid, 1)
@@ -62,14 +61,19 @@ def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, va
     if Grid is not None:
         y, x = Grid.shape
         # print(x,y)
+    else:
+        # if all we want is a  circle
+        x = 2*int(r//dx)+5
+        y = 2*int(r//dy)+5
 
-    grid_x, grid_y = np.mgrid[:y, :x]
+    grid_y, grid_x  = np.mgrid[:y, :x]
 
     # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius
     # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
-
+    tolerance = r  # Ensure tolerance does not dominate
+    print(r)
     circle_mask = operations[bool(fill)][bool(clear)](
-        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, r)
+        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, tolerance)
     # Apply anti-aliasing using Gaussian blur
     # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
     vals = (val,) if not isinstance(val,bool) else (val,not val)
@@ -204,10 +208,48 @@ def rectangle_w_h(x, y, w, h, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid
     return rectangle(x0=x0, x1=x1, y0=y0, y1=y1, dx=dx, dy=dy, val=val, fill=fill, clear=clear, Grid=Grid)
 
 
-# deal with essy overlays
-def identityOverlay(Grid: np.ndarray):
-    return np.full_like(Grid, 1)
+def rectangle_gpt(x0: float, y0: float, x1: float, y1: float, dx: float = 1.0, dy: float = 1.0, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
+    """Generate a rectangle or update an existing grid with the rectangle."""
+    
+    if y1 < y0:
+        y0, y1 = y1, y0
+    if x1 < x0:
+        x0, x1 = x1, x0
 
+    if isinstance(Grid, tuple):
+        Grid = np.full(Grid, 1)
+
+    if Grid is not None:
+        y, x = Grid.shape
+    else:
+        y, x = int((y1 - y0) // dy) + 5, int((x1 - x0) // dx) + 5
+
+    y0, y1, x0, x1 = [int(round(coord / step)) for coord, step in [(y0, dy), (y1, dy), (x0, dx), (x1, dx)]]
+
+    mask = np.zeros((y, x), dtype=bool)
+    
+    if fill:
+        mask[y0:y1, x0:x1] = True
+    else:
+        mask[y0, x0:x1] = mask[y1 - 1, x0:x1] = True
+        mask[y0:y1, x0] = mask[y0:y1, x1 - 1] = True
+
+    pixelated_rectangle = np.where(mask, val, 0)
+
+    if Grid is not None:
+        return Grid * pixelated_rectangle
+
+    return pixelated_rectangle
+
+
+def rectangle_w_h_gpt(x: float, y: float, w: float, h: float, dx=1, dy=1, val=1.0, fill=False, clear=False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
+    """Wrapper for rectangle using width and height."""
+    return rectangle(x, y, x + w, y + h, dx, dy, val, fill, clear, Grid)
+
+
+def identityOverlay(Grid: np.ndarray):
+    """Returns an identity overlay for the given grid."""
+    return np.full_like(Grid, 1)
 
 # if __name__ == '__main__':
 #     import matplotlib.artist,matplotlib.patches,matplotlib.path,matplotlib.pyplot as plt

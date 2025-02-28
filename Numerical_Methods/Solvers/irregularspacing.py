@@ -320,3 +320,151 @@ def laplace_ode_solver_step(Grid: 'np.ndarray[np.ndarray[np.float64]]',
         shouldStop=True
     
     return (*retvals,shouldStop)
+
+
+import numpy as np
+from typing import Callable, Literal
+
+def laplace_ode_solver_step(
+    Grid: np.ndarray,
+    fixedConditions: Callable = doNothing,
+    startingShape: Callable = doNothing,
+    dx: np.ndarray = None,
+    dy: np.ndarray = None,
+    stencil: Literal[5, 9] = 9,
+    gamma: float = 0.0,
+    wrap: bool = False,
+    wrap_direction: Literal["both", "x", "y", "none"] = "none",
+    rel_tol: float = 1e-6,
+    abs_tol: float = 1e-9,
+    refinement_factor: float = 0.5,  # Factor to adjust grid resolution dynamically
+    convergence_threshold: float = 0.1  # Threshold to detect slow convergence
+):
+    """Solves the Laplace equation with dynamic grid resolution adjustment based on convergence rate.
+
+    Args:
+        Grid: A 2D NumPy array representing the initial grid.
+        fixedConditions: A function that enforces boundary conditions on the potential grid.
+        startingShape: A function that defines the initial shape of the potential grid.
+        dx: A 2D ndarray containing the grid spacings in the x-direction.
+        dy: A 2D ndarray containing the grid spacings in the y-direction.
+        stencil: Choose between a 5-point or 9-point stencil.
+        gamma: A parameter controlling diagonal weighting for the 9-point stencil.
+        wrap: If True, applies periodic boundary conditions.
+        wrap_direction: Determines which axes wrap ('both', 'x', 'y', or 'none').
+        rel_tol: Relative tolerance for convergence.
+        abs_tol: Absolute tolerance for convergence.
+        refinement_factor: Factor to refine grid resolution (e.g., 0.5 for halving).
+        convergence_threshold: The threshold to consider an area as having slow convergence.
+
+    Returns:
+        A tuple containing the Y and X coordinate arrays, the final potential grid, and a boolean indicating equilibrium status.
+    """
+    # Ensure dx and dy are numpy arrays if not provided as input, default to 1.0
+    if dx is None:
+        dx = np.ones_like(Grid, dtype=np.float64)  # Default to a uniform grid spacing
+    if dy is None:
+        dy = np.ones_like(Grid, dtype=np.float64)  # Default to a uniform grid spacing
+
+    # Constants for the finite difference method
+    sqrt_a = dy / dx
+    a = sqrt_a ** 2
+    b = dx ** 2 + dy ** 2
+    sqrt_b = np.sqrt(b)
+    
+    Frames = np.zeros((2, *Grid.shape), dtype=np.float64)
+    Frames[0], overlay = startingShape(Grid, retoverlay=True)
+    Xs = np.arange(0, Grid.shape[1], 1)
+    Ys = np.arange(0, Grid.shape[0] + 1, 1)
+
+    if stencil == 9:
+        diagamult = gamma / b
+        adjacentmult = (1 - gamma) / (2.0 * (a + 1))
+    elif stencil == 5:
+        diagamult = 0
+        adjacentmult = 1 / (2.0 * (a + 1))
+    else:
+        raise ValueError(f"Invalid stencil: {stencil}. Only 5 and 9 are supported.")
+
+    # Calculate next step with 9-point stencil
+    ForwardHSpace_A2f = Frames[0, 1:-1, 2:]
+    BackwardHSpace_A2f = Frames[0, 1:-1, :-2]
+    ForwardVSpace_A2f = Frames[0, 2:, 1:-1]
+    BackwardVSpace_A2f = Frames[0, :-2, 1:-1]
+
+    DiagForwardUp = Frames[0, 2:, 2:]
+    DiagForwardDown = Frames[0, :-2, 2:]
+    DiagBackUp = Frames[0, 2:, :-2]
+    DiagBackDown = Frames[0, :-2, :-2]
+
+    # 9-point stencil update
+    Frames[1, 1:-1, 1:-1] = adjacentmult * (
+        a * (ForwardHSpace_A2f + BackwardHSpace_A2f) + 
+        (ForwardVSpace_A2f + BackwardVSpace_A2f)
+    ) + diagamult * (DiagBackUp + DiagBackDown + DiagForwardDown + DiagForwardUp)
+    
+    # Handle periodic boundary conditions (wrap)
+    if wrap:
+        if wrap_direction in ["both", "y"]:
+            Frames[1, (0, -1), 1:-1] = adjacentmult * (
+                a * (Frames[0, (0, -1), 2:] + Frames[0, (0, -1), :-2]) +
+                (Frames[0, (-1, -2), 1:-1] + Frames[0, (1, 0), 1:-1])
+            ) / (2.0 * (a + 1)) + diagamult * (
+                Frames[0, (1, 0), 2:] + Frames[0, (-1, -2), 2:] +
+                Frames[0, (1, 0), :-2] + Frames[0, (-1, -2), :-2]
+            ) / b
+        if wrap_direction in ["both", "x"]:
+            Frames[1, 1:-1, (0, -1)] = adjacentmult * (
+                a * (Frames[0, 1:-1, (-1, -2)] + Frames[0, 1:-1, (1, 0)]) +
+                (Frames[0, 2:, (0, -1)] + Frames[0, :-2, (0, -1)]))/ (2.0 * (a + 1)) + diagamult * (
+                Frames[0, :-2, (-1, -2)] + Frames[0, 2:, (-1, -2)] +
+                Frames[0, :-2, (1, 0)] + Frames[0, 2:, (1, 0)]
+            ) / b
+
+    # Apply fixed boundary conditions
+    Frames[1] = fixedConditions(Frames[1], overlay=overlay)
+    
+    # Convergence check and dynamic grid resolution adjustment
+    absdiff = np.abs((Frames[0] - Frames[1]))
+    indexes = Frames[1] > np.spacing(absdiff) 
+    reldiff = np.abs(absdiff[indexes] / Frames[1][indexes])
+    
+    # Identify slow convergence regions
+    slow_convergence_mask = reldiff > convergence_threshold
+    
+    # Dynamically adjust the grid by expanding and contracting based on convergence areas
+    if np.any(slow_convergence_mask):
+        # Expand grid in areas of slow convergence (increase resolution)
+        Grid = expand_grid(Grid, slow_convergence_mask, refinement_factor)
+    else:
+        # Contract grid in areas of fast convergence (decrease resolution)
+        Grid = contract_grid(Grid, ~slow_convergence_mask, refinement_factor)
+
+    # Check for equilibrium
+    at_equilibrium = False
+    if np.size(reldiff) > 0:
+        max_diff = np.max(reldiff)
+        if max_diff < rel_tol:
+            at_equilibrium = True
+    else:
+        if np.max(absdiff) < abs_tol:
+            at_equilibrium = True
+
+    # Return the results with equilibrium status
+    return Ys, Xs, Frames[1], at_equilibrium
+
+
+def expand_grid(Grid: np.ndarray, mask: np.ndarray, refinement_factor: float) -> np.ndarray:
+    """Expand the grid in areas with slow convergence (mask is True)."""
+    # Assuming you want to expand the grid in slow-convergence regions by adding points
+    new_shape = np.array(Grid.shape) + np.sum(mask, axis=(0, 1)) * refinement_factor
+    expanded_grid = np.resize(Grid, new_shape)
+    return expanded_grid
+
+
+def contract_grid(Grid: np.ndarray, mask: np.ndarray, refinement_factor: float) -> np.ndarray:
+    """Contract the grid in areas with fast convergence (mask is False)."""
+    # Assuming you want to contract the grid in fast-convergence regions by removing points
+    new_shape = np.array(Grid.shape) - np.sum(mask, axis=(0, 1)) * refinement_factor
+    contracted_grid = np.resize(Grid, new_shape)
+    return contracted_grid

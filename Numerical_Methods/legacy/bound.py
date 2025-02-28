@@ -1,4 +1,4 @@
-from geometry import circle
+from ..utils.geometry import circle
 import numpy as np
 
 

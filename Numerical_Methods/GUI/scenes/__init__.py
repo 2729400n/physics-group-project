@@ -42,7 +42,7 @@ def load_gui_scenes(base_dirs=None):
                 
                 # Import the module dynamically
                 try:
-                    mod = import_from_path(pth.join(baseDir, item))
+                    mod = import_from_path(pth.join(baseDir, item),mod_name=f'Numerical_Methods.GUI.Scenes.{mod_name}')
                     
                     # Update global scenes dictionary with any new scenes from the module
                     if hasattr(mod, 'scenes'):
