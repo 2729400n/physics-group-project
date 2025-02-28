@@ -1,1 +1,5 @@
 Numerical_Methods/GUI/py_iface/The setup.png
+*.npy
+*.png
+**/__pycache__
+*.npz

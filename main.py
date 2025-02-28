@@ -20,15 +20,15 @@ class TestGUI:
 
 if __name__ == "__main__":
     
-    clear_cache  = check_user_approval.wouldYouLike(
-        "Would you like to clear cached files in this Package?"
-    )
-    if clear_cache:
-        numerical_methods_path =pathlib.Path(Numerical_Methods.__file__).resolve().absolute()
-        if(numerical_methods_path.is_dir()):
-            cachecleaner.clearPythonCaches(numerical_methods_path)
-        else:
-            cachecleaner.clearPythonCaches(numerical_methods_path.parent)
+    # clear_cache  = check_user_approval.wouldYouLike(
+    #     "Would you like to clear cached files in this Package?"
+    # )
+    # if clear_cache:
+    #     numerical_methods_path =pathlib.Path(Numerical_Methods.__file__).resolve().absolute()
+    #     if(numerical_methods_path.is_dir()):
+    #         cachecleaner.clearPythonCaches(numerical_methods_path)
+    #     else:
+    #         cachecleaner.clearPythonCaches(numerical_methods_path.parent)
             
     
     caching = check_user_approval.wouldYouLike(
