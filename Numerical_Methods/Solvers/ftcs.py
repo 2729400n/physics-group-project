@@ -189,8 +189,8 @@ def laplace_ode_solver_continue(
     Frames = np.zeros((2, *Grid.shape), dtype=np.float64)
     Frames[0] = startingShape(Grid)
     
-    Xs = np.arange(0, Grid.shape[1] + dx, dx)
-    Ys = np.arange(0, Grid.shape[0] + dy, dy)
+    Xs = np.arange(0, Grid.shape[1], 1)
+    Ys = np.arange(0, Grid.shape[0], 1)
     
     if stencil == 9:
         diagamult = gamma / b
@@ -250,11 +250,11 @@ def laplace_ode_solver_continue(
         if np.size(reldiff) > 0:
             max_diff = np.max(reldiff)
             
-            if max_diff < rel_tol:
+            if max_diff <= rel_tol:
                 print('rel_max_Diff',max_diff)
                 at_equilibrium = True
         else:
-            if np.max(absdiff) < abs_tol:
+            if np.max(absdiff) <= abs_tol:
                 print('abs_max_Diff',np.max(absdiff))
                 at_equilibrium = True
         

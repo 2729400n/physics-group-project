@@ -21,9 +21,8 @@ class Task4(Task):
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
         
-        # print(x0, x1, dx)
-        Xs=self.Xs = np.arange(x0, x1+dx, dx)
-        Ys=self.Ys = np.arange(y0, y1+dy, dy)
+        Xs=self.Xs = np.arange(x0, x1, dx)
+        Ys=self.Ys = np.arange(y0, y1, dy)
         self.dx=dx
         self.dy=dy
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)

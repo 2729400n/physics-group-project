@@ -9,7 +9,7 @@ class ResponsivePlotApp(tk.Tk):
         super().__init__()
 
         self.title("Responsive Tkinter Plot with Tools")
-        self.geometry("800x600")
+        self.geometry("640x480+0+0")
 
         # Configure grid for responsiveness
         self.columnconfigure(0, weight=1)
