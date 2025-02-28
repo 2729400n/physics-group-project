@@ -71,14 +71,11 @@ def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, va
     # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius
     # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
     tolerance = r  # Ensure tolerance does not dominate
-    print(r)
+    # print(r)
     circle_mask = operations[bool(fill)][bool(clear)](
         (grid_x-cx)**2 + (grid_y-cy)**2, r**2, tolerance)
-    # Apply anti-aliasing using Gaussian blur
-    # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
-    vals = (val,) if not isinstance(val,bool) else (val,not val)
-    # Threshold to create a binary image (0 or 1)
-    pixelated_circle = circle_mask ==True# np.where(circle_mask == True, *vals)
+    
+    pixelated_circle = circle_mask
 
     return pixelated_circle
 
@@ -153,22 +150,22 @@ def rectangle(x0:np.float64, y0:np.float64, x1:np.float64, y1:np.float64, dx:flo
     
     if fill:
         
-        print([y0,y1,x0,x1])
+        # print([y0,y1,x0,x1])
         y0_ceil,y1_ceil,x0_ceil,x1_ceil =[int(np.ceil(i)) for i in [y0,y1,x0,x1]]
         y0_floor,y1_floor,x0_floor,x1_floor=[int(np.floor(i)) for i in [y0,y1,x0,x1]]
         mul_mask[y0_ceil:y1_ceil, x0_ceil:x1_ceil] = 0 if clear else 1
-        print([y0_ceil,y1_ceil,x0_ceil,x1_ceil])
-        print([y0_floor,y1_floor,x0_floor,x1_floor])
+        # print([y0_ceil,y1_ceil,x0_ceil,x1_ceil])
+        # print([y0_floor,y1_floor,x0_floor,x1_floor])
         
         sets_masks[1][y0_floor, x0_ceil:x1_floor+1] = np.abs(y0_floor-y0)
         sets_masks[1][y1_ceil, x0_ceil:x1_floor+1] = np.abs(y1_ceil-y1)
         sets_masks[1][y0_ceil:y1_floor+1, x0_floor] = np.abs(x0_floor-x0)
         sets_masks[1][y0_ceil:y1_floor+1, x1_ceil] = np.abs(x1_ceil-x1)
         
-        print(np.abs(y0_floor-y0))
-        print(np.abs(y1_ceil-y1))
-        print(np.abs(x0_floor-x0))
-        print(np.abs(x1_ceil-x1))
+        # print(np.abs(y0_floor-y0))
+        # print(np.abs(y1_ceil-y1))
+        # print(np.abs(x0_floor-x0))
+        # print(np.abs(x1_ceil-x1))
         
         
         sets_masks[1][y0_floor, x0_floor] = np.sqrt(((x0_floor-x0)**2+(y0_floor-y0)**2)/2)
@@ -185,7 +182,7 @@ def rectangle(x0:np.float64, y0:np.float64, x1:np.float64, y1:np.float64, dx:flo
             [i for i in (x0, x1) if i is not None])] = 0 if clear else 1
     
     sets_masks[0]= sets_masks[0]==True
-    print(sets_masks[0],sets_masks[1],sep='\n')
+    # print(sets_masks[0],sets_masks[1],sep='\n')
     if Grid is not None:
         if (grid_class != tuple):
             out = Grid*mul_mask

@@ -1,45 +1,31 @@
-import typing
-from ...utils import geometry
 import numpy as np
+from ...utils.geometry import rectangle,rectangle_w_h
 
-class GeometryFactory(typing.Callable):
-    def __int__(self,seperation, plate_seperation, V, cx, cy:'float|str'='centre'):
-        self.grnd1:'str' = None
-        self.V_plus: 'str' = None
-        self.grnd2:'str' = None
-        self.V_negative: 'str' = None
+def geometryFactory(val=1.0, pad_w=30, pad_h=30, gap=40, relative=False):
+    Gridder = None
     
-    def __call__(self,*args,**kwargs):pass
-
-def highSpeedFactory(
-    Grid:np.ndarray[np.float64],
-    width,
-    height,
-    cx:'float|str'='center',
-    cy:'float|str'='center',
-    spacings:'float'=None,
-    padding: "np.ndarray" = None,
-    dx:float = 1.0,
-    dy:float = 1.0,
-):
-    gheight:float
-    gwidth:float
+    def powerGeometry(Grid: np.ndarray, overlay=None, retoverlay=False, *args, **kwargs):
+        nonlocal Gridder
+        
+        # Set the top and bottom ground lines
+        Grid[:2, :] = 0  # Top GND line
+        Grid[-2:, :] = 0  # Bottom GND line
+        
+        # Define the positions of the voltage pads
+        center_x = Grid.shape[1] / 2
+        center_y = Grid.shape[0] / 2
+        pad_positions = [
+            (center_x - gap, center_y,0),  # GND Pad
+            (center_x - gap / 3, center_y,val),  # +V Pad
+            (center_x + gap / 3, center_y,-val),  # -V Pad
+            (center_x + gap, center_y,0)  # GND Pad
+        ]
+        
+        # Create the voltage pads
+        for (px, py,vv) in pad_positions:
+            print(px,py,vv)
+            Grid = rectangle_w_h(px, py, pad_w, pad_h, fill=True, clear=True, Grid=Grid,val=vv)
+            
+        return Grid
     
-    gheight,gwidth=np.array(Grid.shape,dtype=np.float64,copy=True,order='C')*(dy,dx)
-    if height>gheight or width>gwidth:
-        raise ValueError('Cannot have the width greater than the established width')
-    width/2
-    geometry.rectangle_w_h()
-    for i in range(4):pass
-        
-        
-
-
-
-if __name__ == "__main__":
-    EGrid = np.ones((500,500))
-    EGrid=bounds(EGrid,40,40,90,5,100,'centre',True,0,0,3)
-    plt.figure(figsize=(15,15))
-    plt.imshow(EGrid)
-    plt.colorbar()
-    plt.show()
+    return powerGeometry

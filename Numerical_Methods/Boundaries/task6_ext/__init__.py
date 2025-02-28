@@ -27,7 +27,7 @@ class Task6(Task):
         
         # Display the grid as an image
         self._Image = self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
-        self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
+        # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
         self.axes.set_title('Electrostatic Potential')
 
     def _show_Efield(self):
@@ -62,7 +62,7 @@ class Task6(Task):
         if self._Image:
             self._Image.remove()
         self._Image = self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
-        self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
+        # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _cleanup(self):
         """Remove all artists from the axes."""

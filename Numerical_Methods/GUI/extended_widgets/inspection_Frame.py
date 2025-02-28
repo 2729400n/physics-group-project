@@ -21,6 +21,8 @@ from queue import Empty,Full,Queue,SimpleQueue
 from tkinter.filedialog import SaveAs,SaveFileDialog,asksaveasfile,asksaveasfilename
 from ...utils.nfile_io.extensions import numpy_io
 
+import os
+import signal
 # for semmantic porpuses
 class EventFullNavigationToolbar2Tk(NavigationToolbar2Tk):
     def zoom(self, *args):
@@ -127,7 +129,7 @@ class InspectFrame(Frame):
         self.Ys = np.arange(0,self.Grid_obj.shape[0]*self.dy,self.dy)
         self.zoomedXs = self.Xs
         self.zoomedYs = self.Ys
-        print(len(self.Xs),Grid_obj.shape[1])
+        
         mainframe=self.mainframe = Frame(self)
         plot_frame=self.plot_frame = Frame(mainframe)
         button_frame = self.button_frame = Frame(mainframe)
@@ -164,8 +166,12 @@ class InspectFrame(Frame):
         toolbar.bind('<<Arrow-Back>>',self.select_Smallgrid,'+')
         toolbar.bind('<<Home-Clicked>>',self.select_Smallgrid,'+')
         
-        self.calculatePolyNomialButton = Button(self,text="Polynomial Interpolate",command=self.calculatePolyNomial)
+        self.calculatePolyNomialButton = Button(button_frame,text="Polynomial Interpolate",command=self.calculatePolyNomial)
         self.calculatePolyNomialButton.pack()
+        
+        
+        self.calculateLaplacian = Button(button_frame,text="Calulate Laplacian",command=self.findLaplacian)
+        self.calculateLaplacian.pack()
         
         button_frame.grid(column=0,row=0)
         plot_frame.grid(column=1,row=0)
@@ -323,8 +329,33 @@ class InspectFrame(Frame):
             case _ :
                 self.jobRunning=False
         
+    def findLaplacian(self):
+        smdiag= simple_diag.SimpleDialog(self,text="Would you like to wrap the sides",
+                                 buttons=["No","Only_X","Only_Y","Both"],default=0,cancel=0,title="Wrapping")
+        opt =smdiag.go()
+        match opt:
+            case 0:
+                lastfield = (False,'none')
+            case 1:
+                lastfield = (True,'x')
+            case 2:
+                lastfield = (True,'y')
+            case 3:
+                lastfield = (True,'both')
+        error,abserr=errors.laplaceify(grid=self.Grid_obj,dx=self.dx,dy=self.dy,wrap=lastfield[0],wrap_direction=lastfield[1])
         
+        absroot = tk.Toplevel(self)
+        errroot = tk.Toplevel(self)
+        
+        
+        absframe=InspectFrame(absroot,abserr,self.dx,self.dy,title='ABS residuals Laplacian',xlabel='X label',ylabel='Y label')
+        
+        absframe.pack()
+        
+        errframe=InspectFrame(errroot,error,self.dx,self.dy,title='ABS residuals Laplacian',xlabel='X label',ylabel='Y label')
+        errframe.pack()
 
+                    
 
 if __name__ == '__main__':
     

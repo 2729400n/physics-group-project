@@ -1,11 +1,16 @@
+from typing import Literal
 import numpy as np
 
 from .interpolation_stuff import functionMaker,InterpolateGrid_fastest
 
-def laplaceify(grid:'np.ndarray[np.ndarray[np.float64]]',dx,dy,wrap=False):
+def laplaceify(grid:'np.ndarray[np.ndarray[np.float64]]',dx,dy,wrap=False,wrap_direction:Literal['x','y','both','none']='none'):
     errors = np.zeros_like(grid)
     dphi_dx_2 = ((grid[:,:-2] - 2*grid[:,1:-1]+ grid[:,2:])/(dx**2))[1:-1]
     dphi_dy_2 = ((grid[:-2,:] - 2*grid[1:-1,:]+ grid[2:,:])/(dy**2))[:,1:-1]
+    
+    if wrap:
+        pass
+        
     residuals =dphi_dx_2+dphi_dy_2
     abs_residuals = np.abs(residuals)
     

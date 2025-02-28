@@ -2,7 +2,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.quiver import Quiver
 import numpy as np
 from .boundary import geometryFactory as Boundary
-from ...Solvers import findUandV, laplace_ode_solver_continue
+from ...Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from ..task import Task
@@ -50,7 +50,7 @@ class Task1(Task):
 
         axes = self.axes
         self._Image = axes.imshow(grid, cmap='viridis')
-        self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
+        # self._Image.set_clim(vmin=np.min(0), vmax=np.max(self.grid))  # Set color limits
         axes.set_title('Electrostatic Potential')
 
         # Update the figure canvas to reflect changes
@@ -62,7 +62,7 @@ class Task1(Task):
             return
         self.axes.clear()
         self._Image = self.axes.imshow(self.grid, cmap='viridis')
-        self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
+        # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _show_Efield(self):
         '''Display the electric field as quivers.'''
@@ -82,8 +82,11 @@ class Task1(Task):
         Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition)
         
         # Remove the previous colorbar and reset it
-        if self._cbar:
-            self._cbar.remove()
+        if self._cbar is not None:
+            try:
+                self._cbar.remove()
+            except:
+                pass
 
         self.axes.imshow(self.grid, cmap='viridis')
         self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
@@ -93,11 +96,20 @@ class Task1(Task):
     def _cleanup(self):
         '''Remove all artists from the axes and reset class attributes.'''
         if self._Image:
-            self._Image.remove()
-        if self._quivers:
-            self._quivers.remove()
-        if self._cbar:
-            self._cbar.remove()
+            try:
+                self._Image.remove()
+            except:
+                pass
+        if self._quivers is not None:
+            try:
+                self._quivers.remove()
+            except:
+                pass
+        if self._cbar is not None:
+            try:
+                self._cbar.remove()
+            except:
+                pass
 
         self._Image = None
         self._quivers = None

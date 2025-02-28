@@ -30,7 +30,7 @@ def laplace_ode_solver(size: 'tuple[int,int]|np.ndarray[int,int]',
     wrap: bool = False,
     wrap_direction: Literal["both", "x", "y", "none"] = "none",
     rel_tol: float = 1e-6,
-    abs_tol: float = 1e-9,
+    abs_tol: float = 1e-12,
     max_iterations: int = 10_000):
     # TODO: Fix docstrings adding more detail to params
     """Solves the Laplace equation using a finite difference scheme.
@@ -205,7 +205,7 @@ def laplace_ode_solver_continue(
     print(Xs.shape[0], Ys.shape[0])
     
     i = 0
-    while i < max_iterations:
+    while True if ((max_iterations == -1) or (max_iterations  is None)) else i < max_iterations:
         ForwardHSpace_A2f = Frames[i % 2, 1:-1, 2:]
         BackwardHSpace_A2f = Frames[i % 2, 1:-1, :-2]
         ForwardVSpace_A2f = Frames[i % 2, 2:, 1:-1]
@@ -240,28 +240,30 @@ def laplace_ode_solver_continue(
         
         Frames[(i+1) % 2] = fixedConditions(Frames[(i+1) % 2])
         
-        indexes = Frames[(i+1) % 2] != 0
-        diff = np.abs((Frames[0][indexes] - Frames[1][indexes]) / Frames[(i+1) % 2][indexes])
         
         # Convergence check
         absdiff = np.abs((Frames[i % 2] - Frames[(i+1) % 2]))
-        indexes = Frames[(i+1) % 2] > np.spacing(absdiff) 
+        indexes = np.abs(Frames[(i+1) % 2]) > 2*np.spacing(absdiff) 
         reldiff = np.abs(absdiff[indexes] / Frames[(i+1) % 2][indexes])
         
         at_equilibrium = False
         if np.size(reldiff) > 0:
             max_diff = np.max(reldiff)
+            
             if max_diff < rel_tol:
+                print('rel_max_Diff',max_diff)
                 at_equilibrium = True
         else:
             if np.max(absdiff) < abs_tol:
+                print('abs_max_Diff',np.max(absdiff))
                 at_equilibrium = True
-                
-        if at_equilibrium:
+        
+        if at_equilibrium and i>1:
+            print('Reached equilibrium')
             break
         
         i += 1
-    
+    print(f'finished {i} evlas')
     return Ys, Xs, Frames[i % 2]
 
 
@@ -270,7 +272,7 @@ def laplace_ode_solver_step(
     fixedConditions: Callable = doNothing,
     startingShape: Callable = doNothing,
     resolution: tuple[float, float] = (1.0, 1.0),
-    stencil: Literal[5, 9] = 9,
+    stencil: Literal[5, 9] = 5,
     gamma: float = 0.0,
     wrap: bool = False,
     wrap_direction: Literal["both", "x", "y", "none"] = "none",

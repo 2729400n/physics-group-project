@@ -99,7 +99,10 @@ class Task(typing.Protocol):
             self._Image = None
             return
         if self._Image:
-            self._Image.remove()
+            try:
+                self._Image.remove()
+            except:
+                pass
         self._Image = self.axes.imshow(img_data)
 
     @property
@@ -109,8 +112,11 @@ class Task(typing.Protocol):
     @cbar.setter
     def cbar(self, value: Colorbar):
         """Sets a new colorbar and removes the previous one if it exists."""
-        if self._cbar:
-            self._cbar.remove()
+        if self._cbar is not None:
+            try:
+                self._cbar.remove()
+            except:
+                pass
         self._cbar = value
 
     @property
@@ -120,8 +126,11 @@ class Task(typing.Protocol):
     @quivers.setter
     def quivers(self, value: Quiver):
         """Sets new quivers and removes the previous ones if they exist."""
-        if self._quivers:
-            self._quivers.remove()
+        if self._quivers is not None:
+            try:
+                self._quivers.remove()
+            except:
+                pass
         self._quivers = value
 
     def update_plot(self):
@@ -137,3 +146,30 @@ class Task(typing.Protocol):
         
         for label in self.axes.get_xticklabels() + self.axes.get_yticklabels():
             label.set_fontsize(fontsize)
+    
+    
+    def save_grid(self):
+        '''Save the grid to a file.'''
+        if self.grid is None:
+            return (None, None)
+        outfile = io.BytesIO()
+        np.save(outfile, self.grid, allow_pickle=True)
+        try:
+            outfile.flush()
+        except:
+            pass
+        outfile.seek(0)
+        return 'Task1_grid.npy', outfile.read()
+
+    def save_figure(self):
+        '''Save the current figure to a file.'''
+        if self.figure is None:
+            return
+        outfile = io.BytesIO()
+        self.figure.savefig(outfile, format='png')
+        try:
+            outfile.flush()
+        except:
+            pass
+        outfile.seek(0)
+        return 'Task1_figure.png', outfile.read()
