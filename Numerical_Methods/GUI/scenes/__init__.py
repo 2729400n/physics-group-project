@@ -67,4 +67,5 @@ if __name__ == '__main__':
     import pprint
     pprint.pprint(scenes)
 else:
-    load_gui_scenes()
+    # load_gui_scenes()
+    pass
