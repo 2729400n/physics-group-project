@@ -43,7 +43,8 @@ class Task(typing.Protocol):
         self._quivers: Quiver = None
         self.exposed_methods = [self.setup, self.run, self._show_Efield,self.adjust_plot]
         self.savables: 'dict[str,typing.Callable[[],tuple[str,bytes]]]' = {'Grid': self.save_grid, 'Figure': self.save_figure}
-        
+        self.Efield = None
+
 
     def setup(self, height: int, width: int) -> None: ...
     
@@ -60,8 +61,7 @@ class Task(typing.Protocol):
 
     def _find_Efield(self) ->None:
         '''Display the electric field as quivers.'''
-        u_v=self.Efield = findUandV(grid=self.grid)
-        axes = self.axes
+        self.Efield = findUandV(grid=self.grid)
         
         
         # Remove previous quivers if they exist

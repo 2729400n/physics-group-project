@@ -21,12 +21,13 @@ class Task4(Task):
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
         
-        print(x0, x1, dx)
-        Xs = np.arange(x0, x1+dx, dx)
-        Ys = np.arange(y0, y1+dy, dy)
-
+        # print(x0, x1, dx)
+        Xs=self.Xs = np.arange(x0, x1+dx, dx)
+        Ys=self.Ys = np.arange(y0, y1+dy, dy)
+        self.dx=dx
+        self.dy=dy
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
-        self.boundaryCondition=Boundary(radius=a,cx=cx,cy=cy,V=v,seperation=s,center=centre,plate_seperation=l,NNCount=nncount,half_plate_sep=max_spacing)
+        self.boundaryCondition=Boundary(radius=a,cx=cx,cy=cy,V=v,seperation=s,center=centre,plate_seperation=l,NNCount=nncount,half_plate_sep=max_spacing,dx=dx,dy=dy)
         self.grid =grid=self.boundaryCondition(Grid=grid)
         axes = self.axes
         self.Image=axes.imshow(grid)
@@ -35,10 +36,11 @@ class Task4(Task):
             self.cbar = self.figure.colorbar(self.Image)
         
     def _show_Efield(self):
-        u_v = self.Efield*25
+        self._find_Efield()
+        u_v = self.Efield
         axes = self.axes
-        Xs, Ys = self.Xs,self.Ys
-        axes.quiver(Xs, Ys, u_v[:,:,0], u_v[:,:,1], color='b', scale=0.1, scale_units='xy') # Adjust scale and color
+        Ys,Xs = np.meshgrid(self.Ys,self.Xs)
+        axes.quiver(Xs[::5,::5], Ys[::5,::5], u_v[::5,::5,0], u_v[::5,::5,1], color='b', scale=0.1, scale_units='xy') # Adjust scale and color
         
     def __call__(self, *args, **kwargs):
         pass
