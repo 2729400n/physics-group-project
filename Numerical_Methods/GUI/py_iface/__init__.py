@@ -10,7 +10,7 @@ import tkinter.ttk as ttk
 import tkinter.constants as tkconst
 import tkinter.simpledialog as diag
 import tkinter.messagebox as msgbox
-
+from ...utils.naming import slugify_tk
 import numpy as np
 from .. import extended_widgets
 
@@ -160,9 +160,11 @@ def gui_call_wrapper(*positional_types,**kwargs_types):
     return partial_decorator
 
 fieldToWidget = {}
-def  add_Field_Var(master:'tk.Widget', field_name, field_type,field_value=None):
+def  add_Field_Var(master:'tk.Widget', field_name, field_type,field_value=None,field_label=None):
     varname =f'val_{field_name}'
-    innerFrame =tk.LabelFrame(master,text=field_name)
+    if field_label is None:
+        field_label=field_name
+    innerFrame =tk.LabelFrame(master,text=field_label)
     if(field_type==bool):
         entry= tk.BooleanVar(master, value=field_value, name=varname)
         entry_field = ttk.Checkbutton(innerFrame,name=field_name,text=field_name, variable=entry)
@@ -189,6 +191,7 @@ def  add_Field_Var(master:'tk.Widget', field_name, field_type,field_value=None):
 # Calling Function that begin call
 def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
     form = ev.widget.master
+    
     # print(args,kwargs)
     for i in kwargs:
         
@@ -215,11 +218,13 @@ def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
                             arg=str(arg)
             # print('callFunc before Storing:',arg,type(arg))
             kwargs[i]=arg
-    # print(kwargs)
-    returnValue=func(**kwargs)
-    # print(func)
-    if returnValue is not None:
-        msgbox.showinfo(title=func.__name__,message=f"{returnValue}")
+    try:
+        returnValue=func(**kwargs)
+        # print(func)
+        if returnValue is not None:
+            msgbox.showinfo(title=func.__name__,message=f"{returnValue}")
+    except Exception as ex:
+        msgbox.showerror(title=func.__name__,message=f"{ex}")
     return None
 
 def getDefault(arg,func):
@@ -246,7 +251,7 @@ def makeFunctionCallable(func:'function',master=None,classType=False,instance=No
         defarg = getDefault(i,func)
         if defarg[1] == inspect._empty:
             defarg = (defarg[0],None)
-        store,field, iframe =add_Field_Var(wmain,i,argMapping[i],defarg[1] if defarg[0]==ArgsState.ISARG else None)
+        store,field, iframe =add_Field_Var(master=wmain,field_name=slugify_tk(i),field_type=argMapping[i],field_value=defarg[1] if defarg[0]==ArgsState.ISARG else None,field_label=i)
         field.grid(sticky='w')
         iframe.grid(sticky='w')
         stores.update(**{i:store})

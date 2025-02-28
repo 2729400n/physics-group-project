@@ -199,7 +199,7 @@ def laplace_ode_solver_continue(
         diagamult = 0
         adjacentmult = 1 / (2.0 * (a + 1))
     else:
-        raise ValueError(f"Cannot use a {stencil}-point stencil")
+        raise ValueError(f"Cannot use a {stencil}-point stencil. Only offer 9 and 5 point stencils")
     
     print("Multipliers=", (adjacentmult, diagamult))
     print(Xs.shape[0], Ys.shape[0])
