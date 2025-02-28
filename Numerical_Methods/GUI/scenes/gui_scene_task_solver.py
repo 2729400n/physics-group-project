@@ -74,24 +74,25 @@ class TasksFrame(tk.Frame):
         right_panel = ttk.Frame(self)
         right_panel.pack(fill=tk.BOTH, expand=True, side=tk.RIGHT, padx=5, pady=5)
 
-        self.create_task_control_panel(right_panel)
         self.create_canvas_panel(right_panel)
+        self.create_task_control_panel(right_panel)
+        
 
     def create_task_control_panel(self, parent):
         """Create scrollable task control frame."""
         frame = ttk.Frame(parent)
-        frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5,side=tk.TOP)
 
         self.canvasEntry = tk.Canvas(frame)
         self.canvasEntry.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         x_scroll = ttk.Scrollbar(frame, orient="horizontal", command=self.canvasEntry.xview)
         y_scroll = ttk.Scrollbar(frame, orient="vertical", command=self.canvasEntry.yview)
-        x_scroll.pack(fill=tk.X, side=tk.BOTTOM)
-        y_scroll.pack(fill=tk.Y, side=tk.RIGHT)
+        x_scroll.pack(fill=tk.X, side=tk.BOTTOM,expand=False,before=self.canvasEntry)
+        y_scroll.pack(fill=tk.Y, side=tk.RIGHT,before=self.canvasEntry)
 
         self.canvasEntry.config(xscrollcommand=x_scroll.set, yscrollcommand=y_scroll.set)
-
+        
         self.inner_frame = ttk.Frame(self.canvasEntry)
         self.WindowID = self.canvasEntry.create_window(0, 0, anchor=tk.NW, window=self.inner_frame)
 
@@ -100,7 +101,7 @@ class TasksFrame(tk.Frame):
     def create_canvas_panel(self, parent):
         """Create the panel for displaying task graphs."""
         canvas_frame = ttk.Frame(parent)
-        canvas_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        canvas_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5,side=tk.BOTTOM)
 
         self._display = mb_tkagg.FigureCanvasTkAgg(self._heatmap, master=canvas_frame)
         self._canvas = self._display.get_tk_widget()
