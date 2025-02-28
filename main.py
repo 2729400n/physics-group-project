@@ -1,87 +1,39 @@
-import argparse
-import curses
-import sys
+import time
+import Numerical_Methods.GUI as gui
+import test_Numerical.check_user_approval as check_user_approval
+import Numerical_Methods.utils.realtime as rtLoader
+import sys.
+
+class TestGUI:
+    """A Class used for testing implementation of the GUI."""
+
+    def test_scenes(self):
+        """Test if the user approval function works correctly."""
+        assert check_user_approval.didItWorkAsIntended() == 0
+
+    def test_show(self):
+        """Start the GUI for testing."""
+        gui.start()
 
 
-
-Options = []
-
-
-def add_opt(func):
-    if isinstance(func, str):
-        func_name = func
-
-        def add_named(definite_func: "function"):
-            nonlocal func_name
-            definite_func.__name__ = func_name
-            Options += [definite_func]
-            return definite_func
-
-        return add_named
-    else:
-        global Options
-        Options += [func]
-        return func
-
-
-@add_opt
-def Open_GUI():
-    import Numerical_Methods.GUI as gui
-    gui.start()
-    return
-
-
-
-
-BANNER = r"""
-##########################################################
-#                                                        #
-#  Greeting User.                                        #
-#  Welcome to a Electrostatic boundary condition Solver  #
-#                                                        #
-##########################################################
-"""
-
-MENU = r''''''
-def makeMenu():
-    global MENU
-    MENUBUILDER = ["####"]
-    max_str = 0
-    options_len = len(Options)
-    for i in range(options_len):
-        unit = "# " + f"{i+1}. {Options[i].__name__}"
-        MENUBUILDER += [unit]
-        unit_len = len(unit)
-        if unit_len > max_str:
-            max_str = unit_len
-    MENUBUILDER += [MENUBUILDER[0]]
-    MENU = "\r\n".join(
-        [
-            (
-                f"{MENUBUILDER[i]}{' ' if (i!=0) and (i!=max(options_len+1,0)) else '#'}"
-                + "#" * (max(max_str - len(MENUBUILDER[i]), 0)+1)
-            )
-            for i in range(options_len + 2)
-        ]
+if __name__ == "__main__":
+    enable_rtloader = check_user_approval.wouldYouLike(
+        "Would you like to enable RTLoader?\nIt allows for real-time reloading of Python modules!"
     )
-    return MENU
 
+    if enable_rtloader:
+        rtLoader.init_realtime_module()
+        rtLoader.start_realtime_module()
 
-def showMenu():
-    makeMenu()
-    print(BANNER)
-    print(MENU)#
-    
-
-
-
-cliParser = argparse.ArgumentParser(sys.argv[0])
-
-cliParser.add_argument('--gui','--display',action='store_true',help="Wether to enter GUI Mode or not.",dest='gui')
-flags = cliParser.parse_args(sys.argv[1:])
-
-if flags.gui:
-    Open_GUI()
-else:
-    showMenu()
-
+    try:
+        gui.start()
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt detected. Exiting gracefully.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        if enable_rtloader:
+            rtLoader.stop_realtime_module()
+        raise
+    finally:
+        
+        exit(0)
