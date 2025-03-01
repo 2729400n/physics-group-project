@@ -50,11 +50,9 @@ def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, va
     # First solve for a qudrant the apply rotations
     operations = [[lambda x, y, z:np.abs(
         x-y) <= z]*2, [lambda x, y, z:x <= y, lambda x, y, z:x >= y]]
-    grid_class = type(Grid)
-
     
 
-    if type(Grid) == tuple:
+    if isinstance(Grid,tuple):
         Grid = np.full(Grid, 1)
 
     # if we inplace into a grid
