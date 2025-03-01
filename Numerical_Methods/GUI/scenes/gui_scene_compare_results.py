@@ -15,7 +15,7 @@ from ...utils.nfile_io import walkDirectory
 from ...utils.nfile_io.extensions import numpy_io, image_io
 from ...Solvers import errors
 
-
+# print('Compare Res',__name__)
 class FTYPES(Enum):
     DIRECTORY = 'DIRECTORY'
     NPZ = 'Numpy Package File'
@@ -33,6 +33,7 @@ class MagicClass(typing.Collection):
             self.top-=1
         self.side=not self.side
         return ret
+    
     def __next__(self):
         return self.__getitem__()
     def __contains__(self, x):
@@ -112,25 +113,30 @@ def scale_to_fit(a1,a2,copya1=True,copya2=True):
                         if k!=i: 
                             newindex+=[slice(None,None),None]
                         else:
-                            newindex+=[(tuple(f1magic[int(j//2)] for j in range(2*finalslice1[i]))+tuple(range(f1.shape[k]))[finalslice1[i]:]),None]
-                
+                            newindex+=[(tuple(int(j//2) for j in range(2*int(np.ceil(finalslice1[i]/2))))+
+                                        tuple(range(f1.shape[k]))[int(np.ceil(finalslice1[i]/2)):((int(finalslice1[i]//2)//2)+1)]+
+                                        tuple(f1.shape[i]-(int(j//2)+1) for j in range(2*int(finalslice1[i]//2)))),None]
+                print('f1',newindex)
                 f1 = f1[*newindex].reshape(tuple(f1.shape[z] if z != i else (f1.shape[i]+finalslice1[i]) for z in range(len(f1.shape))))
         
         del f1magic
+        
         f2magic = MagicClass()
         
         for i in range(len(finalslice2)):
             if finalslice2[i] !=0:
                 newindex=[]
+                
                 for z in range(2*len(f2.shape)):
-                    
                     if (z%2)==0:
                         k=int(z//2)
                         if k!=i: 
                             newindex+=[slice(None,None),None]
                         else:
-                            newindex+=[(tuple(int(j//2) for j in range(2*int(np.ceil(finalslice2[i]/2))))+tuple(range(f2.shape[k]))[int(np.ceil(finalslice2[i]/2)):(int(finalslice2[i]//2)//2)] + tuple(-int(j//2) for j in range(2*int(finalslice2[i]//2)))),None]
-                
+                            newindex+=[(tuple(int(j//2) for j in range(2*int(np.ceil(finalslice2[i]/2))))+
+                                        tuple(range(f2.shape[k]))[int(np.ceil(finalslice2[i]/2)):((int(finalslice2[i]//2)//2)+1)]+
+                                        tuple(f2.shape[i]-(int(j//2)+1) for j in range(2*int(finalslice2[i]//2)))),None]
+                print('f2',newindex)
                 f2 = f2[*newindex].reshape(tuple(f2.shape[z] if z != i else (f2.shape[i]+finalslice2[i]) for z in range(len(f2.shape))))
         
         del f2magic

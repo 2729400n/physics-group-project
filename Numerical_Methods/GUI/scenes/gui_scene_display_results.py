@@ -20,6 +20,10 @@ import tkinter.filedialog as fdiag
 import tkinter.messagebox as msgbox
 from ..extended_widgets import InspectFrame
 
+
+
+# print('Disp Res',__name__)
+
 class FTYPES(Enum):
     DIRECTORY = 'DIRECTORY'
     NPZ = 'Numpy Package File'

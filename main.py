@@ -1,21 +1,23 @@
-import time
-import Numerical_Methods.GUI as gui
-import Numerical_Methods.utils.check_user_approval as check_user_approval
-import Numerical_Methods.utils.realtime as rtLoader
-import Numerical_Methods.utils.cleancaches as cachecleaner
+import tkinter.simpledialog as diag
+import tkinter.messagebox as msg
 import sys
-import Numerical_Methods
 import pathlib
-class TestGUI:
-    """A Class used for testing implementation of the GUI."""
+import time
 
-    def test_scenes(self):
-        """Test if the user approval function works correctly."""
-        assert check_user_approval.didItWorkAsIntended() == 0
+def didItWorkAsIntendedScale():
+    return diag.askinteger(title='Satisfaction Prompt',prompt='On a scale of 0 to 10\n how well did the GUI work as intended?',initialvalue=5,minvalue=0,maxvalue=10,parent=None)
 
-    def test_show(self):
-        """Start the GUI for testing."""
-        gui.start()
+def didItWorkAsIntended():
+    dialog = diag.SimpleDialog(None,"Did it work as intended",["Yes","No"],0,1,"Did it work?")
+    opt = dialog.go()
+    return opt
+
+def wouldYouLike(msg_:str="Would you like this",title="Physics Solver",):
+    try:
+        opt= msg.askyesno(title,msg_)
+    except:
+        opt = False
+    return opt
 
 
 if __name__ == "__main__":
@@ -31,7 +33,7 @@ if __name__ == "__main__":
     #         cachecleaner.clearPythonCaches(numerical_methods_path.parent)
             
     
-    caching = check_user_approval.wouldYouLike(
+    caching = wouldYouLike(
         "Would you like to enable Python caching? It makes for speedy re runs!"
     )
     
@@ -41,10 +43,16 @@ if __name__ == "__main__":
         sys.dont_write_bytecode=True
     
     
-    enable_rtloader = check_user_approval.wouldYouLike(
+    enable_rtloader = wouldYouLike(
         "Would you like to enable RTLoader?\nIt allows for real-time reloading of Python modules!"
     )
     
+    
+    import Numerical_Methods.GUI as gui
+    import Numerical_Methods.utils.check_user_approval as check_user_approval
+    import Numerical_Methods.utils.realtime as rtLoader
+    import Numerical_Methods.utils.cleancaches as cachecleaner
+    import Numerical_Methods
     
 
     if enable_rtloader:

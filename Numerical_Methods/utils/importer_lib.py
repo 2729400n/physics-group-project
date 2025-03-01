@@ -32,6 +32,7 @@ def import_from_path(path: str,mod_name:str=None,is_pacakge:bool=False):
     module_.__file__ = modorigin
     
     importlib.machinery.SourcelessFileLoader.exec_module(module_.__loader__,module_)
+    sys.modules[module_.__name__]= module_
     
     return module_
 
