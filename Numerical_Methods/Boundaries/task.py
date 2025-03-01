@@ -7,8 +7,8 @@ from matplotlib.image import AxesImage
 from matplotlib.quiver import Quiver
 import numpy as np
 from ..Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
-
-    
+from ..utils.naming import slugify
+from time import strftime
 tasks:'set[Task]' = set()
 
     
@@ -42,8 +42,10 @@ class Task(typing.Protocol):
         self._cbar: Colorbar = None
         self._quivers: Quiver = None
         self.exposed_methods = [self.setup, self.run, self._show_Efield,self.adjust_plot]
-        self.savables: 'dict[str,typing.Callable[[],tuple[str,bytes]]]' = {'Grid': self.save_grid, 'Figure': self.save_figure}
+        self.savables: 'dict[str,typing.Callable[[],tuple[str,bytes]]]' = {'Grid': self.save_grid, 'Figure': self.save_figure,'ALL_DATA':self.save_all_numerical}
         self.Efield = None
+        self.all_data =None
+        
 
 
     def setup(self, height: int, width: int) -> None: ...
@@ -190,3 +192,21 @@ class Task(typing.Protocol):
             pass
         outfile.seek(0)
         return 'Task1_figure.png', outfile.read()
+    
+    def _load_data(self):
+        self.all_data = {'potential':self.grid,'e_field':self.Efield}
+        return
+    
+    def save_all_numerical(self):
+        '''Save the grid to a file.'''
+        for i in self.all_data:
+            if i is None:
+                raise 'Cannot save all data if you havent generated it yet'
+        outfile = io.BytesIO()
+        np.savez(outfile, allow_pickle=True,kwds=self.all_data)
+        try:
+            outfile.flush()
+        except:
+            pass
+        outfile.seek(0)
+        return f'{slugify(self.name)}_{strftime("%Y-%m-%d_%H_%M_%S")}_data.npz', outfile.read()

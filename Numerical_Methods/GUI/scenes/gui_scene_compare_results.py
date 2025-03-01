@@ -285,8 +285,16 @@ class CompareScene(ttk.Frame):
         # Adjust shapes explicitly for each dimension
         
         if f1.shape != f2.shape:
-            wantedShapef1 =[slice(i) for i in f1.shape]
-            wantedShapef2 =[slice(i) for i in f1.shape]
+            
+            wantedShapef1=[f1.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f1.ndim)]
+            wantedShapef2=[f2.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f2.ndim)]
+            
+            f1slices =[slice(0,wantedShapef1[i],1) if ((i%2)==0) else None  for i in range(2*f1.ndim)]
+            f2slices =[slice(0,wantedShapef2[i],1) if ((i%2)==0) else None  for i in range(2*f2.ndim)]
+            finalslice1 = [None for i in range(f1.ndim)]
+            finalslice2 = [None for i in range(f1.ndim)]
+            finalshape1 = [i for i in f1.shape]
+            finalshape2 = [i for i in f2.shape]
             for i in range(f1.ndim):
                 if f1.shape[i] == f2.shape[i]:
                     continue
@@ -294,17 +302,33 @@ class CompareScene(ttk.Frame):
                 if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
                     repeats = f2.shape[i] // f1.shape[i]  # Full repeats
                     remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
-                    f1 = np.tile(f1, (repeats + (1 if remainder else 0),) + (1,) * (f1.ndim - i - 1))
-                    wantedShapef1[i]=slice(f2.shape[i])
-                    f1 = f1[*wantedShapef1]  # Trim excess from the end
+                    # wantedShapef1[i*2]=f2.shape[i]
+                    n=(repeats )
+                    wantedShapef1[1+(i*2)] =n
+                    finalshape1[i]=f1.shape[i]*n
+                    finalslice1[i] = slice(0,f1.shape[i]*n,1)
 
                 elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
-                    repeats = f1.shape[i] // f2.shape[i]
-                    remainder = f1.shape[i] % f2.shape[i]
-                    f2 = np.tile(f2, (repeats + (1 if remainder else 0),) + (1,) * (f2.ndim - i - 1))
-                    wantedShapef2[i]=slice(f1.shape[i])
-                    f2 = f2[*wantedShapef2]  # Trim excess from the end
-                print(f'f1.shape={f1.shape}, f2.shape={f2.shape}')
+                    repeats = f1.shape[i] // f2.shape[i]  # Full repeats
+                    remainder = f1.shape[i] % f2.shape[i]  # Leftover elements
+                    # wantedShapef2[i*2]=f1.shape[i]
+                    n =(repeats)
+                    wantedShapef2[1+(i*2)]=n
+                    finalshape2[i]=f2.shape[i]*n
+                    finalslice2[i] = slice(0,remainder,1)
+                    
+            print('f1slices',f1slices)
+            print('f2slices',f2slices)
+            print('wantedShapef1',wantedShapef1)
+            print('wantedShapef2',wantedShapef2)
+            print('finalShape1',finalshape1)
+            print('finalShape1',finalshape1)
+            f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))
+            f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))
+            
+            
+            
+            print(f'f1.shape={f1.shape}, f2.shape={f2.shape}')
         
         zmask =f1==0
         fz = np.zeros_like(f1)
