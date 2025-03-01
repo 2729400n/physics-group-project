@@ -294,10 +294,12 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                 XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), p0=guess,) # maxfev=xymaxfev)
                 XYOptimal = XYOptimal.flatten()
             else:
+                pass
 #                 print('gcd Inchoherent')
                       
     else:
-#         print('determinant',np.linalg.det(XYOptimal))
+        pass
+#        print('determinant',np.linalg.det(XYOptimal))
     XYOptimal = XYOptimal.flatten()
 #     print(XYOptimal)
 #     print('XYCov',XYcov)
