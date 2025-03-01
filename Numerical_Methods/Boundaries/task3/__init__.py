@@ -31,7 +31,7 @@ class Task3(Task):
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
         
-        print(x0, x1, dx)
+        # print(x0, x1, dx)
         Xs = np.arange(x0, x1+dx, dx)
         Ys = np.arange(y0, y1+dy, dy)
 

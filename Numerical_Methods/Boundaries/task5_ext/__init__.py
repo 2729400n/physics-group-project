@@ -23,12 +23,12 @@ class Task5(Task):
         self.exposed_methods = [self.setup,self.run,self._show_Efield,self.extra]
     
     def extra(self):
-        print('Reloaded')
+        # print('Reloaded')
 
     def setup(self, x1: float, y1: float,r1:float,r2:float,cx:float,cy:float,v:float=1.0,x0:float=0.0,y0:float=0.0,dy:float=1.0,dx:float=1.0):
         x0,x1 = (x0,x1) if x0<=x1 else (x1,x0)
         y0,y1 = (y0,y1) if y0<=y1 else (y1,y0)
-        print(x0,x1,dx)
+        # print(x0,x1,dx)
         Xs=np.arange(x0,x1+dx,dx)
         Ys=np.arange(y0,y1+dy,dy)
         
@@ -48,15 +48,15 @@ class Task5(Task):
         self.resdx = dx
         self.resdy = dy
         axes = self.axes
-        print(grid.shape)
+        # print(grid.shape)
         img=self.Image = axes.imshow(grid)
         
         axes.set_title('Electrostatic Potential')
         self.figure.canvas.figure = None
         self.figure.canvas.figure = self.figure
         self.figure.canvas.draw_idle()
-        print(self.grid)
-        print('Reloaded')
+        # print(self.grid)
+        # print('Reloaded')
     
     
     def redraw(self):

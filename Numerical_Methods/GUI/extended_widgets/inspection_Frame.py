@@ -191,13 +191,13 @@ class InspectFrame(Frame):
         self.after(500,self.checkQueue)
         
     def checkQueue(self):
-        print('checkQueue')
+        # print('checkQueue')
         if self.jobRunning:
             return
         try:
             job= self.jobqueue.get_nowait()
             job()
-            print('done')
+            # print('done')
         except :
             pass
         self.after(500,self.checkQueue)
@@ -221,8 +221,8 @@ class InspectFrame(Frame):
         zoomed_data=self.zoomedArea = data[y_start_idx:y_end_idx+1, x_start_idx:x_end_idx+1]
         self.zoomedXs = self.Xs[x_start_idx:x_end_idx+1]
         self.zoomedYs = self.Ys[y_start_idx:y_end_idx+1]
-        print(f"Zoomed indices: X({x_start_idx}:{x_end_idx}), Y({y_start_idx}:{y_end_idx})")
-        print(f"Extracted zoomed array:\n{zoomed_data}")
+        # print(f"Zoomed indices: X({x_start_idx}:{x_end_idx}), Y({y_start_idx}:{y_end_idx})")
+        # print(f"Extracted zoomed array:\n{zoomed_data}")
         
     
     def showAndOfferSavePolyNomial(self,message,**data):
