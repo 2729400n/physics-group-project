@@ -49,8 +49,8 @@ def interpolate_2d(grid: np.ndarray, n: int, m: int):
 def PolYproduct(x, y):
     # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
     return (2 * (x**2) + 2* (x) +1.+8*x**4)*(y**2+2)
-n_ = 8
-m_ = 8
+n_ = 3
+m_ = 3
 Ygrid, Xgrid = np.mgrid[:m_, :n_]
 print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
 input("Press Enter to continue...")
