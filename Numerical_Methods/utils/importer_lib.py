@@ -19,7 +19,7 @@ import sys
 def import_from_path(path: str,mod_name:str=None,is_pacakge:bool=False):
     ldr = importlib.machinery.SourceFileLoader
     path_=pathlib.Path(path)
-    print(path_)
+#     print(path_)
     
     if mod_name is None:
         mod_name=path_.stem

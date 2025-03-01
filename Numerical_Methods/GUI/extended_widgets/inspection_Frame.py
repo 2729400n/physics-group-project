@@ -204,7 +204,7 @@ class InspectFrame(Frame):
         
     
     def select_Smallgrid(self,evt):
-        print('Called')
+#        print('Called')
         xlim=self.ax.get_xlim()
         ylim=self.ax.get_ylim()
         data=self.Grid_obj
@@ -292,7 +292,7 @@ class InspectFrame(Frame):
             leftoverswidth = width%n
             subviews = np.array(np.split(self.Grid_obj[:,:(-leftoverswidth or None)],n,-1))
             subviews_real = np.array(np.split(subviews[:(-leftoversheight or None),:],m,-2))
-            print(subviews_real)
+#            print(subviews_real)
             self
             
             

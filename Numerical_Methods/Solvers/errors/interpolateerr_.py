@@ -35,12 +35,12 @@ def interpolate_2d(grid: np.ndarray, n: int, m: int):
     coeffs, _ = optimist.curve_fit(poly_model, points, values, p0=guess)
     
     condition_number = np.linalg.cond(poly_func(points).reshape(len(points), -1))
-    print(f"Condition number: {condition_number:.2e}")
+#     print(f"Condition number: {condition_number:.2e}")
     
     interpolated_grid = poly_model(points, *coeffs).reshape(grid.shape)
     error = np.abs(grid - interpolated_grid)
     rmse = np.sqrt(np.mean(error**2))
-    print(f"Interpolation RMSE: {rmse:.4e}")
+#     print(f"Interpolation RMSE: {rmse:.4e}")
     
     return interpolated_grid, coeffs,error
 
@@ -60,7 +60,7 @@ print("Grid:\n", grid)
 input('Ready ?')
 interpolated, coeffs,err = interpolate_2d(grid, 3,3)
 
-
+# 
 print('interpolated',interpolated)
 print()
 print('coeefs',coeffs)

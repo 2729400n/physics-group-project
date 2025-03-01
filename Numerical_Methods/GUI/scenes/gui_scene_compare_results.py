@@ -116,7 +116,7 @@ def scale_to_fit(a1,a2,copya1=True,copya2=True):
                             newindex+=[(tuple(int(j//2) for j in range(2*int(np.ceil(finalslice1[i]/2))))+
                                         tuple(range(f1.shape[k]))[int(np.ceil(finalslice1[i]/2)):((int(finalslice1[i]//2)//2)+1)]+
                                         tuple(f1.shape[i]-(int(j//2)+1) for j in range(2*int(finalslice1[i]//2)))),None]
-                print('f1',newindex)
+#                print('f1',newindex)
                 f1 = f1[*newindex].reshape(tuple(f1.shape[z] if z != i else (f1.shape[i]+finalslice1[i]) for z in range(len(f1.shape))))
         
         del f1magic
@@ -136,7 +136,7 @@ def scale_to_fit(a1,a2,copya1=True,copya2=True):
                             newindex+=[(tuple(int(j//2) for j in range(2*int(np.ceil(finalslice2[i]/2))))+
                                         tuple(range(f2.shape[k]))[int(np.ceil(finalslice2[i]/2)):((int(finalslice2[i]//2)//2)+1)]+
                                         tuple(f2.shape[i]-(int(j//2)+1) for j in range(2*int(finalslice2[i]//2)))),None]
-                print('f2',newindex)
+#                 print('f2',newindex)
                 f2 = f2[*newindex].reshape(tuple(f2.shape[z] if z != i else (f2.shape[i]+finalslice2[i]) for z in range(len(f2.shape))))
         
         del f2magic
@@ -186,12 +186,12 @@ def scale_to_scale(a1,a2,copya1=True,copya2=True):
                 finalshape2[i]=f2.shape[i]*n
                 finalslice[i] = slice(0,f1.shape[i],1)
                 
-        print('f1slices',f1slices)
-        print('f2slices',f2slices)
-        print('wantedShapef1',wantedShapef1)
-        print('wantedShapef2',wantedShapef2)
-        print('finalShape1',finalshape1)
-        print('finalShape1',finalshape1)
+#         print('f1slices',f1slices)
+#         print('f2slices',f2slices)
+#         print('wantedShapef1',wantedShapef1)
+#         print('wantedShapef2',wantedShapef2)
+#         print('finalShape1',finalshape1)
+#         print('finalShape1',finalshape1)
         f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))[*finalslice]
         f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))[*finalslice]
         
@@ -316,7 +316,7 @@ class CompareScene(ttk.Frame):
             return
         selection =[]
         for i in cursel:
-            print(i)
+#             print(i)
             item_type=self.treeView.item(i).get('values',['UNK'])[0]
             if 'DIRECTORY'==item_type.upper().strip():
                 continue
@@ -332,7 +332,7 @@ class CompareScene(ttk.Frame):
         self.cursel.extend(selection)
         if len(self.cursel) > 2:
             self.cursel = self.cursel[-2:]
-            print(self.cursel)
+#             print(self.cursel)
             self.treeView.selection_set(self.cursel)
         self.value_text.set(f'Selected files:\n{' and\n'.join([f"{chr(0x2e)*2}/{pathlib.Path(i).name}" for i in self.cursel])}')
 
@@ -498,7 +498,7 @@ class CompareScene(ttk.Frame):
 
     def load_file(self, file_path):
         """Loads a file (npy or npz) into a numpy array."""
-        print(file_path)
+#         print(file_path)
         try:
             file_path = pathlib.Path(file_path)
             if file_path.suffix == '.npy':

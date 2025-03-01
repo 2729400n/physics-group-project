@@ -138,9 +138,9 @@ class ResultsScene(ttk.Frame):
             case '.npz':
                 try:
                     fil = numpy_io.loadArray(selcfile, True)
-                    print(fil)
-                    print(fil.__class__)
-                    print(fil.__dir__())
+#                     print(fil)
+#                    print(fil.__class__)
+#                     print(fil.__dir__())
                 except Exception as e:
                     msgbox.showerror(message=f"{e}", title='Exception')
             case '.png':
