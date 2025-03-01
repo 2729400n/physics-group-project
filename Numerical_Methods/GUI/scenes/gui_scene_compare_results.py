@@ -133,10 +133,8 @@ def scale_to_fit(a1,a2,copya1=True,copya2=True):
                         if k!=i: 
                             newindex+=[slice(None,None),None]
                         else:
-                            newindex+=[(tuple(int(j//2) for j in range(2*int(np.ceil(finalslice2[i]/2))))+
-                                        tuple(range(f2.shape[k]))[int(np.ceil(finalslice2[i]/2)):((int(finalslice2[i]//2)//2)+1)]+
-                                        tuple(f2.shape[i]-(int(j//2)+1) for j in range(2*int(finalslice2[i]//2)))),None]
-#                 print('f2',newindex)
+                            newindex+=[(tuple(int(j//2) for j in range(finalslice2[i]))+tuple(range(f2.shape[k]))[int(finalslice2[i]//2):] + tuple(int(j//2) for j in range(finalslice2[i]))),None]
+                
                 f2 = f2[*newindex].reshape(tuple(f2.shape[z] if z != i else (f2.shape[i]+finalslice2[i]) for z in range(len(f2.shape))))
         
         del f2magic
@@ -186,12 +184,12 @@ def scale_to_scale(a1,a2,copya1=True,copya2=True):
                 finalshape2[i]=f2.shape[i]*n
                 finalslice[i] = slice(0,f1.shape[i],1)
                 
-#         print('f1slices',f1slices)
-#         print('f2slices',f2slices)
-#         print('wantedShapef1',wantedShapef1)
-#         print('wantedShapef2',wantedShapef2)
-#         print('finalShape1',finalshape1)
-#         print('finalShape1',finalshape1)
+        print('f1slices',f1slices)
+        print('f2slices',f2slices)
+        print('wantedShapef1',wantedShapef1)
+        print('wantedShapef2',wantedShapef2)
+        print('finalShape1',finalshape1)
+        print('finalShape1',finalshape1)
         f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))[*finalslice]
         f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))[*finalslice]
         
