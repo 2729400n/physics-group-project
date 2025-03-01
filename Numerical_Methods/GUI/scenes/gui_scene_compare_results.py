@@ -75,11 +75,13 @@ class CompareScene(ttk.Frame):
         # Configure grid for responsiveness
         self.treeFrame = ttk.Frame(self)
         self.treeFrame.pack(fill=tk.BOTH, anchor=tk.NW, expand=True, padx=5, pady=5, side='left')
-
+        self.treeFrame.propagate(True)
+        
         self.ToggleFrame = ttk.Frame(self)
         self.ToggleFrame.pack(fill=tk.BOTH, side='right', anchor=tk.NW, expand=True, padx=5, pady=5, before=self.treeFrame)
         self.ToggleFrame.columnconfigure(0, weight=1)
         self.ToggleFrame.rowconfigure(0, weight=1)
+        self.ToggleFrame.propagate(True)
 
         # Create TreeView for file structure
         self.create_tree()
@@ -90,13 +92,19 @@ class CompareScene(ttk.Frame):
         self.main_frame.rowconfigure(1, weight=1)
 
         # Add additional frames, labels, and functionality (plot, comparison buttons, etc.)
-        self.value_label = ttk.Label(self.main_frame, text="Click on the plot to see value")
+        self.value_text = tk.StringVar(self,"Select Some files to compare them!")
+        self.value_label = ttk.Label(self.main_frame, textvariable=self.value_text)
         self.value_label.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 
         self.plot_frame = ttk.Frame(self.main_frame)
         self.plot_frame.grid(row=1, column=0, sticky="nsew")
         self.plot_frame.columnconfigure(0, weight=1)
         self.plot_frame.rowconfigure(0, weight=1)
+        
+        self.compare_buttons_frame=None
+        self.abs_diff_button = None
+        self.rel_diff_button = None
+        
 
         self.create_plot()
 
@@ -107,8 +115,12 @@ class CompareScene(ttk.Frame):
         self.cursel = []
         self.data = None
         self.Grid_obj: np.ndarray = None
+        self.currGrid:np.ndarray=None
         self.dx = 1.0
         self.dy = 1.0
+        
+        self.first_file_name=None
+        self.second_file_name = None
         self.first_file = None
         self.second_file = None
 
@@ -157,24 +169,45 @@ class CompareScene(ttk.Frame):
             self.cursel = self.cursel[-2:]
             print(self.cursel)
             self.treeView.selection_set(self.cursel)
-
+        self.value_text.set(f'Selected files:\n{' and\n'.join([f"{chr(0x2e)*2}/{pathlib.Path(i).name}" for i in self.cursel])}')
 
         if len(self.cursel) == 2:
             self.show_comparison_buttons()
+        else:
+            self.hide_comparison_buttons()
 
+    def _clear_selection(self):
+        self.hide_comparison_buttons()
+        self.treeView.selection_remove(*self.cursel)
+        self.cursel.clear()
+        self.first_file=None
+        self.second_file=None
+        self.value_text.set("Select Some files to compare them!")
+        
+    def hide_comparison_buttons(self):
+        if self.compare_buttons_frame is not None:
+            if self.compare_buttons_frame.winfo_exists():
+                self.compare_buttons_frame.grid_remove()
+    
     def show_comparison_buttons(self):
         """Displays buttons for comparing the selected files."""
-        self.compare_buttons_frame = ttk.Frame(self.ToggleFrame)
-        self.compare_buttons_frame.grid(row=1, column=0, sticky="nsew")
+        if self.compare_buttons_frame is None:
+            self.compare_buttons_frame = ttk.Frame(self.ToggleFrame)
+            self.compare_buttons_frame.grid(row=2, column=0, sticky="nsew")
 
-        self.abs_diff_button = ttk.Button(self.compare_buttons_frame, text="Compare Absolute Difference",
-                                          command=self.compare_absolute_difference)
-        self.rel_diff_button = ttk.Button(self.compare_buttons_frame, text="Compare Relative Difference",
-                                          command=self.compare_relative_difference)
+            self.abs_diff_button = ttk.Button(self.compare_buttons_frame, text="Compare Absolute Difference",
+                                            command=self.compare_absolute_difference)
+            self.rel_diff_button = ttk.Button(self.compare_buttons_frame, text="Compare Relative Difference",
+                                            command=self.compare_relative_difference)
 
-        self.abs_diff_button.grid(row=0, column=0, padx=5, pady=5)
-        self.rel_diff_button.grid(row=0, column=1, padx=5, pady=5)
+            self.abs_diff_button.grid(row=0, column=0, padx=5, pady=5)
+            self.rel_diff_button.grid(row=0, column=1, padx=5, pady=5)
+        else:
+            self.compare_buttons_frame.grid()
 
+    def _save_data(self):
+        pass
+    
     def compare_absolute_difference(self):
         """Compares two files by absolute difference."""
         if self.first_file is None or self.second_file is None:
@@ -198,7 +231,10 @@ class CompareScene(ttk.Frame):
             f2 = f2.reshape((1,) + f2.shape)
 
         # Adjust shapes explicitly for each dimension
+        
         if f1.shape != f2.shape:
+            wantedShapef1 =[slice(i) for i in f1.shape]
+            wantedShapef2 =[slice(i) for i in f1.shape]
             for i in range(f1.ndim):
                 if f1.shape[i] == f2.shape[i]:
                     continue
@@ -207,14 +243,18 @@ class CompareScene(ttk.Frame):
                     repeats = f2.shape[i] // f1.shape[i]  # Full repeats
                     remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
                     f1 = np.tile(f1, (repeats + (1 if remainder else 0),) + (1,) * (f1.ndim - i - 1))
-                    f1 = f1[:f2.shape[i]]  # Trim excess from the end
+                    wantedShapef1[i]=slice(f2.shape[i])
+                    f1 = f1[*wantedShapef1]  # Trim excess from the end
 
                 elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
                     repeats = f1.shape[i] // f2.shape[i]
                     remainder = f1.shape[i] % f2.shape[i]
                     f2 = np.tile(f2, (repeats + (1 if remainder else 0),) + (1,) * (f2.ndim - i - 1))
-                    f2 = f2[:f1.shape[i]]  # Trim excess from the end
-
+                    wantedShapef2[i]=slice(f1.shape[i])
+                    f2 = f2[*wantedShapef2]  # Trim excess from the end
+                print(f'f1.shape={f1.shape}, f2.shape={f2.shape}')
+        
+        
         
         # Compare absolute difference
         diff = np.abs(f1-f2)
@@ -243,7 +283,10 @@ class CompareScene(ttk.Frame):
             f2 = f2.reshape((1,) + f2.shape)
 
         # Adjust shapes explicitly for each dimension
+        
         if f1.shape != f2.shape:
+            wantedShapef1 =[slice(i) for i in f1.shape]
+            wantedShapef2 =[slice(i) for i in f1.shape]
             for i in range(f1.ndim):
                 if f1.shape[i] == f2.shape[i]:
                     continue
@@ -252,13 +295,17 @@ class CompareScene(ttk.Frame):
                     repeats = f2.shape[i] // f1.shape[i]  # Full repeats
                     remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
                     f1 = np.tile(f1, (repeats + (1 if remainder else 0),) + (1,) * (f1.ndim - i - 1))
-                    f1 = f1[:f2.shape[i]]  # Trim excess from the end
+                    wantedShapef1[i]=slice(f2.shape[i])
+                    f1 = f1[*wantedShapef1]  # Trim excess from the end
 
                 elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
                     repeats = f1.shape[i] // f2.shape[i]
                     remainder = f1.shape[i] % f2.shape[i]
                     f2 = np.tile(f2, (repeats + (1 if remainder else 0),) + (1,) * (f2.ndim - i - 1))
-                    f2 = f2[:f1.shape[i]]  # Trim excess from the end
+                    wantedShapef2[i]=slice(f1.shape[i])
+                    f2 = f2[*wantedShapef2]  # Trim excess from the end
+                print(f'f1.shape={f1.shape}, f2.shape={f2.shape}')
+        
         zmask =f1==0
         fz = np.zeros_like(f1)
         # fz[zmask]=np.spacing(f2)[zmask]
@@ -275,17 +322,28 @@ class CompareScene(ttk.Frame):
         ax.imshow(diff)
         ax.set_title(title)
 
+        canvas = self.canvas
+        if canvas is not None:
+            canvas.get_tk_widget().destroy()
         canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
+        
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.grid(row=0, column=0, sticky="nsew")
         
         canvas.draw()
         self.canvas = canvas
+        
         # Add Navigation Toolbar
+        if self.toolbar is not None:
+            self.toolbar.destroy()
+        
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.plot_frame, pack_toolbar=False)
         
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="nsew")
+        
+        
+        
         
 
     def _choose_data(self):
@@ -385,12 +443,13 @@ class CompareScene(ttk.Frame):
         self.reloadButton = ttk.Button(self.treeFrame, text='Reload', command=self._reload_tree_view)
         self.newDirectoryButton = ttk.Button(self.treeFrame, text='Change Directory', command=self._pick_directory)
         self.chooseDataButton = ttk.Button(self.treeFrame, text='Choose Data', command=self._choose_data)
-        self.insightButton = ttk.Button(self.treeFrame, text='Get Insight', command=self._error_finder)
+        self.clearFiles = ttk.Button(self.treeFrame, text='Clear Selection', command=self._clear_selection)
+        self.errorFinderButton = ttk.Button(self.treeFrame, text='Error Finder', command=self._error_finder)
 
         self.reloadButton.pack(fill=tk.X, padx=5, pady=5)
         self.newDirectoryButton.pack(fill=tk.X, padx=5, pady=5)
         self.chooseDataButton.pack(fill=tk.X, padx=5, pady=5)
-        self.insightButton.pack(fill=tk.X, padx=5, pady=5)
+        self.clearFiles.pack(fill=tk.X, padx=5, pady=5)
 
         self._load_tree_view()
 
@@ -407,6 +466,12 @@ class CompareScene(ttk.Frame):
         canvas_widget.grid(row=0, column=0, sticky="nsew")
         canvas.draw()
         self.canvas = canvas
+        
+        # Add Navigation Toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.plot_frame, pack_toolbar=False)
+        
+        self.toolbar.update()
+        self.toolbar.grid(row=1, column=0, sticky="nsew")
 
     def on_resize(self, event):
         """Handle resizing of the plot area."""
@@ -416,10 +481,12 @@ class CompareScene(ttk.Frame):
         """Open a file dialog to select a directory."""
         directory = fdiag.askdirectory()
         if directory:
+            self._clear_selection()
             self.results_dir = pathlib.Path(directory)
+            
 
     def _error_finder(self):
-        """Dummy method for error finding or handling."""
+        """Method for error finding or handling."""
         msgbox.showinfo("Error Finder", "This is a placeholder function.")
 
 
