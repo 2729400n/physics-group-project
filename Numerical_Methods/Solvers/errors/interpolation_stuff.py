@@ -478,9 +478,14 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                 # Now call curve_fit with our wrapper
                 XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(), maxfev=xymaxfev,p0=guess)
             else:
+                xOptimal=xOpti
+                yOptimal=yOpti
                 print('gcd Inchoherent')
                       
     else:
+        xOptimal=xOpti
+        yOptimal=yOpti
+        print('gcd Inchoherent')
         print('determinant',np.linalg.det(XYOptimal))
     print(XYOptimal)
     print('XYCov',XYcov)
@@ -492,7 +497,7 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
 if __name__ == '__main__':
     def PolYproduct(x, y):
         # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-        return (2 * (x**2) + 2.5 * (x) + 4.5+8*x**3+9*x**5)*(y**2+2)
+        return (2 * (x**2) + 2* (x) +1.+8*x**4)*(y**2+2)
     n_ = 10
     m_ = 10
     Ygrid, Xgrid = np.mgrid[:m_, :n_]
