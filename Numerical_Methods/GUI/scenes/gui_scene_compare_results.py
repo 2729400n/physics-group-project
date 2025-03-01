@@ -129,7 +129,7 @@ def scale_to_fit(a1,a2,copya1=True,copya2=True):
                         if k!=i: 
                             newindex+=[slice(None,None),None]
                         else:
-                            newindex+=[(tuple(int(j//2) for j in range(finalslice2[i]))+tuple(range(f2.shape[k]))[int(finalslice2[i]//2):] + tuple(int(j//2) for j in range(finalslice2[i]))),None]
+                            newindex+=[(tuple(int(j//2) for j in range(2*int(np.ceil(finalslice2[i]/2))))+tuple(range(f2.shape[k]))[int(np.ceil(finalslice2[i]/2)):(int(finalslice2[i]//2)//2)] + tuple(-int(j//2) for j in range(2*int(finalslice2[i]//2)))),None]
                 
                 f2 = f2[*newindex].reshape(tuple(f2.shape[z] if z != i else (f2.shape[i]+finalslice2[i]) for z in range(len(f2.shape))))
         
