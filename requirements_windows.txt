@@ -32,7 +32,6 @@ sqlparse==0.5.3
 sympy==1.13.3
 tzdata==2025.1
 wheel==0.44.0
-pprint
 
 # These module is required for curses on windows 
 # You can write your own using vt100 standards but too much effort
