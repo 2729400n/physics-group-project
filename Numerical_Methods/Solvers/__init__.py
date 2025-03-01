@@ -3,7 +3,6 @@
 # Description: The solver submodule initializer 
 
 from .ftcs import laplace_ode_solver,laplace_ode_solver_step,laplace_ode_solver_continue
-from .ftcs_algebra import laplace_ode_solver_8pointd,laplace_ode_solver_8pointd_continue
 import numpy as np
 
 
