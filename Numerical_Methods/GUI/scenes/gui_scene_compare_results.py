@@ -291,8 +291,7 @@ class CompareScene(ttk.Frame):
             
             f1slices =[slice(0,wantedShapef1[i],1) if ((i%2)==0) else None  for i in range(2*f1.ndim)]
             f2slices =[slice(0,wantedShapef2[i],1) if ((i%2)==0) else None  for i in range(2*f2.ndim)]
-            finalslice1 = [None for i in range(f1.ndim)]
-            finalslice2 = [None for i in range(f1.ndim)]
+            finalslice = [slice(0,1,1)  for i in range(f1.ndim)]
             finalshape1 = [i for i in f1.shape]
             finalshape2 = [i for i in f2.shape]
             for i in range(f1.ndim):
@@ -303,19 +302,19 @@ class CompareScene(ttk.Frame):
                     repeats = f2.shape[i] // f1.shape[i]  # Full repeats
                     remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
                     # wantedShapef1[i*2]=f2.shape[i]
-                    n=(repeats )
+                    n=(repeats + (1 if remainder else 0))
                     wantedShapef1[1+(i*2)] =n
                     finalshape1[i]=f1.shape[i]*n
-                    finalslice1[i] = slice(0,f1.shape[i]*n,1)
+                    finalslice[i] = slice(0,f2.shape[i],1)
 
                 elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
                     repeats = f1.shape[i] // f2.shape[i]  # Full repeats
                     remainder = f1.shape[i] % f2.shape[i]  # Leftover elements
                     # wantedShapef2[i*2]=f1.shape[i]
-                    n =(repeats)
+                    n =(repeats + (1 if remainder else 0))
                     wantedShapef2[1+(i*2)]=n
                     finalshape2[i]=f2.shape[i]*n
-                    finalslice2[i] = slice(0,remainder,1)
+                    finalslice[i] = slice(0,f1.shape[i],1)
                     
             print('f1slices',f1slices)
             print('f2slices',f2slices)
@@ -323,10 +322,8 @@ class CompareScene(ttk.Frame):
             print('wantedShapef2',wantedShapef2)
             print('finalShape1',finalshape1)
             print('finalShape1',finalshape1)
-            f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))
-            f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))
-            
-            
+            f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))[*finalslice]
+            f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))[*finalslice]
             
             print(f'f1.shape={f1.shape}, f2.shape={f2.shape}')
         
