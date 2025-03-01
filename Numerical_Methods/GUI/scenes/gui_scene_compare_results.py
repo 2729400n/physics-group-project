@@ -7,6 +7,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from tkinter import messagebox as msgbox
+from tkinter import simpledialog as simp_diag
 import pathlib
 import time
 import tkinter.filedialog as fdiag
@@ -21,48 +22,6 @@ class FTYPES(Enum):
     NPY = 'Numpy Binary File'
 
 
-from enum import Enum
-import tkinter as tk
-import tkinter.ttk as ttk
-from typing import Generator
-import numpy as np
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from tkinter import messagebox as msgbox
-import pathlib
-import time
-import tkinter.filedialog as fdiag
-from ...utils.nfile_io import walkDirectory
-from ...utils.nfile_io.extensions import numpy_io, image_io
-from ...Solvers import errors
-
-
-class FTYPES(Enum):
-    DIRECTORY = 'DIRECTORY'
-    NPZ = 'Numpy Package File'
-    NPY = 'Numpy Binary File'
-
-
-from enum import Enum
-import tkinter as tk
-import tkinter.ttk as ttk
-from typing import Generator
-import numpy as np
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from tkinter import messagebox as msgbox
-import pathlib
-import time
-import tkinter.filedialog as fdiag
-from ...utils.nfile_io import walkDirectory
-from ...utils.nfile_io.extensions import numpy_io, image_io
-from ...Solvers import errors
-
-
-class FTYPES(Enum):
-    DIRECTORY = 'DIRECTORY'
-    NPZ = 'Numpy Package File'
-    NPY = 'Numpy Binary File'
 
 class MagicClass(typing.Collection):
     def __getitem__(self,*args):
@@ -170,7 +129,7 @@ def scale_to_fit(a1,a2,copya1=True,copya2=True):
                         if k!=i: 
                             newindex+=[slice(None,None),None]
                         else:
-                            newindex+=[(tuple(f2magic[int(j//2)] for j in range(2*finalslice2[i]))+tuple(range(f2.shape[k]))[finalslice2[i]:]),None]
+                            newindex+=[(tuple(int(j//2) for j in range(finalslice2[i]))+tuple(range(f2.shape[k]))[int(finalslice2[i]//2):] + tuple(int(j//2) for j in range(finalslice2[i]))),None]
                 
                 f2 = f2[*newindex].reshape(tuple(f2.shape[z] if z != i else (f2.shape[i]+finalslice2[i]) for z in range(len(f2.shape))))
         
@@ -196,8 +155,9 @@ def scale_to_scale(a1,a2,copya1=True,copya2=True):
         
         f1slices =[slice(0,wantedShapef1[i],1) if ((i%2)==0) else None  for i in range(2*f1.ndim)]
         f2slices =[slice(0,wantedShapef2[i],1) if ((i%2)==0) else None  for i in range(2*f2.ndim)]
-        finalshape = [i for i in f1.shape]
-        finalshape = [i for i in f2.shape]
+        finalslice = [slice(0,1,1)  for i in range(f1.ndim)]
+        finalshape1 = [i for i in f1.shape]
+        finalshape2 = [i for i in f2.shape]
         for i in range(f1.ndim):
             if f1.shape[i] == f2.shape[i]:
                 continue
@@ -205,22 +165,30 @@ def scale_to_scale(a1,a2,copya1=True,copya2=True):
             if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
                 repeats = f2.shape[i] // f1.shape[i]  # Full repeats
                 remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
-                wantedShapef1[i*2]=f2.shape[i]
-                n=(repeats+(1 if remainder else 0))
+                # wantedShapef1[i*2]=f2.shape[i]
+                n=(repeats + (1 if remainder else 0))
                 wantedShapef1[1+(i*2)] =n
-                finalshape[i]=f2.shape[i]
+                finalshape1[i]=f1.shape[i]*n
+                finalslice[i] = slice(0,f2.shape[i],1)
 
             elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
                 repeats = f1.shape[i] // f2.shape[i]  # Full repeats
                 remainder = f1.shape[i] % f2.shape[i]  # Leftover elements
-                wantedShapef2[i*2]=f1.shape[i]
-                n=(repeats+(1 if remainder else 0))
+                # wantedShapef2[i*2]=f1.shape[i]
+                n =(repeats + (1 if remainder else 0))
                 wantedShapef2[1+(i*2)]=n
-                finalshape[i]=f1.shape[i]*n
+                finalshape2[i]=f2.shape[i]*n
+                finalslice[i] = slice(0,f1.shape[i],1)
+                
+        print('f1slices',f1slices)
+        print('f2slices',f2slices)
+        print('wantedShapef1',wantedShapef1)
+        print('wantedShapef2',wantedShapef2)
+        print('finalShape1',finalshape1)
+        print('finalShape1',finalshape1)
+        f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))[*finalslice]
+        f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))[*finalslice]
         
-        
-        f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape))
-        f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape))
         return f1,f2
 
 def tile_scale(a1,a2,copya1=True,copya2=True):
@@ -412,7 +380,26 @@ class CompareScene(ttk.Frame):
             return
         
         
-        f1,f2=scale_to_fit(f1,f2)
+        
+        f1 = np.array(f1,copy=True)
+        f2 = np.array(f2,copy=True)
+        if f1.shape!=f2.shape:
+            dg=simp_diag.SimpleDialog(self,
+                               "The data(s) you have chosen are of different dimensions!\nHow would you like to rescale?",
+                               ["Homogenously","Inhomogenously","Repeat","Dont"],
+                               default=3,cancel=3)
+        
+            opt = dg.go()
+            match opt:
+                case 0:
+                    f1,f2 = scale_to_fit(f1,f2,copya1=False,copya2=False)
+                case 1:
+                    f1,f2 = scale_to_scale(f1,f2,copya1=False,copya2=False)
+                case 2:
+                    f1,f2 = tile_scale(f1,f2,copya1=False,copya2=False)
+                case _:
+                    return
+            del dg,opt
         
         
         
@@ -433,14 +420,30 @@ class CompareScene(ttk.Frame):
         if not (isinstance(f1,(np.ndarray,typing.Iterable,typing.Collection,list,tuple)) and isinstance(f2,(np.ndarray,typing.Iterable,typing.Collection,list,tuple))):
             msgbox.showerror(message="Files cannot be arrayified.")
             return
+        f1 = np.array(f1,copy=True)
+        f2 = np.array(f2,copy=True)
+        if f1.shape!=f2.shape:
+            dg=simp_diag.SimpleDialog(self,
+                               "The data(s) you have chosen are of different dimensions!\nHow would you like to rescale?",
+                               ["Homogenously","Inhomogenously","Repeat","Dont"],
+                               default=3,cancel=3)
         
-        
-        f1,f2 = scale_to_scale(f1,f2)
-        zmask =f1==0
-        fz = np.zeros_like(f1)
+            opt = dg.go()
+            match opt:
+                case 0:
+                    f1,f2 = scale_to_fit(f1,f2,copya1=False,copya2=False)
+                case 1:
+                    f1,f2 = scale_to_scale(f1,f2,copya1=False,copya2=False)
+                case 2:
+                    f1,f2 = tile_scale(f1,f2,copya1=False,copya2=False)
+                case _:
+                    return
+            del dg,opt
+        # zmask =f1==0
+        # fz = np.zeros_like(f1)
         # fz[zmask]=np.spacing(f2)[zmask]
         # Compare relative difference
-        diff = np.abs((f1 - f2) / (f1+fz))
+        diff = np.abs((f1 - f2) / (f1))
         self.plot_comparison(diff, title="Relative Difference")
 
     def plot_comparison(self, diff, title):
