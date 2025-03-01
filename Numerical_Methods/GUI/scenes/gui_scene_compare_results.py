@@ -64,7 +64,198 @@ class FTYPES(Enum):
     NPZ = 'Numpy Package File'
     NPY = 'Numpy Binary File'
 
+class MagicClass(typing.Collection):
+    def __getitem__(self,*args):
+        if self.side:
+            ret = self.bottom
+            self.bottom+=1
+        else:
+            ret=self.top
+            self.top-=1
+        self.side=not self.side
+        return ret
+    def __next__(self):
+        return self.__getitem__()
+    def __contains__(self, x):
+        return False
+    def __iter__(self):
+        return self
+    def __len__(self):
+        return np.inf
+    def __init__(self,a=None,b=None,a_first=True):
+        self.bottom=0
+        self.top=-1
+        if a is not None:
+            self.bottom=a
+        if a is not None:
+            self.top=b
+        self.side=a_first
+        
 
+def scale_to_fit(a1,a2,copya1=True,copya2=True):
+    f1:np.ndarray = np.array(a1,copy=copya1)
+    f2:np.ndarray = np.array(a2,copy=copya2)
+    
+        # Ensure same number of dimensions by padding the smaller array
+    while f1.ndim < f2.ndim:
+        f1 = f1.reshape((1,) + f1.shape)
+    while f2.ndim < f1.ndim:
+        f2 = f2.reshape((1,) + f2.shape)
+
+    # Adjust shapes explicitly for each dimension
+    
+    if f1.shape != f2.shape:
+        
+        wantedShapef1=[f1.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f1.ndim)]
+        wantedShapef2=[f2.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f2.ndim)]
+        
+        f1slices =[slice(0,wantedShapef1[i],1) if ((i%2)==0) else None  for i in range(2*f1.ndim)]
+        f2slices =[slice(0,wantedShapef2[i],1) if ((i%2)==0) else None  for i in range(2*f2.ndim)]
+        finalslice1 = [0 for i in range(f1.ndim)]
+        finalslice2 = [0  for i in range(f1.ndim)]
+        finalshape1 = [i for i in f1.shape]
+        finalshape2 = [i for i in f2.shape]
+        for i in range(f1.ndim):
+            if f1.shape[i] == f2.shape[i]:
+                continue
+
+            if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
+                repeats = f2.shape[i] // f1.shape[i]  # Full repeats
+                remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
+                # wantedShapef1[i*2]=f2.shape[i]
+                n=repeats
+                wantedShapef1[1+(i*2)] =n
+                finalshape1[i]=f1.shape[i]*n
+                finalslice1[i] = remainder
+
+            elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
+                repeats = f1.shape[i] // f2.shape[i]  # Full repeats
+                remainder = f1.shape[i] % f2.shape[i]  # Leftover elements
+                # wantedShapef2[i*2]=f1.shape[i]
+                n =repeats 
+                wantedShapef2[1+(i*2)]=n
+                finalshape2[i]=f2.shape[i]*n
+                finalslice2[i] = remainder
+        
+        
+        f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))
+        f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))
+        
+        del finalshape1,finalshape2,f1slices,f2slices,wantedShapef1,wantedShapef2
+        f1magic = MagicClass()
+        for i in range(len(finalslice1)):
+            if finalslice1[i] !=0:
+                newindex=[]
+                for z in range(2*len(f1.shape)):
+                    
+                    if (z%2)==0:
+                        k=int(z//2)
+                        if k!=i: 
+                            newindex+=[slice(None,None),None]
+                        else:
+                            newindex+=[(tuple(f1magic[int(j//2)] for j in range(2*finalslice1[i]))+tuple(range(f1.shape[k]))[finalslice1[i]:]),None]
+                
+                f1 = f1[*newindex].reshape(tuple(f1.shape[z] if z != i else (f1.shape[i]+finalslice1[i]) for z in range(len(f1.shape))))
+        
+        del f1magic
+        f2magic = MagicClass()
+        
+        for i in range(len(finalslice2)):
+            if finalslice2[i] !=0:
+                newindex=[]
+                for z in range(2*len(f2.shape)):
+                    
+                    if (z%2)==0:
+                        k=int(z//2)
+                        if k!=i: 
+                            newindex+=[slice(None,None),None]
+                        else:
+                            newindex+=[(tuple(f2magic[int(j//2)] for j in range(2*finalslice2[i]))+tuple(range(f2.shape[k]))[finalslice2[i]:]),None]
+                
+                f2 = f2[*newindex].reshape(tuple(f2.shape[z] if z != i else (f2.shape[i]+finalslice2[i]) for z in range(len(f2.shape))))
+        
+        del f2magic
+        return f1,f2
+
+def scale_to_scale(a1,a2,copya1=True,copya2=True):
+    f1:np.ndarray = np.array(a1,copy=copya1)
+    f2:np.ndarray = np.array(a2,copy=copya2)
+    
+        # Ensure same number of dimensions by padding the smaller array
+    while f1.ndim < f2.ndim:
+        f1 = f1.reshape((1,) + f1.shape)
+    while f2.ndim < f1.ndim:
+        f2 = f2.reshape((1,) + f2.shape)
+
+    # Adjust shapes explicitly for each dimension
+    
+    if f1.shape != f2.shape:
+        
+        wantedShapef1=[f1.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f1.ndim)]
+        wantedShapef2=[f2.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f2.ndim)]
+        
+        f1slices =[slice(0,wantedShapef1[i],1) if ((i%2)==0) else None  for i in range(2*f1.ndim)]
+        f2slices =[slice(0,wantedShapef2[i],1) if ((i%2)==0) else None  for i in range(2*f2.ndim)]
+        finalshape = [i for i in f1.shape]
+        finalshape = [i for i in f2.shape]
+        for i in range(f1.ndim):
+            if f1.shape[i] == f2.shape[i]:
+                continue
+
+            if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
+                repeats = f2.shape[i] // f1.shape[i]  # Full repeats
+                remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
+                wantedShapef1[i*2]=f2.shape[i]
+                n=(repeats+(1 if remainder else 0))
+                wantedShapef1[1+(i*2)] =n
+                finalshape[i]=f2.shape[i]
+
+            elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
+                repeats = f1.shape[i] // f2.shape[i]  # Full repeats
+                remainder = f1.shape[i] % f2.shape[i]  # Leftover elements
+                wantedShapef2[i*2]=f1.shape[i]
+                n=(repeats+(1 if remainder else 0))
+                wantedShapef2[1+(i*2)]=n
+                finalshape[i]=f1.shape[i]*n
+        
+        
+        f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape))
+        f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape))
+        return f1,f2
+
+def tile_scale(a1,a2,copya1=True,copya2=True):
+    f1:np.ndarray = np.array(a1,copy=copya1)
+    f2:np.ndarray = np.array(a2,copy=copya2)
+    # Ensure same number of dimensions by padding the smaller array
+    while f1.ndim < f2.ndim:
+        f1 = f1.reshape((1,) + f1.shape)
+    while f2.ndim < f1.ndim:
+        f2 = f2.reshape((1,) + f2.shape)
+
+    # Adjust shapes explicitly for each dimension
+    
+    if f1.shape != f2.shape:
+        wantedShapef1 =[slice(i) for i in f1.shape]
+        wantedShapef2 =[slice(i) for i in f1.shape]
+        for i in range(f1.ndim):
+            if f1.shape[i] == f2.shape[i]:
+                continue
+
+            if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
+                repeats = f2.shape[i] // f1.shape[i]  # Full repeats
+                remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
+                f1 = np.tile(f1, (repeats + (1 if remainder else 0),) + (1,) * (f1.ndim - i - 1))
+                wantedShapef1[i]=slice(f2.shape[i])
+                f1 = f1[*wantedShapef1]  # Trim excess from the end
+
+            elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
+                repeats = f1.shape[i] // f2.shape[i]
+                remainder = f1.shape[i] % f2.shape[i]
+                f2 = np.tile(f2, (repeats + (1 if remainder else 0),) + (1,) * (f2.ndim - i - 1))
+                wantedShapef2[i]=slice(f1.shape[i])
+                f2 = f2[*wantedShapef2]  # Trim excess from the end
+    
+    return f1,f2
 class CompareScene(ttk.Frame):
     name = 'Compare'
 
@@ -221,38 +412,9 @@ class CompareScene(ttk.Frame):
             return
         
         
-        f1:np.ndarray = np.array(f1)
-        f2:np.ndarray = np.array(f2)
+        f1,f2=scale_to_fit(f1,f2)
         
-            # Ensure same number of dimensions by padding the smaller array
-        while f1.ndim < f2.ndim:
-            f1 = f1.reshape((1,) + f1.shape)
-        while f2.ndim < f1.ndim:
-            f2 = f2.reshape((1,) + f2.shape)
-
-        # Adjust shapes explicitly for each dimension
         
-        if f1.shape != f2.shape:
-            wantedShapef1 =[slice(i) for i in f1.shape]
-            wantedShapef2 =[slice(i) for i in f1.shape]
-            for i in range(f1.ndim):
-                if f1.shape[i] == f2.shape[i]:
-                    continue
-
-                if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
-                    repeats = f2.shape[i] // f1.shape[i]  # Full repeats
-                    remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
-                    f1 = np.tile(f1, (repeats + (1 if remainder else 0),) + (1,) * (f1.ndim - i - 1))
-                    wantedShapef1[i]=slice(f2.shape[i])
-                    f1 = f1[*wantedShapef1]  # Trim excess from the end
-
-                elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
-                    repeats = f1.shape[i] // f2.shape[i]
-                    remainder = f1.shape[i] % f2.shape[i]
-                    f2 = np.tile(f2, (repeats + (1 if remainder else 0),) + (1,) * (f2.ndim - i - 1))
-                    wantedShapef2[i]=slice(f1.shape[i])
-                    f2 = f2[*wantedShapef2]  # Trim excess from the end
-                print(f'f1.shape={f1.shape}, f2.shape={f2.shape}')
         
         
         
@@ -273,60 +435,7 @@ class CompareScene(ttk.Frame):
             return
         
         
-        f1:np.ndarray = np.array(f1,copy=True)
-        f2:np.ndarray = np.array(f2,copy=True)
-        
-            # Ensure same number of dimensions by padding the smaller array
-        while f1.ndim < f2.ndim:
-            f1 = f1.reshape((1,) + f1.shape)
-        while f2.ndim < f1.ndim:
-            f2 = f2.reshape((1,) + f2.shape)
-
-        # Adjust shapes explicitly for each dimension
-        
-        if f1.shape != f2.shape:
-            
-            wantedShapef1=[f1.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f1.ndim)]
-            wantedShapef2=[f2.shape[int(i//2)] if ((i%2)==0) else 1  for i in range(2*f2.ndim)]
-            
-            f1slices =[slice(0,wantedShapef1[i],1) if ((i%2)==0) else None  for i in range(2*f1.ndim)]
-            f2slices =[slice(0,wantedShapef2[i],1) if ((i%2)==0) else None  for i in range(2*f2.ndim)]
-            finalslice = [slice(0,1,1)  for i in range(f1.ndim)]
-            finalshape1 = [i for i in f1.shape]
-            finalshape2 = [i for i in f2.shape]
-            for i in range(f1.ndim):
-                if f1.shape[i] == f2.shape[i]:
-                    continue
-
-                if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
-                    repeats = f2.shape[i] // f1.shape[i]  # Full repeats
-                    remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
-                    # wantedShapef1[i*2]=f2.shape[i]
-                    n=(repeats + (1 if remainder else 0))
-                    wantedShapef1[1+(i*2)] =n
-                    finalshape1[i]=f1.shape[i]*n
-                    finalslice[i] = slice(0,f2.shape[i],1)
-
-                elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
-                    repeats = f1.shape[i] // f2.shape[i]  # Full repeats
-                    remainder = f1.shape[i] % f2.shape[i]  # Leftover elements
-                    # wantedShapef2[i*2]=f1.shape[i]
-                    n =(repeats + (1 if remainder else 0))
-                    wantedShapef2[1+(i*2)]=n
-                    finalshape2[i]=f2.shape[i]*n
-                    finalslice[i] = slice(0,f1.shape[i],1)
-                    
-            print('f1slices',f1slices)
-            print('f2slices',f2slices)
-            print('wantedShapef1',wantedShapef1)
-            print('wantedShapef2',wantedShapef2)
-            print('finalShape1',finalshape1)
-            print('finalShape1',finalshape1)
-            f1=np.broadcast_to(f1[*f1slices],wantedShapef1).reshape(tuple(finalshape1))[*finalslice]
-            f2=np.broadcast_to(f2[*f2slices],wantedShapef2).reshape(tuple(finalshape2))[*finalslice]
-            
-            print(f'f1.shape={f1.shape}, f2.shape={f2.shape}')
-        
+        f1,f2 = scale_to_scale(f1,f2)
         zmask =f1==0
         fz = np.zeros_like(f1)
         # fz[zmask]=np.spacing(f2)[zmask]
