@@ -24,6 +24,7 @@ class Task5(Task):
     
     def extra(self):
         # print('Reloaded')
+        pass
 
     def setup(self, x1: float, y1: float,r1:float,r2:float,cx:float,cy:float,v:float=1.0,x0:float=0.0,y0:float=0.0,dy:float=1.0,dx:float=1.0):
         x0,x1 = (x0,x1) if x0<=x1 else (x1,x0)

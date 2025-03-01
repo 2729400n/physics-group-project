@@ -61,7 +61,8 @@ class TabbedView(ttk.Notebook):
                         text = f'Tab-{k}'
                     self.loaded_scenes.update({text: curr_scene})
                 else:
-                    # print(scene_module, 'No Scene')
+                    print(scene_module, 'No Scene')
+                    
 
         for i in self.loaded_scenes:
             self.add(self.loaded_scenes[i], state='normal', sticky='nesw', text=i)
