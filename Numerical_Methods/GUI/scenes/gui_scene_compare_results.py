@@ -225,13 +225,50 @@ class CompareScene(ttk.Frame):
         if self.first_file is None or self.second_file is None:
             msgbox.showerror(message="Please select two files for comparison.")
             return
+        f1:np.ndarray = self.first_file
+        f2:np.ndarray = self.second_file
 
+        if not (isinstance(f1,(np.ndarray,typing.Iterable,typing.Collection,list,tuple)) and isinstance(f2,(np.ndarray,typing.Iterable,typing.Collection,list,tuple))):
+            msgbox.showerror(message="Files cannot be arrayified.")
+            return
+        
+        
+        f1:np.ndarray = np.array(f1,copy=True)
+        f2:np.ndarray = np.array(f2,copy=True)
+        
+            # Ensure same number of dimensions by padding the smaller array
+        while f1.ndim < f2.ndim:
+            f1 = f1.reshape((1,) + f1.shape)
+        while f2.ndim < f1.ndim:
+            f2 = f2.reshape((1,) + f2.shape)
+
+        # Adjust shapes explicitly for each dimension
+        if f1.shape != f2.shape:
+            for i in range(f1.ndim):
+                if f1.shape[i] == f2.shape[i]:
+                    continue
+
+                if f1.shape[i] < f2.shape[i]:  # Expand f1 by repeating cyclically
+                    repeats = f2.shape[i] // f1.shape[i]  # Full repeats
+                    remainder = f2.shape[i] % f1.shape[i]  # Leftover elements
+                    f1 = np.tile(f1, (repeats + (1 if remainder else 0),) + (1,) * (f1.ndim - i - 1))
+                    f1 = f1[:f2.shape[i]]  # Trim excess from the end
+
+                elif f1.shape[i] > f2.shape[i]:  # Expand f2 by repeating cyclically
+                    repeats = f1.shape[i] // f2.shape[i]
+                    remainder = f1.shape[i] % f2.shape[i]
+                    f2 = np.tile(f2, (repeats + (1 if remainder else 0),) + (1,) * (f2.ndim - i - 1))
+                    f2 = f2[:f1.shape[i]]  # Trim excess from the end
+        zmask =f1==0
+        fz = np.zeros_like(f1)
+        # fz[zmask]=np.spacing(f2)[zmask]
         # Compare relative difference
-        diff = np.abs((self.first_file - self.second_file) / self.first_file)
+        diff = np.abs((f1 - f2) / (f1+fz))
         self.plot_comparison(diff, title="Relative Difference")
 
     def plot_comparison(self, diff, title):
         """Plots the difference data."""
+        self.currGrid = diff
         fig = Figure(figsize=(8, 8))
         ax = fig.add_subplot(111)
 
@@ -241,9 +278,15 @@ class CompareScene(ttk.Frame):
         canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.grid(row=0, column=0, sticky="nsew")
+        
         canvas.draw()
-
         self.canvas = canvas
+        # Add Navigation Toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.plot_frame, pack_toolbar=False)
+        
+        self.toolbar.update()
+        self.toolbar.grid(row=1, column=0, sticky="nsew")
+        
 
     def _choose_data(self):
         cursel = self.cursel

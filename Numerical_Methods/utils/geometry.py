@@ -60,14 +60,15 @@ def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, va
     # if we inplace into a grid
     if Grid is not None:
         y, x = Grid.shape
+        y=y/dy
+        x=x/dx
         # print(x,y)
     else:
         # if all we want is a  circle
         x = 2*int(r//dx)+5
         y = 2*int(r//dy)+5
 
-    grid_y, grid_x  = np.mgrid[:y, :x]
-
+    grid_y, grid_x  = np.mgrid[:y:dy, :x:dx]
     # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius
     # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
     tolerance = r  # Ensure tolerance does not dominate

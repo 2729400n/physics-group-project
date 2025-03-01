@@ -90,9 +90,11 @@ class Task1(Task):
         # Plot the quiver with normalized vectors and colored by magnitude
         axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy', cmap='plasma', norm=norm)
 
-    def run(self):
+    def run(self,maxruns:int=1000,stencil:int=5,gamma:float=0.0,abs_tol:float=1e-9,rel_tol:float=1e-6):
         '''Solve the Laplace equation and update the grid and electric field.'''
-        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition)
+        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns,
+                                                        abs_tol=abs_tol,rel_tol=rel_tol,resolution=(self.resdx,self.resdy),
+                                                        stencil=stencil,gamma=gamma)
         
         # Remove the previous colorbar and reset it
         if self._cbar is not None:

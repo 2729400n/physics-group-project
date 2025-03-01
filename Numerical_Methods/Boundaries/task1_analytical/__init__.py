@@ -1,21 +1,23 @@
 from matplotlib.colorbar import Colorbar
 from matplotlib.quiver import Quiver
 import numpy as np
-from .boundary import geometryFactory as Boundary
+from . import boundary
 from ...Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from ..task import Task
 import io
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
-class Task1(Task):
+Boundary = boundary.GeometryFactory
+class Task1_A(Task):
     '''
         Task1:
             description: Task one is the first task given to solve the anulus situation.
             The class defines the standard task interface methods.
     '''
     
-    name = "Anulus"
+    name = "Anulus_Analytical"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__(axes=axes, *args, **kwargs)
@@ -36,9 +38,10 @@ class Task1(Task):
         Ys = np.arange(y0, y1+dy, dy)
 
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
-        self.boundaryCondition = Boundary(v, r1, r2, cx, cy)
+        self.boundaryCondition = boundary.GeometryFactory(V=v, r1=r1, r2=r2, cx=cx, cy=cy, dx=dx,dy=dy)
         self.grid = grid = self.boundaryCondition(Grid=grid, retoverlay=False)
         self.Xs, self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]
+        
         self.resXs = Xs
         self.resYs = Ys
         self.resdx = dx
@@ -79,7 +82,7 @@ class Task1(Task):
 
     def run(self):
         '''Solve the Laplace equation and update the grid and electric field.'''
-        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition)
+        self.grid,self.Efield = self.boundaryCondition.calculateField(self.grid)
         
         # Remove the previous colorbar and reset it
         if self._cbar is not None:
