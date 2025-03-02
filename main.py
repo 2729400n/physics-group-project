@@ -65,6 +65,7 @@ if __name__ == "__main__":
         print("\nKeyboardInterrupt detected. Exiting gracefully.")
     except Exception as e:
         print(f"An error occurred: {e}")
+        
         if enable_rtloader:
             rtLoader.stop_realtime_module()
         raise

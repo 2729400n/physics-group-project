@@ -9,11 +9,11 @@ import numpy as np
 from ..Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
 from ..utils.naming import slugify
 from time import strftime
-tasks:'set[Task]' = set()
+trends:'set[Trend]' = set()
 
     
 # Our task Class
-class Task(typing.Protocol):
+class Trend(typing.Protocol):
     
     'An Interface for the Tasks class should be subclassed to add new tasks'
     

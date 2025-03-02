@@ -7,7 +7,8 @@ import numpy as np
 
 # TODO Fix all Circular constraints : The cirlce seems to have an r value that is 1 greater than expected
 
-def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
+def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: float = 1.0,
+           fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None, thickness:float=1.0):
     # First solve for a qudrant the apply rotations
     operations = [[lambda x, y, z:np.abs(
         x-y) <= z]*2, [lambda x, y, z:x <= y, lambda x, y, z:x >= y]]
@@ -32,7 +33,7 @@ def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: fl
     tolerance = r  # Ensure tolerance does not dominate
     print(r)
     circle_mask = operations[bool(fill)][bool(clear)](
-        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, tolerance)
+        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, thickness*tolerance)
     # Apply anti-aliasing using Gaussian blur
     # blurred_circle = gaussian_filter(circle_mask.astype(float), sigma=antialias_sigma)
     vals = (val,0) if not isinstance(val,bool) else (val,not val)
@@ -46,7 +47,8 @@ def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: fl
 
     return pixelated_circle
 
-def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: float = 1.0, fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None):
+def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: float = 1.0,
+                fill: bool = False, clear: bool = False, Grid: 'np.ndarray[np.ndarray[np.float64]]' = None, thickness:float=1.0):
     # First solve for a qudrant the apply rotations
     operations = [[lambda x, y, z:np.abs(
         x-y) <= z]*2, [lambda x, y, z:x <= y, lambda x, y, z:x >= y]]
@@ -72,7 +74,7 @@ def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, va
     tolerance = r  # Ensure tolerance does not dominate
     # print(r)
     circle_mask = operations[bool(fill)][bool(clear)](
-        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, tolerance)
+        (grid_x-cx)**2 + (grid_y-cy)**2, r**2, thickness*tolerance)
     
     pixelated_circle = circle_mask
 

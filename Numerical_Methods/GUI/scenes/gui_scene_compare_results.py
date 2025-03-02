@@ -764,7 +764,8 @@ class CompareScene(ttk.Frame):
 
     def on_resize(self, event):
         """Handle resizing of the plot area."""
-        self.canvas.get_tk_widget().config(width=event.width, height=event.height)
+        self.canvas.get_tk_widget().config(width=event.width,
+                                           height=event.height)
 
     def _pick_directory(self):
         """Open a file dialog to select a directory."""

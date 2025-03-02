@@ -17,7 +17,7 @@ __base__ = pth.abspath(pth.dirname(__file__))
 
 
 class TasksFrame(tk.Frame):
-    name = "TaskSolver"
+    name = "Trend Plotter"
 
     def __init__(self, master=None, *args, **kwargs):
         super().__init__(master)
@@ -272,6 +272,6 @@ class TasksFrame(tk.Frame):
             self._display.figure = self.current_task.figure
             self._display.draw()
 
-        self.after(3000, self.update_canvas)  # Schedule next update
+        self.after(10000, self.update_canvas)  # Schedule next update
 
 scene = TasksFrame

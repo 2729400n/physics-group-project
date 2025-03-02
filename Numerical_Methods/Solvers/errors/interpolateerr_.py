@@ -45,29 +45,29 @@ def interpolate_2d(grid: np.ndarray, n: int, m: int):
     return interpolated_grid, coeffs,error
 
 # Example Usage
+if __name__== "__main__":
+    def PolYproduct(x, y):
+        # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
+        return  (8.5*x**1 )*(2)
+    n_ = 100
+    m_ = 100
+    Ygrid, Xgrid = np.mgrid[:m_, :n_]
+    print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
+    input("Press Enter to continue...")
 
-def PolYproduct(x, y):
-    # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-    return  (8.5*x**1 )*(2)
-n_ = 100
-m_ = 100
-Ygrid, Xgrid = np.mgrid[:m_, :n_]
-print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
-input("Press Enter to continue...")
+    grid = PolYproduct(Xgrid, Ygrid)
+    print("Grid:\n", grid)
+    input('Ready ?')
+    interpolated, coeffs,err = interpolate_2d(grid, 3,3)
 
-grid = PolYproduct(Xgrid, Ygrid)
-print("Grid:\n", grid)
-input('Ready ?')
-interpolated, coeffs,err = interpolate_2d(grid, 3,3)
+    # 
+    print('interpolated',interpolated)
+    print()
+    print('coeefs',coeffs)
+    print(coeffs.shape)
+    print()
 
-# 
-print('interpolated',interpolated)
-print()
-print('coeefs',coeffs)
-print(coeffs.shape)
-print()
-
-plt.imshow(err)
-plt.colorbar()
-plt.show(block=True)
+    plt.imshow(err)
+    plt.colorbar()
+    plt.show(block=True)
 
