@@ -63,7 +63,6 @@ def update_modules():
                 if module_name.startswith(i):
                     continue
             
-
             if module is None or not hasattr(module, "__spec__"):
                 excluded_modules.add(module_name)
                 continue
