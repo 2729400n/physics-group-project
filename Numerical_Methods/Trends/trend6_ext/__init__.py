@@ -26,7 +26,7 @@ class Task6(Task):
             self._Image.remove()
         
         # Display the grid as an image
-        self._Image = self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
+        self._Image = self.axes.imshow(self.grid, )
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
         self.axes.set_title('Electrostatic Potential')
 
@@ -61,7 +61,7 @@ class Task6(Task):
         # Update the image with the new grid
         if self._Image:
             self._Image.remove()
-        self._Image = self.axes.imshow(self.grid, cmap='viridis', interpolation='nearest')
+        self._Image = self.axes.imshow(self.grid, )
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _cleanup(self):

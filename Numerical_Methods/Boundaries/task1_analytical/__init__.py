@@ -9,6 +9,8 @@ from ..task import Task
 import io
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
+import matplotlib.colors as mcolors
+
 Boundary = boundary.GeometryFactory
 class Task1_A(Task):
     '''
@@ -52,7 +54,7 @@ class Task1_A(Task):
             self._Image.remove()
 
         axes = self.axes
-        self._Image = axes.imshow(grid, cmap='viridis')
+        self._Image = axes.imshow(grid, )
         # self._Image.set_clim(vmin=np.min(0), vmax=np.max(self.grid))  # Set color limits
         axes.set_title('Electrostatic Potential')
 
@@ -64,21 +66,34 @@ class Task1_A(Task):
         if self.grid is None:
             return
         self.axes.clear()
-        self._Image = self.axes.imshow(self.grid, cmap='viridis')
+        self._Image = self.axes.imshow(self.grid, )
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _show_Efield(self):
         '''Display the electric field as quivers.'''
-        u_v = findUandV(grid=self.grid)[::5, ::5]
+        if(self.Efield is None):
+            return
         axes = self.axes
-        Xs, Ys = self.Xs[::5, ::5], self.Ys[::5, ::5]
+        Xs, Ys = self.Xs, self.Ys
         
         # Remove previous quivers if they exist
         if self._quivers:
             self._quivers.remove()
 
-        # Draw new quivers
-        self._quivers = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b', scale=1, scale_units='xy')
+        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], self.Efield[::5, ::5, 0], self.Efield[::5, ::5, 1])
+            
+        # Compute the magnitude of the vectors
+        M = np.sqrt(U**2 + V**2)
+
+        # Normalize the vectors (avoid division by zero)
+        U_norm = U / (M + 1e-10)
+        V_norm = V / (M + 1e-10)
+
+        # Create a color map based on the magnitudes
+        norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
+                    
+        # Plot the quiver with normalized vectors and colored by magnitude
+        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
 
     def run(self):
         '''Solve the Laplace equation and update the grid and electric field.'''
@@ -91,7 +106,7 @@ class Task1_A(Task):
             except:
                 pass
 
-        self.axes.imshow(self.grid, cmap='viridis')
+        self.axes.imshow(self.grid, )
         self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
 
         self.figure.canvas.draw()

@@ -49,7 +49,7 @@ class TripleCircle(Task):
             self._Image.remove()
 
         axes = self.axes
-        self._Image = axes.imshow(grid, cmap='viridis')
+        self._Image = axes.imshow(grid, )
         # self._Image.set_clim(vmin=np.min(0), vmax=np.max(self.grid))  # Set color limits
         axes.set_title('Electrostatic Potential')
 
@@ -61,7 +61,7 @@ class TripleCircle(Task):
         if self.grid is None:
             return
         self.axes.clear()
-        self._Image = self.axes.imshow(self.grid, cmap='viridis')
+        self._Image = self.axes.imshow(self.grid, )
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _show_Efield(self):
@@ -80,7 +80,7 @@ class TripleCircle(Task):
     def run(self,maxruns:int=1000,stencil:int=5,gamma:float=0.0,abs_tol:float=1e-9,rel_tol:float=1e-6,wrap:bool=False,wrap_axis:str='none'):
         '''Solve the Laplace equation and update the grid and electric field.'''
         Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns,abs_tol=abs_tol,
-                                                        rel_tol=rel_tol,stencil=stencil,gamma=gamma,wrap=wrap,wrap_axis=wrap_axis)
+                                                        rel_tol=rel_tol,stencil=stencil,gamma=gamma,wrap=wrap,wrap_direction=wrap_axis)
         
         # Remove the previous colorbar and reset it
         if self._cbar is not None:
@@ -89,7 +89,7 @@ class TripleCircle(Task):
             except:
                 pass
 
-        self.axes.imshow(self.grid, cmap='viridis')
+        self.axes.imshow(self.grid, )
         self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
 
         self.figure.canvas.draw()

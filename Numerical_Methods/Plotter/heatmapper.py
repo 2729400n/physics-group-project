@@ -11,7 +11,7 @@ def _backend_plot_E_Field(potentialMap=None, E_FieldMap=None, xs=None, ys=None, 
     # Adjust figure size for better visualization
     plt.figure(figsize=(18, 18), dpi=320)
     # Set origin for consistency
-    plt.imshow(potentialMap, cmap='PiYG', origin='lower')
+    plt.imshow(potentialMap, )
     plt.colorbar(label='Electric Potential')
     plt.quiver(xs, ys, E_FieldMap[:, :, 0], E_FieldMap[:, :, 1],
                color='b', scale=0.1, scale_units='xy')  # Adjust scale and color

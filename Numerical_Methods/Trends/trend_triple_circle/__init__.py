@@ -49,7 +49,7 @@ class TripleCircle(Task):
             self._Image.remove()
 
         axes = self.axes
-        self._Image = axes.imshow(grid, cmap='viridis')
+        self._Image = axes.imshow(grid, )
         # self._Image.set_clim(vmin=np.min(0), vmax=np.max(self.grid))  # Set color limits
         axes.set_title('Electrostatic Potential')
 
@@ -61,7 +61,7 @@ class TripleCircle(Task):
         if self.grid is None:
             return
         self.axes.clear()
-        self._Image = self.axes.imshow(self.grid, cmap='viridis')
+        self._Image = self.axes.imshow(self.grid, )
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _show_Efield(self):
@@ -89,7 +89,7 @@ class TripleCircle(Task):
             except:
                 pass
 
-        self.axes.imshow(self.grid, cmap='viridis')
+        self.axes.imshow(self.grid, )
         self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
 
         self.figure.canvas.draw()

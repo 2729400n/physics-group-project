@@ -70,7 +70,7 @@ class Task4(Task):
         self.figure.canvas.draw()
         
 
-        self.axes.imshow(self.grid, cmap='viridis')
+        self.axes.imshow(self.grid, )
         
         if self.cbar is None:
             self.cbar = self.figure.colorbar(self.Image)

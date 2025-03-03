@@ -136,7 +136,7 @@ if __name__ == '__main__':
     grid = np.ones((100, 100))
     circ = rectangle_w_h(10, 10, 40, 40, fill=True, clear=True, Grid=grid)
 
-    plt.imshow(circ, cmap='gray')
+    plt.imshow(circ, )
     plt.colorbar()
     plt.title('Pixelated Shape')
     plt.show()

@@ -31,7 +31,7 @@ def circle(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, val: fl
     # TODO Variate Tolerance : the cirlces tolerance for a non filled circle should be a function of the radius
     # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
     tolerance = r  # Ensure tolerance does not dominate
-    print(r)
+    # print(r)
     circle_mask = operations[bool(fill)][bool(clear)](
         (grid_x-cx)**2 + (grid_y-cy)**2, r**2, thickness*tolerance)
     # Apply anti-aliasing using Gaussian blur
@@ -73,10 +73,12 @@ def circle_bool(cx: float, cy: float, r: float, dx: float = 1, dy: float = 1, va
     # Currently not implemented correctly it causes a band instead of a line this band width can variet based on the tolerance
     tolerance = r  # Ensure tolerance does not dominate
     # print(r)
-    circle_mask = operations[bool(fill)][bool(clear)](
+    circle_mask = operations[bool(fill)][0](
         (grid_x-cx)**2 + (grid_y-cy)**2, r**2, thickness*tolerance)
     
-    pixelated_circle = circle_mask
+    if clear:
+        circle_mask = np.logical_not(circle_mask)
+    pixelated_circle = circle_mask 
 
     return pixelated_circle
 
@@ -373,7 +375,7 @@ def identityOverlay(Grid: np.ndarray):
 #     grid[:,:]=1
 #     circ=annulus(100,100,25,100,2,fill=False,clear=False,Grid=grid)
 
-#     plt.imshow(circ, cmap='gray')
+#     plt.imshow(circ, )
 #     plt.colorbar()
 #     plt.title('Pixelated Circle with Anti-aliasing')
 #     plt.show()
@@ -387,7 +389,7 @@ if __name__ == '__main__':
     grid[:, :] = 1
     circ = rectangle_w_h_smooth(1.5, 7.89, 79.83323, 20.332, fill=True,
                          clear=True, Grid=grid)
-    plt.imshow(circ, cmap='gray')
+    plt.imshow(circ, )
     plt.colorbar()
     plt.title('Pixelated Circle with Anti-aliasing')
     plt.show()

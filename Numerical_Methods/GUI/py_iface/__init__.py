@@ -210,12 +210,15 @@ def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
                     try:
                         arg=int(arg)
                     except:
-                        print('not int')
+                        # print('not int')
                         try:
                             arg=np.float64(arg)
                         except:
-                            print('not float')
-                            arg=str(arg)
+                            # print('not float')
+                            try:
+                                arg=str(arg).encode('utf-8').decode('unicode_escape')
+                            except:
+                                arg=str(arg)
             # print('callFunc before Storing:',arg,type(arg))
             kwargs[i]=arg
     try:

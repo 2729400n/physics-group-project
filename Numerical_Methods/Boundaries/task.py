@@ -5,6 +5,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
 from matplotlib.image import AxesImage
 from matplotlib.quiver import Quiver
+from matplotlib.text import Text
 import numpy as np
 from ..Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
 from ..utils.naming import slugify
@@ -173,13 +174,40 @@ class Task(typing.Protocol):
         self.figure.canvas.flush_events()
         
     # New method to adjust figure size, font size, and axis limits
-    def adjust_plot(self, figsize_w: float=12, figsize_h:float = 12, fontsize: int = 12):
+    def adjust_plot(self, figsize_w: float=12, figsize_h:float = 12, fontsize: float = 12,FigTitle:str="",XLabel:str='',YLabel:str='',axesTitle:str='',
+                    FigTitlefontSize:float=16,axesTitlefontSize:float=16, ylabelfontsize:float=16,xlabelFontSize:float=16,tight_layout:bool=False,dpi:int=64):
         """Adjust figure size, font size, and axis limits."""
+        if self.figure is None or self.axes is None:
+            raise Exception('Cannot save to empty Figure')
+        self.figure.draw_without_rendering()
         if (figsize_w is not None) and (figsize_h is not None):
-            self.figure.set_size_inches(figsize_w, figsize_h, forward=True)
+            self.figure.set_dpi(dpi)
+            self.figure.set_size_inches(figsize_w, figsize_h, forward=False,)
         
         for label in self.axes.get_xticklabels() + self.axes.get_yticklabels():
             label.set_fontsize(fontsize)
+            
+        ylabel =self.axes.set_ylabel(YLabel)
+        xlabel=self.axes.set_xlabel(XLabel)
+        #
+        
+        ylabel.set_fontsize(ylabelfontsize)
+        xlabel.set_fontsize(ylabelfontsize)
+        #
+        #
+        self.axes.set_title(axesTitle)
+        self.axes.title.set_fontsize(axesTitlefontSize)
+        #
+        #
+        title=self.figure.suptitle(FigTitle,)
+        title.set_fontsize(FigTitlefontSize)
+        
+        self.figure.draw_without_rendering()
+        if (figsize_w is not None) and (figsize_h is not None):
+            self.figure.set_size_inches(figsize_w, figsize_h, forward=True)
+        
+        if tight_layout:
+            self.figure.tight_layout()
     
     
     def save_grid(self):

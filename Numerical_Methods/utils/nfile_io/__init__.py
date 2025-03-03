@@ -71,6 +71,15 @@ def saveFileGui(data:bytes,ftypes=None,initname:str=None):
     fout.close()
     return True
 
+
+def getModuleFileNamesGui(initname:str=None):
+    ftypes = [("Python",'*.py'),("Python Compiled",'*.pyc'),("ALL","*.*")]
+    import tkinter.filedialog as fdiag
+    fout=fdiag.askopenfilenames(defaultextension='.py',initialdir=SAVEDIR,filetypes=ftypes, title="Choose Module",initialfile=initname)
+    if fout is '':
+        fout=None
+    return fout
+
 def walkDirectory(directory:'pathlib.Path|str|bytes',extension=''):
     if isinstance(dir,bytes):
         directory=directory.decode()

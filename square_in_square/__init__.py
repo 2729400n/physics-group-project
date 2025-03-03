@@ -1,23 +1,50 @@
 from matplotlib.colorbar import Colorbar
 from matplotlib.quiver import Quiver
 import numpy as np
-from . import boundary
-from ...Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
+from Numerical_Methods.Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
-from ..task import Task
+from Numerical_Methods.Boundaries.task import Task
 import io
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
-Boundary = boundary.GeometryFactory
-class Task1_A(Task):
+
+from Numerical_Methods.utils.geometry import circle,annulus,circle_bool,rectangle,rectangle_w_h_bool
+import numpy as np
+
+
+# Will employ the use of a closure to ensure uniqueness for multi-threading
+def Boundary(val1:float=1.0,val2:float=1.0,r1:float=35,cx:float=100,cy:float=100,relative=False):
+    
+    # A simple cacher 
+    Gridder:'list[np.ndarray[np.ndarray[np.float64]], np.ndarray[np.ndarray[np.bool]]]' = None
+    
+    def AnnulusField(Grid:np.ndarray,overlay:bool=None,retoverlay:bool=False):
+        nonlocal Gridder
+        temp1 = Grid.copy()
+        if Gridder is None:
+            stepback=r1*np.tan(45)
+            width,height = Grid.shape
+            rect1 = rectangle_w_h_bool(cx-stepback,cy-stepback,r1/np.sqrt(2),r1/np.sqrt(2),val=True,fill=True,clear=False,Grid=(width,height))
+            circ1 = circle_bool(cx,cy,r1,val=True,fill=False,clear=False,Grid=(width,height))
+            circ2 = circle_bool(cx,cy,r1+1,clear=True,fill=True,Grid=(width,height))
+            
+            Gridder = [rect1,circ1,circ2]
+        
+        temp1[Gridder[0]] = val1
+        temp1[Gridder[1]] = val2
+        # temp1[Gridder[2]] = 0
+        
+        return temp1
+    return AnnulusField
+
+class TripleCircle(Task):
     '''
         Task1:
             description: Task one is the first task given to solve the anulus situation.
             The class defines the standard task interface methods.
     '''
     
-    name = "Anulus_Analytical"
+    name = "Concentric_circle_and_Square"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__(axes=axes, *args, **kwargs)
@@ -26,22 +53,21 @@ class Task1_A(Task):
         self._cbar = None
         self.grid = None
 
-    def setup(self, x1: float, y1: float, r1: float, r2: float, cx: float,
-              cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,
+    def setup(self, x1: float, y1: float, r1: float, cx: float,
+              cy: float, v1: float = 1.0,v2: float = 1.0, x0: float = 0.0, y0: float = 0.0,
               dy: float = 1.0, dx: float = 1.0):
         '''Setup the grid and boundary condition, display the initial potential.'''
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)
         
-        # print(x0, x1, dx)
-        Xs = np.arange(x0, x1+dx, dx)
-        Ys = np.arange(y0, y1+dy, dy)
+        print(x0, x1, dx)
+        Ys=self.Xs = np.arange(x0, x1+dx, dx)
+        Xs=self.Ys = np.arange(y0, y1+dy, dy)
 
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
-        self.boundaryCondition = boundary.GeometryFactory(V=v, r1=r1, r2=r2, cx=cx, cy=cy, dx=dx,dy=dy)
+        self.boundaryCondition = Boundary(val1=v1,val2=v2, r1=r1, cx=cx, cy=cy)
         self.grid = grid = self.boundaryCondition(Grid=grid, retoverlay=False)
         self.Xs, self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]
-        
         self.resXs = Xs
         self.resYs = Ys
         self.resdx = dx
@@ -80,9 +106,10 @@ class Task1_A(Task):
         # Draw new quivers
         self._quivers = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b', scale=1, scale_units='xy')
 
-    def run(self):
+    def run(self,maxruns:int=1000,stencil:int=5,gamma:float=0.0,abs_tol:float=1e-9,rel_tol:float=1e-6,wrap:bool=False,wrap_axis:str='none'):
         '''Solve the Laplace equation and update the grid and electric field.'''
-        self.grid,self.Efield = self.boundaryCondition.calculateField(self.grid)
+        Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns,abs_tol=abs_tol,
+                                                        rel_tol=rel_tol,stencil=stencil,gamma=gamma,wrap=wrap,wrap_direction=wrap_axis)
         
         # Remove the previous colorbar and reset it
         if self._cbar is not None:

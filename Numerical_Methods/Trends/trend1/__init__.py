@@ -50,7 +50,7 @@ class Task1(Task):
             self._Image.remove()
 
         axes = self.axes
-        self._Image = axes.imshow(grid, cmap='viridis')
+        self._Image = axes.imshow(grid, )
         # self._Image.set_clim(vmin=np.min(0), vmax=np.max(self.grid))  # Set color limits
         axes.set_title('Electrostatic Potential')
 
@@ -62,7 +62,7 @@ class Task1(Task):
         if self.grid is None:
             return
         self.axes.clear()
-        self._Image = self.axes.imshow(self.grid, cmap='viridis')
+        self._Image = self.axes.imshow(self.grid, )
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
     def _show_Efield(self):
@@ -88,7 +88,7 @@ class Task1(Task):
         norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
                     
         # Plot the quiver with normalized vectors and colored by magnitude
-        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy', cmap='plasma', norm=norm)
+        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
 
     def run(self,maxruns:int=1000,stencil:int=5,gamma:float=0.0,abs_tol:float=1e-9,rel_tol:float=1e-6):
         '''Solve the Laplace equation and update the grid and electric field.'''
@@ -103,7 +103,7 @@ class Task1(Task):
             except:
                 pass
 
-        self.axes.imshow(self.grid, cmap='viridis')
+        self.axes.imshow(self.grid, )
         self._cbar = self.figure.colorbar(self._Image, ax=self.axes)
 
         self.figure.canvas.draw()

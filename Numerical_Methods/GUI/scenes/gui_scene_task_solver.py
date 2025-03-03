@@ -3,8 +3,9 @@ import os.path as pth
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as msgbox_
+import tkinter.filedialog as fdiag
 
-from ...utils import nfile_io
+from ...utils import nfile_io,importer_lib
 from ... import Boundaries as tasks_module
 from .. import py_iface
 
@@ -33,12 +34,16 @@ class TasksFrame(tk.Frame):
         self._heatmap = matplotlib.figure.Figure(figsize=(3, 3), dpi=64, tight_layout=True)
         self.ctask_label:ttk.Label = None
         self.ctask_str = tk.StringVar(self,"No Task Selected")
+        self.control_panel=None
+        self.canvas_frame= None
         self.createWidgets()
 
     def load_Tasks(self):
         """Load available tasks into taskMap."""
         if self.taskMap is None:
             self.taskMap = {}
+        
+        self.taskMap.clear()
 
         for task in tasks_module.tasks:
             curr_task = task()
@@ -53,7 +58,23 @@ class TasksFrame(tk.Frame):
 
         # Start real-time update loop
         self.update_canvas()
-
+        
+    def _load_task_file(self):
+        task_files=nfile_io.getModuleFileNamesGui()
+        if task_files is None:
+            return
+        if isinstance(task_files,str):
+            task_files = (task_files,)
+        for i in task_files:
+            is_package=msgbox_.askyesnocancel('Module Loading',f'is \n[ {i} ]\n a ModuleFile')
+            if is_package is None:
+                is_package=False
+            if is_package:
+                mod=importer_lib.import_from_path(i,is_pacakge=True,load_spec=True,make_updateable=True)
+            else:
+                mod=importer_lib.import_from_path(i,package_suffix='Numerical_Methods.Boundaries.',is_pacakge=False,load_spec=True,make_updateable=True)
+            
+        
     def create_sidebar(self):
         """Create the left panel with task list and action buttons."""
         sidebar = tk.LabelFrame(self, text="Tasks")
@@ -69,6 +90,8 @@ class TasksFrame(tk.Frame):
         ttk.Button(sidebar, text="Pop Out Canvas", command=self.pop_out_canvas).pack(fill=tk.X, padx=5, pady=5)
         ttk.Button(sidebar, text="Reload Tasks", command=self.reload).pack(fill=tk.X, padx=5, pady=5)
         ttk.Button(sidebar, text="Save Data", command=self.save_data).pack(fill=tk.X, padx=5, pady=5)
+        ttk.Button(sidebar, text="Load new task", command=self._load_task_file).pack(fill=tk.X, padx=5, pady=5)
+        ttk.Button(sidebar, text="Remove tasks", command=self.remove_task).pack(fill=tk.X, padx=5, pady=5)
 
     def create_main_view(self):
         """Create the right panel with task controls and graph display."""
@@ -81,8 +104,8 @@ class TasksFrame(tk.Frame):
 
     def create_task_control_panel(self, parent):
         """Create scrollable task control frame."""
-        frame = ttk.Frame(parent)
-        frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5,side=tk.TOP)
+        frame = self.control_panel=ttk.Frame(parent)
+        frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5,side=tk.TOP,before=self.canvas_frame)
 
         self.canvasEntry = tk.Canvas(frame)
         self.canvasEntry.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -103,7 +126,7 @@ class TasksFrame(tk.Frame):
 
     def create_canvas_panel(self, parent):
         """Create the panel for displaying task graphs."""
-        canvas_frame = ttk.Frame(parent)
+        canvas_frame=self.canvas_frame = ttk.Frame(parent)
         canvas_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5,side=tk.BOTTOM)
 
         self._display = mb_tkagg.FigureCanvasTkAgg(self._heatmap, master=canvas_frame)
@@ -121,6 +144,23 @@ class TasksFrame(tk.Frame):
         self.load_Tasks()
         self.update_task_list()
 
+    def remove_task(self):
+        index = self.taskList.curselection()
+        if not index:
+            return
+
+        key = self.taskList.get(index[0])
+        if key == self.current_task:
+            return
+        
+        self.taskList.delete(index)
+        task_obj:Task=self.taskMap.pop(key)
+        try:
+            tasks_module.tasks.remove(task_obj)
+        except KeyError:
+            pass
+        
+        
     def update_task_list(self):
         """Update the task list in the UI."""
         self.taskList.delete(0, tk.END)

@@ -82,8 +82,8 @@ def laplace_ode_solver(size: 'tuple[int,int]|np.ndarray[int,int]',
     else:
         raise ValueError(f'Cannot use a {stencil}-point stencil')
 
-    print("Multipliers=", (adjacentmult, diagamult))
-    print(Xs.shape[0], Ys.shape[0])
+    # print("Multipliers=", (adjacentmult, diagamult))
+    # print(Xs.shape[0], Ys.shape[0])
     
     i = 0
     while i < max_iterations:
@@ -150,7 +150,7 @@ def laplace_ode_solver_continue(
     Grid: np.ndarray,
     fixedConditions: 'Callable' = doNothing,
     startingShape: 'Callable' = doNothing,
-    resolution: tuple[float, float] | str = (1.0, 1.0),
+    resolution: tuple[float, float] = (1.0, 1.0),
     overlaySaver: bool = False,
     stencil: Literal[5, 9] = 5,
     gamma: float = 0.0,
@@ -201,11 +201,11 @@ def laplace_ode_solver_continue(
     else:
         raise ValueError(f"Cannot use a {stencil}-point stencil. Only offer 9 and 5 point stencils")
     
-    print("Multipliers=", (adjacentmult, diagamult))
-    print(Xs.shape[0], Ys.shape[0])
+    # print("Multipliers=", (adjacentmult, diagamult))
+    # print(Xs.shape[0], Ys.shape[0])
     
     i = 0
-    while True if ((max_iterations == -1) or (max_iterations  is None)) else i < max_iterations:
+    while True if ((max_iterations == -1) or (max_iterations  is None)) else (i < max_iterations):
         ForwardHSpace_A2f = Frames[i % 2, 1:-1, 2:]
         BackwardHSpace_A2f = Frames[i % 2, 1:-1, :-2]
         ForwardVSpace_A2f = Frames[i % 2, 2:, 1:-1]
@@ -251,19 +251,19 @@ def laplace_ode_solver_continue(
             max_diff = np.max(reldiff)
             
             if max_diff <= rel_tol:
-                print('rel_max_Diff',max_diff)
+                # print('rel_max_Diff',max_diff)
                 at_equilibrium = True
         else:
             if np.max(absdiff) <= abs_tol:
-                print('abs_max_Diff',np.max(absdiff))
+                # print('abs_max_Diff',np.max(absdiff))
                 at_equilibrium = True
         
         if at_equilibrium and i>1:
-            print('Reached equilibrium')
+            # print('Reached equilibrium')
             break
         
         i += 1
-    print(f'finished {i} evlas')
+    # print(f'finished {i} evlas')
     return Ys, Xs, Frames[i % 2]
 
 
@@ -298,17 +298,17 @@ def laplace_ode_solver_step(
     """
     dx, dy = resolution if isinstance(resolution, tuple) else (1.0, 1.0)
     
-    # Constants for the finite difference method
     sqrt_a = dy / dx
-    a = sqrt_a ** 2
-    b = dx ** 2 + dy ** 2
+    a = sqrt_a**2
+    
+    b = dy**2 + dx**2
     sqrt_b = np.sqrt(b)
     
     Frames = np.zeros((2, *Grid.shape), dtype=np.float64)
-    Frames[0], overlay = startingShape(Grid, retoverlay=True)
+    Frames[0] = startingShape(Grid)
+    
     Xs = np.arange(0, Grid.shape[1], 1)
-    Ys = np.arange(0, Grid.shape[0] + 1, 1)
-    print(Xs.shape[0], Ys.shape[0])
+    Ys = np.arange(0, Grid.shape[0], 1)
     
     if stencil == 9:
         diagamult = gamma / b
@@ -317,60 +317,69 @@ def laplace_ode_solver_step(
         diagamult = 0
         adjacentmult = 1 / (2.0 * (a + 1))
     else:
-        raise ValueError(f"Invalid stencil: {stencil}. Only 5 and 9 are supported.")
-
-    # Calculate next step with 9-point stencil
-    ForwardHSpace_A2f = Frames[0, 1:-1, 2:]
-    BackwardHSpace_A2f = Frames[0, 1:-1, :-2]
-    ForwardVSpace_A2f = Frames[0, 2:, 1:-1]
-    BackwardVSpace_A2f = Frames[0, :-2, 1:-1]
-
-    DiagForwardUp = Frames[0, 2:, 2:]
-    DiagForwardDown = Frames[0, :-2, 2:]
-    DiagBackUp = Frames[0, 2:, :-2]
-    DiagBackDown = Frames[0, :-2, :-2]
-
-    # 9-point stencil update
-    Frames[1, 1:-1, 1:-1] = adjacentmult * (
-        a * (ForwardHSpace_A2f + BackwardHSpace_A2f) + 
-        (ForwardVSpace_A2f + BackwardVSpace_A2f)
+        raise ValueError(f"Cannot use a {stencil}-point stencil. Only offer 9 and 5 point stencils")
+    
+    # print("Multipliers=", (adjacentmult, diagamult))
+    # print(Xs.shape[0], Ys.shape[0])
+    
+    i = 0
+    # while True if ((2 == -1) ) else i < 1:
+    ForwardHSpace_A2f = Frames[i % 2, 1:-1, 2:]
+    BackwardHSpace_A2f = Frames[i % 2, 1:-1, :-2]
+    ForwardVSpace_A2f = Frames[i % 2, 2:, 1:-1]
+    BackwardVSpace_A2f = Frames[i % 2, :-2, 1:-1]
+    
+    DiagForwardUp = Frames[i % 2, 2:, 2:]
+    DiagForwardDown = Frames[i % 2, :-2, 2:]
+    DiagBackUp = Frames[i % 2, 2:, :-2]
+    DiagBackDown = Frames[i % 2, :-2, :-2]
+    
+    Frames[(i+1) % 2, 1:-1, 1:-1] = adjacentmult * (
+        a * (ForwardHSpace_A2f + BackwardHSpace_A2f) + (ForwardVSpace_A2f + BackwardVSpace_A2f)
     ) + diagamult * (DiagBackUp + DiagBackDown + DiagForwardDown + DiagForwardUp)
     
-    # Handle periodic boundary conditions (wrap)
     if wrap:
         if wrap_direction in ["both", "y"]:
-            Frames[1, (0, -1), 1:-1] = adjacentmult * (
-                a * (Frames[0, (0, -1), 2:] + Frames[0, (0, -1), :-2]) +
-                (Frames[0, (-1, -2), 1:-1] + Frames[0, (1, 0), 1:-1])
-            ) + diagamult * (
-                Frames[0, (1, 0), 2:] + Frames[0, (-1, -2), 2:] +
-                Frames[0, (1, 0), :-2] + Frames[0, (-1, -2), :-2]
-            )
-        if wrap_direction in ["both", "x"]:
-            Frames[1, 1:-1, (0, -1)] = adjacentmult * (
-                a * (Frames[0, 1:-1, (-1, -2)] + Frames[0, 1:-1, (1, 0)]) +
-                (Frames[0, 2:, (0, -1)] + Frames[0, :-2, (0, -1)])
-            ) + diagamult * (
-                Frames[0, :-2, (-1, -2)] + Frames[0, 2:, (-1, -2)] +
-                Frames[0, :-2, (1, 0)] + Frames[0, 2:, (1, 0)]
+            Frames[(i+1) % 2, (0, -1), 1:-1] = adjacentmult * (
+                a * (Frames[i % 2, (0, -1), 2:] + Frames[i % 2, (0, -1), :-2]) +
+                (Frames[i % 2, (-1, -2), 1:-1] + Frames[i % 2, (1, 0), 1:-1])
+            )  + diagamult * (
+                Frames[i % 2, (1, 0), 2:] + Frames[i % 2, (-1, -2), 2:] +
+                Frames[i % 2, (1, 0), :-2] + Frames[i % 2, (-1, -2), :-2]
             ) 
-
-    # Apply fixed boundary conditions
-    Frames[1] = fixedConditions(Frames[1], overlay=overlay)
+        if wrap_direction in ["both", "x"]:
+            Frames[(i+1) % 2, 1:-1, (0, -1)] = adjacentmult * (
+                a * (Frames[i % 2, 1:-1, (-1, -2)] + Frames[i % 2, 1:-1, (1, 0)]) +
+                (Frames[i % 2, 2:, (0, -1)] + Frames[i % 2, :-2, (0, -1)])
+            )  + diagamult * (
+                Frames[i % 2, :-2, (-1, -2)] + Frames[i % 2, 2:, (-1, -2)] +
+                Frames[i % 2, :-2, (1, 0)] + Frames[i % 2, 2:, (1, 0)]
+            ) 
+    
+    Frames[(i+1) % 2] = fixedConditions(Frames[(i+1) % 2])
+    
     
     # Convergence check
-    absdiff = np.abs((Frames[0] - Frames[1]))
-    indexes = Frames[1] > np.spacing(absdiff) 
-    reldiff = np.abs(absdiff[indexes] / Frames[1][indexes])
+    absdiff = np.abs((Frames[i % 2] - Frames[(i+1) % 2]))
+    indexes = np.abs(Frames[(i+1) % 2]) > 2*np.spacing(absdiff) 
+    reldiff = np.abs(absdiff[indexes] / Frames[(i+1) % 2][indexes])
     
     at_equilibrium = False
     if np.size(reldiff) > 0:
         max_diff = np.max(reldiff)
-        if max_diff < rel_tol:
+        
+        if max_diff <= rel_tol:
+            # print('rel_max_Diff',max_diff)
             at_equilibrium = True
     else:
-        if np.max(absdiff) < abs_tol:
+        if np.max(absdiff) <= abs_tol:
+            # print('abs_max_Diff',np.max(absdiff))
             at_equilibrium = True
-
-    # Return the results with equilibrium status
-    return Ys, Xs, Frames[1], at_equilibrium
+    
+    # if at_equilibrium and i>1:
+    #     # print('Reached equilibrium')
+    #     break
+        
+    i += 1
+    # print(f'finished {i} evlas')
+    return Ys, Xs, Frames[i % 2], at_equilibrium

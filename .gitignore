@@ -4,3 +4,7 @@ Numerical_Methods/GUI/py_iface/The setup.png
 **/__pycache__
 *.npz
 output.png
+*.gif
+*.pyc
+*ipynb
+setup.py
