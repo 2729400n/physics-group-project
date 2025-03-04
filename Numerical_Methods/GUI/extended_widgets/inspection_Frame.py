@@ -200,7 +200,8 @@ class InspectFrame(Frame):
         # self.ax.legend()
 
         resi, absresi = errors.laplaceify(self.Grid_obj, self.dx, self.dy)
-        ax.imshow(Grid_obj)
+        img=ax.imshow(Grid_obj)
+        fig.colorbar(img)
         self.after(500, self.checkQueue)
 
     def checkQueue(self):
@@ -511,7 +512,7 @@ class InspectFrame(Frame):
             error,
             self.dx,
             self.dy,
-            title="ABS residuals Laplacian",
+            title="Residuals Laplacian",
             xlabel="X label",
             ylabel="Y label",
         )

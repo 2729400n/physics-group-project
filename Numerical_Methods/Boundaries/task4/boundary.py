@@ -23,11 +23,12 @@ class GeometryFactory(typing.Callable):
         self.dx = dx
         self.dy = dy
         self.circles:'list[np.ndarray[np.float64]]'=None
+        self.circ_data:'list[typing.Any]'=[]
         self.grid_shape= None
     
     def __call__(self,Grid: np.ndarray, overlay=None, retoverlay=False, *args, **kwargs):
         grid = Grid.copy()
-        if (self.circles is None) or (self.grid_shape != grid.shape):
+        if (self.circles is None) or (self.circ_data is None) or (self.grid_shape != grid.shape) :
             self.circles = []
             self.grid_shape = grid.shape
         
@@ -46,6 +47,7 @@ class GeometryFactory(typing.Callable):
             for cx_i in cx_s:
                 c1 = geometry.circle_bool(cx_i, cy, self.radius, 1.0, 1.0, fill=True, clear=False,Grid=tuple(grid.shape))
                 self.circles.append(c1)
+                self.circ_data.append([cx_i,cy,self.radius])
                 grid[c1]=0
         else:
             for i in self.circles:
@@ -75,16 +77,21 @@ class GeometryFactory(typing.Callable):
     
     def shift_circle(self,cirlce_index:int=0,cx:float=0.0,cy:float=0.0):
         
-        self.circles[cirlce_index] = geometry.circle_bool(cx, cy, self.radius, 1.0, 1.0, fill=True, clear=False,Grid=tuple(self.circles[cirlce_index].shape))
+        self.circles[cirlce_index] = geometry.circle_bool(cx, cy, self.radius,  self.dx, self.dy, fill=True, clear=False,Grid=tuple(self.circles[cirlce_index].shape))
     
     def shift_circle_displace(self,cirlce_index:int=0,d_x:float=0.0,d_y:float=0.0,oldcy=0.0,oldcx:float=0.0):
+        
         if self.center:
-                cy = (cirlce_index[cirlce_index].shape[0]/2)*self.dy
-                cx = (cirlce_index[cirlce_index].shape[1]/2)*self.dx
+                cy = (self.circles[cirlce_index].shape[0]/2)*self.dy
+                cx = (self.circles[cirlce_index].shape[1]/2)*self.dx
                 
         else:
             cy = self.cy
             cx = self.cx
-        self.circles[cirlce_index] = geometry.circle_bool(cy+d_x, cx+d_y, self.radius, 1.0, 1.0, fill=True, clear=False,Grid=tuple(self.circles[cirlce_index].shape))
+        # print(cx,cy)
+        cdata=self.circ_data[cirlce_index]
+        # cdata[0]+=d_x
+        # cdata[1]+=d_y
+        self.circles[cirlce_index] = geometry.circle_bool(cdata[0]+d_x, cdata[1]+d_y, cdata[2], self.dx, self.dy, fill=True, clear=False,Grid=tuple(self.circles[cirlce_index].shape))
 
 

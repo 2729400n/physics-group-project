@@ -39,29 +39,7 @@ class Task2(Task):
         axes.imshow(grid)
         axes.set_title('Electrostatic Potential')
         
-    def _show_Efield(self):
-        '''Display the electric field as quivers.'''
-        u_v=self.Efield = findUandV(grid=self.grid)
-        axes = self.axes
-        Xs, Ys = self.Xs, self.Ys
-        
-        # Remove previous quivers if they exist
-        if self._quivers:
-            self._quivers.remove()
 
-        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[::5, ::5, 0], u_v[::5, ::5, 1])
-            
-        # Compute the magnitude of the vectors
-        M = np.sqrt(U**2 + V**2)
-
-        # Normalize the vectors (avoid division by zero)
-        U_norm = U / (M + 1e-10)
-        V_norm = V / (M + 1e-10)
-
-        # Create a color map based on the magnitudes
-        norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
-        # Plot the quiver with normalized vectors and colored by magnitude
-        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
         
     def redraw(self):
         '''Redraw the grid and other plot elements.'''
@@ -78,7 +56,7 @@ class Task2(Task):
         '''Solve the Laplace equation and update the grid and electric field.'''
         Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns,
                                                         abs_tol=abs_tol,rel_tol=rel_tol,resolution=(self.resdx,self.resdy),
-                                                        stencil=stencil,gamma=gamma,wrap=True,wrap_direction='both')
+                                                        stencil=stencil,gamma=gamma,wrap=True,wrap_direction='y')
         
         # Remove the previous colorbar and reset it
         if self._cbar is not None:

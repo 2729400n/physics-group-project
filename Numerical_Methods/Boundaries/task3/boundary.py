@@ -18,8 +18,8 @@ def geometryFactory(val=1.0, pad_w=30, pad_h=30, gap=40, relative=False,NNCount=
         if Gridder is None:
             pad_positions = [
                 (center_x - 2*(gap+pad_w),     center_y-pad_h/2,    0),  # GND Pad
-                (center_x - (gap+pad_w), center_y-pad_h/2,  val),  # +V Pad
-                (center_x + gap, center_y-pad_h/2, -val),  # -V Pad
+                (center_x - (gap/2+pad_w), center_y-pad_h/2,  val),  # +V Pad
+                (center_x + gap/2, center_y-pad_h/2, -val),  # -V Pad
                 (center_x + (2*gap+pad_w),     center_y-pad_h/2,    0)  # GND Pad
             ]
         

@@ -12,6 +12,7 @@ from ..utils.naming import slugify
 from time import strftime
 tasks:'set[Task]' = set()
 import matplotlib.colors as mcolors
+from .. import Solvers
     
 # Our task Class
 class Task(typing.Protocol):
@@ -44,10 +45,12 @@ class Task(typing.Protocol):
         self.grid = None
         self._cbar: Colorbar = None
         self._quivers: Quiver = None
-        self.exposed_methods = [self.setup, self.run, self._show_Efield,self.adjust_plot,self._cleanup]
+        self.exposed_methods = [self.setup, self.run, self._show_Efield,self.adjust_plot,self._cleanup,self.clear_quivers,self.hide_cbar,self.show_cbar,self.hide_quivers,self.show_quivers]
         self.savables: 'dict[str,typing.Callable[[],tuple[str,bytes]]]' = {'Grid': self.save_grid, 'Figure': self.save_figure,'ALL_DATA':self.save_all_numerical}
         self.Efield = None
         self.all_data =None
+        self.dx=1.0
+        self.dy=1.0
         
 
 
@@ -75,16 +78,19 @@ class Task(typing.Protocol):
     
     def _show_Efield(self):
         '''Display the electric field as quivers.'''
-        u_v=self.Efield = Solvers.findUandV(grid=self.grid)
+        if self.grid is None:
+            raise  ValueError('Need to run Setup')
+        u_v=self.Efield = Solvers.findUandV_ind1(grid=self.grid)
         axes = self.axes
-        Ys,Xs = np.meshgrid(self.Ys, self.Xs)
-        
+        Ys,Xs = np.mgrid[:self.grid.shape[0], :self.grid.shape[1]]
+        Ys = Ys*self.dy
+        Xs = Xs *self.dx
         # Remove previous quivers if they exist
         if self._quivers:
             self._quivers.remove()
             self._quivers=None
 
-        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[::5, ::5, 0], u_v[::5, ::5, 1])
+        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[1,::5, ::5], u_v[0,::5, ::5])
             
         # Compute the magnitude of the vectors
         M = np.sqrt(U**2 + V**2)
@@ -98,7 +104,7 @@ class Task(typing.Protocol):
         norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
                     
         # Plot the quiver with normalized vectors and colored by magnitude
-        axes.quiver(Xs.T, Ys.T, U_norm.T, V_norm.T, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
+        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='uv',  norm=norm)
 
     def run(self) -> None: ...
 
@@ -109,7 +115,47 @@ class Task(typing.Protocol):
         self.cbar=None
         self.quivers=None
         self.__init__()
+    
+    def clear_quivers(self):
+        if self.quivers is not None:
+            try:
+                self._quivers.remove()
+            except KeyError:
+                raise Exception('No Quiver')
+            self._quivers=None
+        return
 
+    def hide_quivers(self):
+        if self.quivers is not None:
+            try:
+                self._quivers.set_visible(False)
+            except KeyError:
+                raise Exception('No Quiver')
+        return
+    
+    def show_quivers(self):
+        if self.quivers is not None:
+            try:
+                self._quivers.set_visible(True)
+            except KeyError:
+                raise Exception('No Quiver')
+        return
+    
+    def hide_cbar(self):
+        if self.quivers is not None:
+            try:
+                self.cbar.set_visible(False)
+            except KeyError:
+                raise Exception('No Quiver')
+        return
+    
+    def show_cbar(self):
+        if self.quivers is not None:
+            try:
+                self.cbar.set_visible(True)
+            except KeyError:
+                raise Exception('No Quiver')
+        return
 
     def reset(self) -> None: ...
     

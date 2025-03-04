@@ -120,7 +120,7 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
                     dy: float = 1.0, dx: float = 1.0,
                     xmaxfev: int = None, ymaxfev: int = None, xymaxfev: int = None,
                     xtol: float = None, ytol: float = None, xytol: float = None,
-                    savefunc:bool=True,xdeg:int=None,ydeg:int=None):
+                    savefunc:bool=True,xdeg:int=None,ydeg:int=None,Xs=None,Ys=None):
     (m, n) = Grid.shape
     if m < 1 or n < 1:
         raise ValueError('Cannot interpolate an empty grid')

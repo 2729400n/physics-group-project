@@ -64,18 +64,6 @@ class TripleCircle(Task):
         self._Image = self.axes.imshow(self.grid, )
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
-    def _show_Efield(self):
-        '''Display the electric field as quivers.'''
-        u_v = findUandV(grid=self.grid)[::5, ::5]
-        axes = self.axes
-        Xs, Ys = self.Xs[::5, ::5], self.Ys[::5, ::5]
-        
-        # Remove previous quivers if they exist
-        if self._quivers:
-            self._quivers.remove()
-
-        # Draw new quivers
-        self._quivers = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b', scale=1, scale_units='xy')
 
     def run(self,maxruns:int=1000,stencil:int=5,gamma:float=0.0,abs_tol:float=1e-9,rel_tol:float=1e-6,wrap:bool=False,wrap_axis:str='none'):
         '''Solve the Laplace equation and update the grid and electric field.'''

@@ -68,20 +68,6 @@ class Task5(Task):
         self.Image = self.axes.imshow(self.grid)
         return
 
-    def _show_Efield(self):
-        u_v = findUandV(grid=self.grid)[::5, ::5]*25
-        axes = self.axes
-        Xs = self.Xs[::5, ::5]
-        Ys = self.Ys[::5, ::5]
-        if self.quivers is not None:
-            self.quivers.set_visible(False)
-            self.quivers.remove()
-            self.quivers = None
-        # Adjust scale and color
-        quiv = axes.quiver(Xs, Ys, u_v[:, :, 0], u_v[:, :, 1], color='b',
-                           scale=0.1, scale_units='xy')
-
-        self.quivers = quiv
 
     def run(self):
         Xs, Ys, self.grid = laplace_ode_solver_continue(

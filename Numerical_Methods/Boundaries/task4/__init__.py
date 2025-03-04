@@ -14,7 +14,7 @@ class Task4(Task):
     name="MWPC"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__()
-        self.exposed_methods+=[self.move_circle_by,self.move_circle_to,self.clear_quivers]
+        self.exposed_methods+=[self.move_circle_by,self.move_circle_to]
         
 
     def setup(self, x1: float, y1: float, a: float, cx: float,
@@ -67,7 +67,8 @@ class Task4(Task):
         norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
                     
         # Plot the quiver with normalized vectors and colored by magnitude
-        axes.quiver(Xs.T, Ys.T, U_norm.T, V_norm.T, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
+        axes.quiver(Xs, Ys, U_norm.T, V_norm.T, M, scale=0.1, scale_units='xy', angles='uv',  norm=norm)
+        
     def clear_quivers(self):
         if self.quivers is not None:
             self._quivers.remove()

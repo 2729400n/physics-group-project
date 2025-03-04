@@ -30,20 +30,7 @@ class Task6(Task):
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
         self.axes.set_title('Electrostatic Potential')
 
-    def _show_Efield(self):
-        """Display the electric field as quivers."""
-        if self.Efield is None:
-            raise ValueError('Electric field not computed yet.')
-        u_v = self.Efield  # Do not multiply by 25, use as is.
-        axes = self.axes
-        Xs, Ys = self.Xs, self.Ys
-        
-        # Remove old quivers if they exist
-        if self._quivers:
-            self._quivers.remove()
 
-        # Adjust the quiver scale so arrow heads are visible
-        self._quivers = axes.quiver(Xs[:-1:5,:-1:5], Ys[:-1:5,:-1:5], u_v[::5, ::5, 0], u_v[::5, ::5, 1], color='b', scale=1, scale_units='xy')
 
     def __call__(self, *args, **kwargs):
         pass
