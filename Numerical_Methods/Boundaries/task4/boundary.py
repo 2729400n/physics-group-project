@@ -34,6 +34,7 @@ class GeometryFactory(typing.Callable):
             if self.center:
                 cy = (grid.shape[0]/2)*self.dy
                 cx = (grid.shape[1]/2)*self.dx
+                
             else:
                 cy = self.cy
                 cx = self.cx
@@ -73,9 +74,17 @@ class GeometryFactory(typing.Callable):
         return grid
     
     def shift_circle(self,cirlce_index:int=0,cx:float=0.0,cy:float=0.0):
+        
         self.circles[cirlce_index] = geometry.circle_bool(cx, cy, self.radius, 1.0, 1.0, fill=True, clear=False,Grid=tuple(self.circles[cirlce_index].shape))
     
-    def shift_circle_displace(self,cirlce_index:int=0,d_x:float=0.0,d_y:float=0.0):
-        self.circles[cirlce_index] = geometry.circle_bool(self.cx+d_x, self.cy+d_y, self.radius, 1.0, 1.0, fill=True, clear=False,Grid=tuple(self.circles[cirlce_index].shape))
+    def shift_circle_displace(self,cirlce_index:int=0,d_x:float=0.0,d_y:float=0.0,oldcy=0.0,oldcx:float=0.0):
+        if self.center:
+                cy = (cirlce_index[cirlce_index].shape[0]/2)*self.dy
+                cx = (cirlce_index[cirlce_index].shape[1]/2)*self.dx
+                
+        else:
+            cy = self.cy
+            cx = self.cx
+        self.circles[cirlce_index] = geometry.circle_bool(cy+d_x, cx+d_y, self.radius, 1.0, 1.0, fill=True, clear=False,Grid=tuple(self.circles[cirlce_index].shape))
 
 
