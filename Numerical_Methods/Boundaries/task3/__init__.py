@@ -15,7 +15,7 @@ class Task3(Task):
             The class defines the standard task interface methods.
     '''
     
-    name = "HighSpeed "
+    name = "HighSpeed"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__(axes=axes, *args, **kwargs)
@@ -23,6 +23,7 @@ class Task3(Task):
         self._quivers = None
         self._cbar = None
         self.grid = None
+        self.exposed_methods+=[self.reset]
 
     def setup(self, x1: float, y1: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,pad_w: int = 30, pad_h: int = 30, gap: int = 40,
 
@@ -51,7 +52,8 @@ class Task3(Task):
         axes = self.axes
         self._Image = axes.imshow(grid, )
         # self._Image.set_clim(vmin=np.min(0), vmax=np.max(self.grid))  # Set color limits
-        self.cbar = self.figure.colorbar(self._Image,None,None)
+        if self.cbar is  None:
+            self.cbar = self.figure.colorbar(self._Image,None,None)
         axes.set_title('Electrostatic Potential')
 
         # Update the figure canvas to reflect changes
@@ -82,15 +84,15 @@ class Task3(Task):
         '''Solve the Laplace equation and update the grid and electric field.'''
         Xs, Ys, self.grid = laplace_ode_solver_continue(self.grid, self.boundaryCondition,max_iterations=maxruns,wrap=True,wrap_direction='x')
         
-        # Remove the previous colorbar and reset it
-        if self._cbar is not None:
-            try:
-                self._cbar.remove()
-            except:
-                pass
 
         self.axes.imshow(self.grid, )
-        self._cbar = self.figure.colorbar(self._Image,None,None)
+        
+        if self._cbar is None:
+            try:
+                self._cbar = self.figure.colorbar(self._Image,None,None)
+            except:
+                pass
+        
         self.axes.set_title('Electrostatic Potential')
 
         self.figure.canvas.draw()

@@ -49,10 +49,13 @@ class GeometryFactory(typing.Callable):
         else:
             for i in self.circles:
                 grid[i]=0
-                
+        if self.half_plate_sep:
+            grid[-1,:] =-self.V
+            grid[0,:] =-self.V
+            return grid
         midy=(grid.shape[0]/2)*self.dy
         # midx=(grid.shape[1]/2)*self.dx
-        eachsep = (self.plate_seperation/2)*self.dy
+        eachsep = (self.plate_seperation/2)
         topPlate=midy+eachsep
         bottomPlate=midy-eachsep
         # print(eachsep)
@@ -65,7 +68,7 @@ class GeometryFactory(typing.Callable):
         if bottomPlate<0:
             bottomPlate=(bottomPlate%grid.shape[0])
         
-        grid[topPlate,:] =-self.V
+        grid[(topPlate),:] =-self.V
         grid[bottomPlate,:] =-self.V
         return grid
     

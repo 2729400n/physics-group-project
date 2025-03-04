@@ -3,16 +3,18 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.quiver import Quiver
 import numpy as np
 from ...Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,laplace_ode_solver_continue
+from ...Solvers.equations.electrostatics import energy,force,find_capacitance_per_length
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from ..task import Task
 import io
-
+from ... import Solvers
+import matplotlib.colors as mcolors
 class Task4(Task):
     name="MWPC"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
         super().__init__()
-        self.exposed_methods+=[self.move_circle_by,self.move_circle_to]
+        self.exposed_methods+=[self.move_circle_by,self.move_circle_to,self.clear_quivers]
         
 
     def setup(self, x1: float, y1: float, a: float, cx: float,
@@ -25,6 +27,12 @@ class Task4(Task):
         Ys=self.Ys = np.arange(y0, y1, dy)
         self.dx=dx
         self.dy=dy
+        self.cy=cy
+        self.cx=cx
+        self.isCentered = centre
+        if centre:
+            self.cx=(x1*dx)/2
+            self.cy=(y1*dy)/2
         grid = np.zeros(shape=(Ys.shape[0], Xs.shape[0]), dtype=np.float64)
         self.boundaryCondition=Boundary(radius=a,cx=cx,cy=cy,V=v,seperation=s,center=centre,plate_seperation=l,NNCount=nncount,half_plate_sep=max_spacing,dx=dx,dy=dy)
         self.grid =grid=self.boundaryCondition(Grid=grid)
@@ -35,14 +43,44 @@ class Task4(Task):
             self.cbar = self.figure.colorbar(self.Image)
         
     def _show_Efield(self):
-        self._find_Efield()
-        u_v = self.Efield
+        '''Display the electric field as quivers.'''
+        u_v=self.Efield = Solvers.findUandV(grid=self.grid)
         axes = self.axes
-        Ys,Xs = np.meshgrid(self.Ys,self.Xs)
-        axes.quiver(Xs[::5,::5], Ys[::5,::5], u_v[::5,::5,0], u_v[::5,::5,1], color='b', scale=0.1, scale_units='xy') # Adjust scale and color
+        Ys,Xs = np.meshgrid(self.Ys, self.Xs)
+        
+        # Remove previous quivers if they exist
+        if self._quivers:
+            self._quivers.remove()
+            self._quivers=None
 
+        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[::5, ::5, 0], u_v[::5, ::5, 1])
+            
+        # Compute the magnitude of the vectors
+        M = np.sqrt(U**2 + V**2)
+
+
+        # Normalize the vectors (avoid division by zero)
+        U_norm = U / (M + np.spacing(U))
+        V_norm = V / (M + np.spacing(V))
+
+        # Create a color map based on the magnitudes
+        norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
+                    
+        # Plot the quiver with normalized vectors and colored by magnitude
+        axes.quiver(Xs.T, Ys.T, U_norm.T, V_norm.T, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
+    def clear_quivers(self):
+        if self.quivers is not None:
+            self._quivers.remove()
+            self._quivers=None
+        return
     def find_capacitance(self):
-        pass
+        circles=self.boundaryCondition.circles
+        for circle in circles:
+            widths = [(True if np.array(circles[i,:],copy=False).any() else False) for i in range(circle.shape[0])]
+            grid_slice=self.grid[:,widths]
+            disstances=(np.abs(i-self.boundaryCondition.cy) for i in np.arange(0,self.boundaryCondition.cy,self.dy))
+            
+        
         
     def __call__(self, *args, **kwargs):
         pass
@@ -79,9 +117,19 @@ class Task4(Task):
     
     def move_circle_to(self,cricle_index:int=0,cx:float=0.0,cy:float=0.0):
         self.boundaryCondition.shift_circle(cirlce_index=cricle_index,cx=cx,cy=cy)
+        self.grid=self.boundaryCondition(self.grid)
+        for j in [i for i in self.axes.images]:
+            j.remove()
+            
+        self.axes.imshow(self.grid)
     
     def move_circle_by(self,cricle_index:int,cx:float,cy:float):
-        self.boundaryCondition.shift_circle_displace(cirlce_index=cricle_index,cx=cx,cy=cy)
+        self.boundaryCondition.shift_circle_displace(cirlce_index=cricle_index,d_x=cx,d_y=cy)
+        self.grid=self.boundaryCondition(self.grid)
+        for j in [i for i in self.axes.images]:
+            j.remove()
+            
+        self.axes.imshow(self.grid)
     
     def _cleanup(self):
         '''Remove all artists from the axes and reset class attributes.'''

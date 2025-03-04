@@ -12,6 +12,9 @@ def find_capacitance_per_length(potential_field:np.ndarray,charge_enclosed:float
 def energy(potential_field:np.ndarray=None,E_field:np.ndarray=None, length:float=1.0):
     E = np.mean(E_field)
     qs = E_field*phys_const.epsilon_0
-    rho = E * 8.854*10**(-12)
+    rho = E * phys_const.epsilon_0
     cap_per_length = find_capacitance_per_length(potential_field=potential_field,length=length,charge_enclosed=rho)
     return 0.5*cap_per_length*potential_field**2
+
+def force(energy,distance):
+    return energy/distance

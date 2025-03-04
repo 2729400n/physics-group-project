@@ -11,7 +11,7 @@ from ..Solvers import laplace_ode_solver, findUandV,laplace_ode_solver_step,lapl
 from ..utils.naming import slugify
 from time import strftime
 tasks:'set[Task]' = set()
-
+import matplotlib.colors as mcolors
     
 # Our task Class
 class Task(typing.Protocol):
@@ -44,7 +44,7 @@ class Task(typing.Protocol):
         self.grid = None
         self._cbar: Colorbar = None
         self._quivers: Quiver = None
-        self.exposed_methods = [self.setup, self.run, self._show_Efield,self.adjust_plot]
+        self.exposed_methods = [self.setup, self.run, self._show_Efield,self.adjust_plot,self._cleanup]
         self.savables: 'dict[str,typing.Callable[[],tuple[str,bytes]]]' = {'Grid': self.save_grid, 'Figure': self.save_figure,'ALL_DATA':self.save_all_numerical}
         self.Efield = None
         self.all_data =None
@@ -73,7 +73,32 @@ class Task(typing.Protocol):
         if self._quivers:
             self._quivers.remove()
     
-    def _show_Efield(self)->None:...
+    def _show_Efield(self):
+        '''Display the electric field as quivers.'''
+        u_v=self.Efield = Solvers.findUandV(grid=self.grid)
+        axes = self.axes
+        Ys,Xs = np.meshgrid(self.Ys, self.Xs)
+        
+        # Remove previous quivers if they exist
+        if self._quivers:
+            self._quivers.remove()
+            self._quivers=None
+
+        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[::5, ::5, 0], u_v[::5, ::5, 1])
+            
+        # Compute the magnitude of the vectors
+        M = np.sqrt(U**2 + V**2)
+
+
+        # Normalize the vectors (avoid division by zero)
+        U_norm = U / (M + np.spacing(U))
+        V_norm = V / (M + np.spacing(V))
+
+        # Create a color map based on the magnitudes
+        norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
+                    
+        # Plot the quiver with normalized vectors and colored by magnitude
+        axes.quiver(Xs.T, Ys.T, U_norm.T, V_norm.T, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
 
     def run(self) -> None: ...
 

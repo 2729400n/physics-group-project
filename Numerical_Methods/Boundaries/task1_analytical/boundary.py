@@ -80,11 +80,12 @@ class GeometryFactory(typing.Callable):
         theta = np.zeros_like(pot)
 
         pot[mask_grid] = ((V * np.log(r1) - V * np.log(r_grid)) / (np.log(r1) - np.log(r2)))[mask_grid]
-        E_r[mask_grid] = (V / np.log(r2 / r1) * r_grid)[mask_grid]
+        E_r[mask_grid] = (V / (np.log(r2 / r1) * r_grid))[mask_grid]
+
         
         
         theta[mask_grid] = np.arctan2(y_grid-cy, x_grid-cx)[mask_grid]
-        x_y= np.array((E_r * [np.cos(theta),np.sin(theta)])[:,mask_grid]) # x-component of electric field
+        x_y= np.array((E_r * np.abs([np.cos(theta),np.sin(theta)]))[:,mask_grid]) # x-component of electric field
         u_v[mask_grid]=x_y.T
         pot=self(pot)
         return pot,u_v
