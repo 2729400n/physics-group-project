@@ -8,18 +8,18 @@ from matplotlib.backend_bases import (
 )
 import tkinter as tk
 from ...Solvers import errors
-
+from .. import py_iface
 import numpy as np
 import tkinter.messagebox as msgbox
 import tkinter.simpledialog as simple_diag
 
 from threading import Thread
-from queue import Full, SimpleQueue
+from queue import Full, SimpleQueue,Empty
 from tkinter.filedialog import (
     asksaveasfilename,
 )
 from ...utils.nfile_io.extensions import numpy_io
-
+import matplotlib as mplib
 # for semmantic porpuses
 
 
@@ -139,26 +139,33 @@ class InspectFrame(Frame):
         mainframe = self.mainframe = Frame(self)
         plot_frame = self.plot_frame = Frame(mainframe)
         button_frame = self.button_frame = Frame(mainframe)
+        
+        mainframe.columnconfigure(1,weight=2)
+        mainframe.columnconfigure(0,weight=1)
+        
+        mainframe.rowconfigure(0,weight=1)
 
         self.propagate(True)
         mainframe.propagate(True)
         plot_frame.propagate(True)
         button_frame.propagate(True)
 
-        plot_frame.columnconfigure(0, weight=1)
-        plot_frame.rowconfigure(0, weight=1)
-        plot_frame.columnconfigure(0, weight=1)
-        plot_frame.rowconfigure(1, weight=1)
+        # plot_frame.columnconfigure(0, weight=1)
+        # plot_frame.rowconfigure(0, weight=1)
+        # plot_frame.columnconfigure(0, weight=1)
+        # plot_frame.rowconfigure(1, weight=1)
         # Plot data
-        mainframe.columnconfigure(0, weight=1)
+        mainframe.columnconfigure(0, weight=3)
         mainframe.rowconfigure(0, weight=1)
-        mainframe.columnconfigure(0, weight=1)
+        mainframe.columnconfigure(1, weight=1)
         mainframe.rowconfigure(1, weight=1)
 
         # Embed figure into Tkinter canvas
-        canvas = self.canvas = FigureCanvasTkAgg(fig, master=plot_frame)
+        canvas=self._display = self.canvas = FigureCanvasTkAgg(fig, master=plot_frame)
         canvas_widget = self.canvas = canvas.get_tk_widget()
-        canvas_widget.grid(row=0, column=0, sticky="nsew")
+        canvas_widget.pack(fill=tk.BOTH,expand=True,pady=2,anchor=tk.SE,side=tk.BOTTOM)
+        # plot_frame.rowconfigure(0,weight=1)
+        # plot_frame.columnconfigure(0,weight=1)
         canvas_widget.configure(width=640, height=480)
         canvas.draw()
         # Add Navigation Toolbar
@@ -167,7 +174,7 @@ class InspectFrame(Frame):
         )
 
         toolbar.update()
-        toolbar.grid(row=1, column=0, sticky="ew")
+        toolbar.pack(fill=tk.NONE,expand=False,pady=2,anchor=tk.NE,after=self._display.get_tk_widget(),side=tk.BOTTOM)
 
         toolbar.bind("<<Zoom-End>>", self.select_Smallgrid, "+")
         toolbar.bind("<<Pan-End>>", self.select_Smallgrid, "+")
@@ -186,14 +193,19 @@ class InspectFrame(Frame):
         self.calculateLaplacian = Button(
             button_frame, text="Calulate Laplacian", command=self.findLaplacian
         )
-
+        
+        
         self.calculateLaplacian.pack()
 
-        button_frame.grid(column=0, row=0)
-        plot_frame.grid(column=1, row=0)
+        button_frame.grid(column=0, row=0,sticky=tk.NSEW)
+        # plot_frame.rowconfigure(1,weight=0)
+        plot_frame.grid(column=1, row=0,sticky=tk.NSEW)
 
         mainframe.pack(anchor=tk.NW, side=tk.TOP, fill=tk.BOTH, expand=True)
-
+        self.mplibFrame = tk.LabelFrame(button_frame,text="Matplotlib Config")
+        py_iface.makeFunctionCallable(
+                self.changeMplib, self.mplibFrame, classType=True, instance=self)
+        self.mplibFrame.pack()
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -203,17 +215,86 @@ class InspectFrame(Frame):
         img=ax.imshow(Grid_obj)
         fig.colorbar(img)
         self.after(500, self.checkQueue)
+        self.after(150,self.update_canvas)
+        
+    def update_canvas(self):
+        """Real-time canvas update every 100ms."""
+        self._display.figure = self.fig
+        self._display.draw()
 
+        self.after(3000, self.update_canvas)  # Schedule next update
+        
+    def changeMplib(self, figsize_w: float=12, figsize_h:float = 12, fontsize: float = 12,FigTitle:str="",XLabel:str='',YLabel:str='',axesTitle:str='',
+                    FigTitlefontSize:float=16,axesTitlefontSize:float=16, ylabelfontsize:float=16,xlabelFontSize:float=16,tight_layout:bool=False,use_tex:bool=False,dpi:int=64):
+        """Adjust figure size, font size, and axis limits."""
+        print('Called')
+        
+        if self.fig is None:
+            raise Exception('Cannot save to empty Figure')
+        if self.ax is None:
+            self.ax = self.fig.axes[0]
+        if self.ax is None:
+            raise Exception('Cannot save to empty Figure')
+        print('Fig Called')
+        self.fig.draw_without_rendering()
+        usetx= mplib.rcParams.get('text.usetex',None)
+        mplib.rc('text',usetex=use_tex)
+        if (figsize_w is not None) and (figsize_h is not None):
+            self.fig.set_dpi(dpi)
+            self.fig.set_size_inches(figsize_w, figsize_h, forward=False,)
+        
+        for label in self.ax.get_xticklabels() + self.ax.get_yticklabels():
+            label.set_fontsize(fontsize)
+            
+        ylabel =self.ax.set_ylabel(YLabel)
+        xlabel=self.ax.set_xlabel(XLabel)
+        #
+        
+        ylabel.set_fontsize(ylabelfontsize)
+        xlabel.set_fontsize(ylabelfontsize)
+        #
+        #
+        self.ax.set_title(axesTitle)
+        self.ax.title.set_fontsize(axesTitlefontSize)
+        #
+        #
+        title=self.fig.suptitle(FigTitle,)
+        title.set_fontsize(FigTitlefontSize)
+        
+        self.fig.draw_without_rendering()
+        if (figsize_w is not None) and (figsize_h is not None):
+            self.fig.set_size_inches(figsize_w, figsize_h, forward=True)
+        
+        if tight_layout:
+            self.fig.tight_layout()
+        if usetx  is None:
+            mplib.rcParams.pop('text.usetex')
+        else:
+            mplib.rc('text',usetex=usetx)
+            
     def checkQueue(self):
         # print('checkQueue')
-        if self.jobRunning:
-            return
+        # if self.jobRunning:
+        #     return
+        # print
+        job=None
         try:
             job = self.jobqueue.get_nowait()
-            job()
+            
             # print('done')
-        except Exception:
+        except Empty as e:
             pass
+        except Exception as exp:
+            print(e)
+        try:
+            if job is not None: 
+                job()
+            else:
+                # print('No Job')
+                pass
+        except Exception as e:
+            print("What is up")
+            print(e)
         self.after(500, self.checkQueue)
 
     def select_Smallgrid(self, evt):
@@ -239,18 +320,20 @@ class InspectFrame(Frame):
         # print(f"Extracted zoomed array:\n{zoomed_data}")
 
     def showAndOfferSavePolyNomial(self, message, **data):
+        print('Message')
         def __inner_func() -> None:
             nonlocal message, data
+            print('Hello')
             dsimple = simple_diag.SimpleDialog(
                 title="Polynomial Interpolation",
-                text=message,
+                text='\n'.join([k[:35] for k in str(message).splitlines(keepends=False)[:4]]),
                 buttons=["OK"],
                 master=self,
                 cancel=0,
                 default=0,
             )
             dsimple.go()
-            dsimple.wm_delete_window()
+            # dsimple.wm_delete_window()
 
             shouldSave = simple_diag.SimpleDialog(
                 master=self,
@@ -262,21 +345,26 @@ class InspectFrame(Frame):
             )
 
             opt = shouldSave.go()
-            dsimple.wm_delete_window()
+            # shouldSave.wm_delete_window()
             if opt == 0:
                 try:
                     fname = asksaveasfilename(
-                        parent=self, defaultextension=".polynomial"
+                        parent=self, defaultextension=".polynomial",
+                        filetypes=[("Python",'*.polynomail'),("Python Compiled",'*.pyc'),("ALL","*.*")],
+                        initialfile='save'
                     )
                     if fname is None:
-                        raise Exception("No Name Given")
-                    numpy_io.saveArrays(fname, karray=data)
-                except Exception:
+                        return
+                    print(data)
+                    numpy_io.saveArrays(fname, karray=data,pickle=True)
+                except Exception as e:
                     opt = simple_diag.SimpleDialog(
-                        master=self, text="Failed to save Polynomial ", title="Error"
+                        master=self, text="Failed to save Polynomial ", title="Error",cancel=0,default=0,
                     )
+                    opt.go()
+                    raise e
             return
-
+        print('Message 2')
         return __inner_func
 
     def callInterpolate(self):
@@ -314,6 +402,8 @@ class InspectFrame(Frame):
                     break
                 except Full:
                     pass
+                except Exception:
+                    break
         finally:
             self.jobRunning = False
             self.job = None
@@ -338,12 +428,7 @@ class InspectFrame(Frame):
 
             message = f"c={c}\nxPoly={xopt}\n\
             Ypoly={yopt}\nXYPoly={XYOpt}\n{region_text}"
-
-            # Schedule the message box on the main thread
-            while True:
-                try:
-                    self.jobqueue.put_nowait(
-                        self.showAndOfferSavePolyNomial(
+            resp =self.showAndOfferSavePolyNomial(
                             message,
                             xopt=xopt,
                             yopt=yopt,
@@ -351,11 +436,19 @@ class InspectFrame(Frame):
                             Xs=self.zoomedXs,
                             Ys=self.zoomedYs,
                         )
+            # Schedule the message box on the main thread
+            while True:
+                try:
+                    self.jobqueue.put_nowait(
+                        resp
                     )
                     break
                 except Full:
                     pass
-
+                except Exception:
+                    break
+            self.jobRunning = False
+            self.job = None
         finally:
             self.jobRunning = False
             self.job = None
@@ -394,11 +487,7 @@ class InspectFrame(Frame):
             message = (
                 f"c={c}\nxPoly={xopt}\nYpoly={yopt}\nXYPoly={XYOpt}\n{region_text}"
             )
-            # Schedule the message box on the main thread
-            while True:
-                try:
-                    self.jobqueue.put_nowait(
-                        self.showAndOfferSavePolyNomial(
+            retmsg =self.showAndOfferSavePolyNomial(
                             message,
                             xopt=xopt,
                             yopt=yopt,
@@ -406,10 +495,22 @@ class InspectFrame(Frame):
                             Xs=self.Xs,
                             Ys=self.Ys,
                         )
+            # Schedule the message box on the main thread
+            print(retmsg)
+            while True:
+                
+                try:
+                    
+                    self.jobqueue.put_nowait(
+                        retmsg
                     )
+                    
                     break
                 except Full:
-                    pass
+                    print('Full')
+                except Exception as e:
+                    print('Error')
+                    raise e
         finally:
             self.jobRunning = False
             self.job = None

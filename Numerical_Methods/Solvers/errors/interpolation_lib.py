@@ -435,7 +435,6 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
     wrapper.__signature__ = inspect.Signature(params_list, return_annotation=np.float64)
     
     # Now call curve_fit with our wrapper
-    print('Solving for XY')
     XYoptimal, XYcov = optimist.curve_fit(wrapper, points, Grid.flatten(),p0=guess.flatten(), maxfev=xymaxfev)
     # XYoptimal[np.abs(XYoptimal)<1e-12]=0.0
     Unknown = 0.5#np.spacing(np.float64(2**(16)-1))*1e2
@@ -536,7 +535,7 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
         xOptimal=xOpti
         yOptimal=yOpti
     print(XYOptimal)
-    print('done')
+    # print('XYCov',XYcov)
     if savefunc:
         return c,xOptimal,yOptimal,XYoptimal,(XPolyNomial,YPolyNomial,XYPolyNomial)
     return xOptimal,yOptimal,XYoptimal
@@ -544,15 +543,15 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
 if __name__ == '__main__':
     def PolYproduct(x, y):
         # Example polynomial: 2x^2 + 2x + 3 (ignores y for demonstration)
-        return (2 * (x**2) + 2* (x) +1. +5*x**9)*(2)
-    n_ = 45
-    m_ = 45
+        return (2 * (x**2) + 2 * (x) + 4.7+8*x**3+4*x**5)*(y**2+2)
+    n_ = 10
+    m_ = 10
     Ygrid, Xgrid = np.mgrid[:m_, :n_]
-#     print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
+    print("Xgrid:\n", Xgrid, "\nYgrid:\n", Ygrid)
     input("Press Enter to continue...")
     
     grid = PolYproduct(Xgrid, Ygrid)
-#     print("Grid:\n", grid)
+    print("Grid:\n", grid)
     input('Ready ?')
     
     c,xopt, yopt, xyopt,(XFunc,YFunc,XYFunc) = InterpolateGrid_fastest(grid, 0, 0, n_ - 1, m_ - 1,savefunc=True)
@@ -562,11 +561,11 @@ if __name__ == '__main__':
     
     
     
-#     print("xopt:", xopt)
-#     print("yopt:", yopt)
-#     print("xyopt:", xyopt)
+    print("xopt:", xopt)
+    print("yopt:", yopt)
+    print("xyopt:", xyopt)
     input('...')
-    err = np.abs(grid-XYFunc(points,xopt,yopt,*xyopt).reshape(m_,n_))
+    err = grid-XYFunc(points,xopt,yopt,*xyopt).reshape(m_,n_)
     plt.imshow(err)
     plt.colorbar()
     plt.show(block=True)

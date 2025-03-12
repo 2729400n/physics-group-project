@@ -11,6 +11,8 @@ from tkinter import simpledialog as simp_diag
 import pathlib
 import time
 import tkinter.filedialog as fdiag
+
+from ..extended_widgets import InspectFrame
 from ...utils.nfile_io import walkDirectory
 from ...utils.nfile_io.extensions import numpy_io
 
@@ -431,6 +433,7 @@ class CompareScene(ttk.Frame):
         self.cursel.clear()
         self.first_file = None
         self.second_file = None
+        self.currGrid=None
         self.value_text.set("Select Some files to compare them!")
 
     def hide_comparison_buttons(self):
@@ -733,10 +736,11 @@ class CompareScene(ttk.Frame):
             self.treeFrame, text="Error Finder", command=self._error_finder
         )
 
-        self.reloadButton.pack(fill=tk.X, padx=5, pady=5)
-        self.newDirectoryButton.pack(fill=tk.X, padx=5, pady=5)
-        self.chooseDataButton.pack(fill=tk.X, padx=5, pady=5)
-        self.clearFiles.pack(fill=tk.X, padx=5, pady=5)
+        self.reloadButton.pack(fill=tk.X, padx=5, pady=1)
+        self.newDirectoryButton.pack(fill=tk.X, padx=5, pady=1)
+        self.chooseDataButton.pack(fill=tk.X, padx=5, pady=1)
+        self.clearFiles.pack(fill=tk.X, padx=5, pady=1)
+        self.errorFinderButton.pack(fill=tk.X, padx=5, pady=1)
 
         self._load_tree_view()
 
@@ -766,7 +770,16 @@ class CompareScene(ttk.Frame):
         """Handle resizing of the plot area."""
         self.canvas.get_tk_widget().config(width=event.width,
                                            height=event.height)
-
+    def _error_finder(self):
+        if self.currGrid is None:
+            msgbox.showerror(message="Make sure you have selected an insightable file.")
+            return
+        mroot = tk.Toplevel(self)
+        mroot.wm_title('Insight Finder')
+        mroot.propagate(True)
+        iframe = InspectFrame(mroot, self.currGrid, self.dx, self.dy, "Field Data", "Width", "Height", dpi=80)
+        iframe.pack(expand=True, fill=tk.BOTH, side=tk.TOP, anchor=tk.NW)
+        
     def _pick_directory(self):
         """Open a file dialog to select a directory."""
         directory = fdiag.askdirectory()
@@ -774,9 +787,6 @@ class CompareScene(ttk.Frame):
             self._clear_selection()
             self.results_dir = pathlib.Path(directory)
 
-    def _error_finder(self):
-        """Method for error finding or handling."""
-        msgbox.showinfo("Error Finder", "This is a placeholder function.")
 
 
 scene = CompareScene
