@@ -16,7 +16,7 @@ import tkinter.simpledialog as simple_diag
 from threading import Thread
 from queue import Full, SimpleQueue,Empty
 from tkinter.filedialog import (
-    asksaveasfilename,
+    asksaveasfilename,asksaveasfile
 )
 from ...utils.nfile_io.extensions import numpy_io
 import matplotlib as mplib
@@ -350,11 +350,13 @@ class InspectFrame(Frame):
                 try:
                     fname = asksaveasfilename(
                         parent=self, defaultextension=".polynomial",
-                        filetypes=[("Python",'*.polynomail'),("Python Compiled",'*.pyc'),("ALL","*.*")],
+                        filetypes=[("Python",'*.polynomail'),("Python Compiled",'*.pyc'),("Numpy FIle",['*.npz.gz','*.npz','*.npy']),("ALL","*.*")],
                         initialfile='save'
                     )
                     if fname is None:
                         return
+                    if  str(fname) == '.':
+                        pass
                     print(data)
                     numpy_io.saveArrays(fname, karray=data,pickle=True)
                 except Exception as e:
@@ -362,6 +364,7 @@ class InspectFrame(Frame):
                         master=self, text="Failed to save Polynomial ", title="Error",cancel=0,default=0,
                     )
                     opt.go()
+                    
                     raise e
             return
         print('Message 2')
