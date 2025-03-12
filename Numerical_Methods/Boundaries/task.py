@@ -13,6 +13,7 @@ from time import strftime
 tasks:'set[Task]' = set()
 import matplotlib.colors as mcolors
 from .. import Solvers
+import matplotlib as mplib
     
 # Our task Class
 class Task(typing.Protocol):
@@ -246,11 +247,13 @@ class Task(typing.Protocol):
         
     # New method to adjust figure size, font size, and axis limits
     def adjust_plot(self, figsize_w: float=12, figsize_h:float = 12, fontsize: float = 12,FigTitle:str="",XLabel:str='',YLabel:str='',axesTitle:str='',
-                    FigTitlefontSize:float=16,axesTitlefontSize:float=16, ylabelfontsize:float=16,xlabelFontSize:float=16,tight_layout:bool=False,dpi:int=64):
+                    FigTitlefontSize:float=16,axesTitlefontSize:float=16, ylabelfontsize:float=16,xlabelFontSize:float=16,tight_layout:bool=False,use_tex:bool=False,dpi:int=64):
         """Adjust figure size, font size, and axis limits."""
         if self.figure is None or self.axes is None:
             raise Exception('Cannot save to empty Figure')
         self.figure.draw_without_rendering()
+        usetx= mplib.rcParams.get('text.usetex',None)
+        mplib.rc('text',usetex=use_tex)
         if (figsize_w is not None) and (figsize_h is not None):
             self.figure.set_dpi(dpi)
             self.figure.set_size_inches(figsize_w, figsize_h, forward=False,)
@@ -279,6 +282,10 @@ class Task(typing.Protocol):
         
         if tight_layout:
             self.figure.tight_layout()
+        if usetx  is None:
+            mplib.rcParams.pop('text.usetex')
+        else:
+            mplib.rc('text',usetex=usetx)
     
     
     def save_grid(self):
@@ -313,6 +320,8 @@ class Task(typing.Protocol):
     
     def save_all_numerical(self):
         '''Save the grid to a file.'''
+        if self.all_data is None:
+            return
         for i in self.all_data:
             if i is None:
                 raise 'Cannot save all data if you havent generated it yet'

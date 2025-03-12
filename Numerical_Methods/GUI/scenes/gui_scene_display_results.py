@@ -238,10 +238,10 @@ class ResultsScene(ttk.Frame):
         self.chooseDataButton = ttk.Button(self.treeFrame, text='Choose Data', command=self._choose_data)
         self.insightButton = ttk.Button(self.treeFrame, text='Get Insight', command=self._error_finder)
         
-        self.insightButton.pack()
-        self.reloadButton.pack()
-        self.newDirectoryButton.pack()
-        self.chooseDataButton.pack()
+        self.insightButton.pack(fill=tk.X,padx=2)
+        self.reloadButton.pack(fill=tk.X,padx=2)
+        self.newDirectoryButton.pack(fill=tk.X,padx=2)
+        self.chooseDataButton.pack(fill=tk.X,padx=2)
         
         self._load_tree_view()
     

@@ -249,7 +249,7 @@ def laplace_ode_solver_continue(
         at_equilibrium = False
         if np.size(reldiff) > 0:
             max_diff = np.max(reldiff)
-            
+            print(max_diff)
             if max_diff <= rel_tol:
                 # print('rel_max_Diff',max_diff)
                 at_equilibrium = True
@@ -366,8 +366,9 @@ def laplace_ode_solver_step(
     
     at_equilibrium = False
     if np.size(reldiff) > 0:
-        max_diff = np.max(reldiff)
         
+        max_diff = np.max(reldiff)
+        print(max_diff)
         if max_diff <= rel_tol:
             # print('rel_max_Diff',max_diff)
             at_equilibrium = True

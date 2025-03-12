@@ -150,7 +150,8 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
     guess=np.full((m,n),np.spacing(0))
     
     try:
-        xOpti, xCov = optimist.curve_fit(XPolyNomial, Xs, Grid[0, :], )#maxfev=xmaxfev)
+        print(XPolyNomial, Xs, Grid[0, :],)
+        xOpti, xCov = optimist.curve_fit(XPolyNomial, Xs, Grid[0, :], ) # maxfev=xmaxfev)
         
         if  np.logical_or(np.abs(xOpti-1)<1e-12, np.logical_not(np.isfinite(xOpti))).all():
             raise RuntimeError('Not a good looking polynomial')
@@ -159,7 +160,6 @@ def InterpolateGrid_fastest(Grid: np.ndarray, x0, y0, x1, y1,
 #         print("X curve_fit failed:", e)
         xOpti = np.polyfit(Xs, Grid[0, :], n - 1)
 #     print('XOpti=', xOpti)
-    
     
     try:
         yOpti, yCov = optimist.curve_fit(YPolyNomial, Ys, Grid[:, 0].T, )#maxfev=ymaxfev)
