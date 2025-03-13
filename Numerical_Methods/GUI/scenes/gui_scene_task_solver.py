@@ -207,7 +207,9 @@ class TasksFrame(tk.Frame):
         if self.current_task is None:
             return
         
-        backup_old_store = {i:self.stores[i].get() for i in self.stores}
+        backup_old_store = {}
+        for i in self.stores:
+            backup_old_store.update({i:self.stores[i].get()})
         _to_clear = {i:(self._to_clear.get(i,0)+1) for i in self.stores}
         for i in _to_clear :
             if _to_clear.get(i,0)>=2:
