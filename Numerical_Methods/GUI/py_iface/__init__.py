@@ -215,7 +215,7 @@ def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
                     except:
                         # print('not int')
                         try:
-                            argz=np.float64(arg)
+                            argz=float(arg)
                         except:
                             # print('not float')
                             try:
