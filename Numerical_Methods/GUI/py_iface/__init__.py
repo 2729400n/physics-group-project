@@ -200,26 +200,30 @@ def callFunc(ev:'tk.Event[ttk.Button]',func:'function',*args, **kwargs):
             if  isinstance(kwargs[i],tk.Variable):
                 try:
                     if arg.strip() =='True':
-                        arg=True
+                        argz=True
                     elif arg.strip() =='False':
-                        arg=False
+                        argz=False
                     else:
                         raise ValueError()
 
                 except:
                     try:
-                        arg=int(arg)
+                        if  isinstance(kwargs[i],tk.DoubleVar):
+                            raise ValueError('Double')
+                        argz=int(arg)
+                        print(kwargs[i],argz,type(kwargs[i]))
                     except:
                         # print('not int')
                         try:
-                            arg=np.float64(arg)
+                            argz=np.float64(arg)
                         except:
                             # print('not float')
                             try:
-                                arg=str(arg).encode('utf-8').decode('unicode_escape')
+                                argz=str(arg).encode('utf-8').decode('unicode_escape')
                             except:
-                                arg=str(arg)
+                                argz=str(arg)
             # print('callFunc before Storing:',arg,type(arg))
+            arg=argz
             kwargs[i]=arg
     try:
         returnValue=func(**kwargs)
