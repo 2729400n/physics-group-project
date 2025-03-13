@@ -8,6 +8,7 @@ from matplotlib.backend_bases import (
 )
 import tkinter as tk
 from ...Solvers import errors
+from  ... import Solvers
 from .. import py_iface
 import numpy as np
 import tkinter.messagebox as msgbox
@@ -18,6 +19,8 @@ from queue import Full, SimpleQueue,Empty
 from tkinter.filedialog import (
     asksaveasfilename,asksaveasfile
 )
+import matplotlib.colors as mcolors
+import matplotlib as mplib
 from ...utils.nfile_io.extensions import numpy_io
 import matplotlib as mplib
 # for semmantic porpuses
@@ -194,8 +197,16 @@ class InspectFrame(Frame):
             button_frame, text="Calulate Laplacian", command=self.findLaplacian
         )
         
+        self.showEfieldAll = Button(
+            button_frame, text="Calulate Efield", command=self._show_Efield
+        )
         
+        # self.showEfieldSelect = Button(
+        #     button_frame, text="Calulate Select Efield", command=self._show_Efield_Select
+        # )
         self.calculateLaplacian.pack()
+        # self.showEfieldSelect.pack()
+        self.showEfieldAll.pack()
 
         button_frame.grid(column=0, row=0,sticky=tk.NSEW)
         # plot_frame.rowconfigure(1,weight=0)
@@ -621,6 +632,55 @@ class InspectFrame(Frame):
             ylabel="Y label",
         )
         errframe.pack()
+    
+    # TODO: IMplement New
+    def _show_Efield(self):
+        '''Display the electric field as quivers.'''
+        if self.Grid_obj is None:
+            raise  ValueError('Need to run Setup')
+        
+        grd = self.Grid_obj
+        smdiag = simple_diag.SimpleDialog(
+            self,
+            text="What would you like to take the laplacian of?",
+            buttons=["Full Area", "Zoomed Area"],
+            default=0,
+            cancel=0,
+            title="Laplacian",
+        )
+        opt = smdiag.go()
+        match opt:
+            case 1:
+                grd = self.zoomedArea
+
+            case _:
+                grd = self.Grid_obj
+                
+        u_v=self.Efield = Solvers.findUandV_ind1(grid=grd)
+        axes = self.ax
+        Ys,Xs = np.mgrid[:grd.shape[0], :grd.shape[1]]
+        Ys = Ys*self.dy
+        Xs = Xs *self.dx
+        # # Remove previous quivers if they exist
+        # if self._quivers:
+        #     self._quivers.remove()
+        #     self._quivers=None
+
+        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[1,::5, ::5], u_v[0,::5, ::5])
+            
+        # Compute the magnitude of the vectors
+        M = np.sqrt(U**2 + V**2)
+
+
+        # Normalize the vectors (avoid division by zero)
+        U_norm = U / (M + np.spacing(U))
+        V_norm = V / (M + np.spacing(V))
+
+        # Create a color map based on the magnitudes
+        norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
+                    
+        # Plot the quiver with normalized vectors and colored by magnitude
+        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='uv',  norm=norm)
 
 
 if __name__ == "__main__":
