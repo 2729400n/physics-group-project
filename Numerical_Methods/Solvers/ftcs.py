@@ -205,7 +205,7 @@ def laplace_ode_solver_continue(
     # print(Xs.shape[0], Ys.shape[0])
     
     i = 0
-    while True if ((max_iterations == -1) or (max_iterations  is None)) else (i < max_iterations):
+    while True if ((max_iterations < 0) or (max_iterations  is None)) else (i < max_iterations):
         ForwardHSpace_A2f = Frames[i % 2, 1:-1, 2:]
         BackwardHSpace_A2f = Frames[i % 2, 1:-1, :-2]
         ForwardVSpace_A2f = Frames[i % 2, 2:, 1:-1]
