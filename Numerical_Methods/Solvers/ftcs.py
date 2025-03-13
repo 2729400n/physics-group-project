@@ -193,7 +193,7 @@ def laplace_ode_solver_continue(
     Ys = np.arange(0, Grid.shape[0], 1)
     
     if stencil == 9:
-        diagamult = gamma / b
+        diagamult = gamma / (4.0*b)
         adjacentmult = (1 - gamma) / (2.0 * (a + 1))
     elif stencil == 5:
         diagamult = 0
