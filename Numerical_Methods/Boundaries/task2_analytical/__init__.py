@@ -26,7 +26,8 @@ class Task2_A(Task):
     def setup(self, height: float, width: float,V:float=1.0,r:float=35.0,cx:float=50,cy:float=100,dy:float=1.0,dx:float=1.0):
         self.dx=dx
         self.dy=dy
-        grid = np.zeros(shape=(height,width),dtype=np.float64)
+        self.Ys,self.Xs = np.mgrid[0:height:dy, :width:dx]
+        grid = np.zeros_like(self.Xs,dtype=np.float64)
         self.boundaryCondition=Boundary(val=V,r=r,cx=cx,cy=cy)
         self.grid =grid=self.boundaryCondition(Grid=grid,retoverlay=False)
         self.Xs, self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]

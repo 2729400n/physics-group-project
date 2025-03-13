@@ -25,10 +25,11 @@ class Task2(Task):
         self.dy=dy
         self.resdx=dx
         self.resdy=dy
-        grid = np.zeros(shape=(height,width),dtype=np.float64)
+        self.Ys,self.Xs = np.mgrid[0:height:dy, :width:dx]
+        grid = np.zeros_like(self.Xs,dtype=np.float64)
         self.boundaryCondition=Boundary(val=V,r=r,cx=cx,cy=cy)
         self.grid =grid=self.boundaryCondition(Grid=grid,retoverlay=False)
-        self.Xs, self.Ys = np.mgrid[:grid.shape[1], :grid.shape[0]]
+        
         self.resXs = self.Xs
         self.resYs = self.Ys
         self.resdx = dx
