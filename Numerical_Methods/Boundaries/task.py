@@ -27,15 +27,19 @@ class Task(typing.Protocol):
     def __init__(self, figure: 'Figure|Axes' = None, *args, **kwargs):
         self.figure = None
         self.axes = None
+        print(figure,figure.__class__)
         if isinstance(figure, Figure):
             self.figure: Figure = figure
             if figure.axes:
                 figure.clf()
             self.axes: Axes = figure.add_subplot(111)
+            print('fig')
         elif isinstance(figure, Axes):
             self.axes: Axes = figure
             self.figure: Figure = figure.figure
+            print('ax')
         elif figure is None:
+            print('fig')
             self.figure = Figure()
             self.axes = self.figure.add_subplot(111)
         else:
@@ -105,7 +109,7 @@ class Task(typing.Protocol):
         norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
                     
         # Plot the quiver with normalized vectors and colored by magnitude
-        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='uv',  norm=norm)
+        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
 
     def run(self) -> None: ...
 

@@ -11,7 +11,7 @@ import matplotlib.colors as mcolors
 class Task2_A(Task):
     name="EndtoEndLine Analytical"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__()
+        super().__init__(axes)
         self.Efield = None
         self.dx=1.0
         self.dy=1.0

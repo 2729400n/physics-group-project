@@ -13,7 +13,7 @@ class Task6(Task):
     name = "EndtoEndLine_9_Point"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__(axes=axes, *args, **kwargs)
+        super().__init__(axes, *args, **kwargs)
 
     def setup(self, height: int, width: int):
         """Setup the grid and boundary condition, display the initial potential."""

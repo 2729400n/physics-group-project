@@ -14,7 +14,7 @@ class Task5(Task):
     name = "Task5"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__()
+        super().__init__(axes)
         self.Image: 'AxesImage' = None
         self.grid = None
         self.cbar: 'Colorbar' = None

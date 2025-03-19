@@ -13,12 +13,12 @@ import matplotlib.colors as mcolors
 class Task4(Task):
     name="MWPC"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__()
+        super().__init__(axes)
         self.exposed_methods+=[self.move_circle_by,self.move_circle_to]
         
 
-    def setup(self, x1: float, y1: float, a: float, cx: float,
-              cy: float, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,l:float=1.0,s:float=1.0,
+    def setup(self, x1: float, y1: float, a: float, cx: float=0.0,
+              cy: float=0.0, v: float = 1.0, x0: float = 0.0, y0: float = 0.0,l:float=1.0,s:float=1.0,
               dy: float = 1.0, dx: float = 1.0,centre:bool=True,max_spacing:bool=False,nncount:int=1):
         x0, x1 = (x0, x1) if x0 <= x1 else (x1, x0)
         y0, y1 = (y0, y1) if y0 <= y1 else (y1, y0)

@@ -13,7 +13,7 @@ import matplotlib.colors as mcolors
 class Task2(Task):
     name="EndtoEndLine"
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__()
+        super().__init__(axes)
         self.dx=1.0
         self.dy=1.0
         self.resdx=1.0

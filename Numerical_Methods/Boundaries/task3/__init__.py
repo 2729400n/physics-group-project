@@ -18,7 +18,7 @@ class Task3(Task):
     name = "HighSpeed"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__(axes=axes, *args, **kwargs)
+        super().__init__(axes, *args, **kwargs)
         self._Image = None
         self._quivers = None
         self._cbar = None

@@ -9,6 +9,8 @@ from ..task import Task
 import io
 import matplotlib.colors as mcolors
 
+from Numerical_Methods import Solvers
+
 class Task1(Task):
     '''
         Task1:
@@ -19,7 +21,7 @@ class Task1(Task):
     name = "Anulus"
 
     def __init__(self, axes: 'Axes' = None, *args, **kwargs):
-        super().__init__(axes=axes, *args, **kwargs)
+        super().__init__(figure=axes, *args, **kwargs)
         self._Image = None
         self._quivers = None
         self._cbar = None
@@ -65,30 +67,60 @@ class Task1(Task):
         self._Image = self.axes.imshow(self.grid)
         # self._Image.set_clim(vmin=0, vmax=np.max(self.grid))  # Set color limits
 
-    def _show_Efield(self):
-        '''Display the electric field as quivers.'''
-        u_v=self.Efield = findUandV(grid=self.grid)
-        axes = self.axes
-        Xs, Ys = self.Xs, self.Ys
+    # def _show_Efield(self):
+    #     '''Display the electric field as quivers.'''
+    #     u_v=self.Efield = findUandV(grid=self.grid)
+    #     axes = self.axes
+    #     Xs, Ys = self.Xs, self.Ys
         
-        # Remove previous quivers if they exist
-        if self._quivers:
-            self._quivers.remove()
+    #     # Remove previous quivers if they exist
+    #     if self._quivers:
+    #         self._quivers.remove()
 
-        Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[::5, ::5, 0], u_v[::5, ::5, 1])
+    #     Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[::5, ::5, 0], u_v[::5, ::5, 1])
             
-        # Compute the magnitude of the vectors
-        M = np.sqrt(U**2 + V**2)
+    #     # Compute the magnitude of the vectors
+    #     M = np.sqrt(U**2 + V**2)
 
-        # Normalize the vectors (avoid division by zero)
-        U_norm = U / (M + 1e-10)
-        V_norm = V / (M + 1e-10)
+    #     # Normalize the vectors (avoid division by zero)
+    #     U_norm = U / (M + 1e-10)
+    #     V_norm = V / (M + 1e-10)
 
-        # Create a color map based on the magnitudes
-        norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
+    #     # Create a color map based on the magnitudes
+    #     norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
                     
-        # Plot the quiver with normalized vectors and colored by magnitude
-        axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
+    #     # Plot the quiver with normalized vectors and colored by magnitude
+    #     axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
+
+    # def _show_Efield(self):
+    #     '''Display the electric field as quivers.'''
+    #     if self.grid is None:
+    #         raise  ValueError('Need to run Setup')
+    #     u_v=self.Efield = Solvers.findUandV_ind1(grid=self.grid)
+    #     axes = self.axes
+    #     Ys,Xs = np.mgrid[:self.grid.shape[0], :self.grid.shape[1]]
+    #     Ys = Ys*self.dy
+    #     Xs = Xs *self.dx
+    #     # Remove previous quivers if they exist
+    #     if self._quivers:
+    #         self._quivers.remove()
+    #         self._quivers=None
+
+    #     Xs,Ys,U,V=(Xs[::5,::5], Ys[::5,::5], u_v[1,::5, ::5], u_v[0,::5, ::5])
+            
+    #     # Compute the magnitude of the vectors
+    #     M = np.sqrt(U**2 + V**2)
+
+
+    #     # Normalize the vectors (avoid division by zero)
+    #     U_norm = U / (M + np.spacing(U))
+    #     V_norm = V / (M + np.spacing(V))
+
+    #     # Create a color map based on the magnitudes
+    #     norm = mcolors.Normalize(vmin=M.min(), vmax=M.max())
+                    
+    #     # Plot the quiver with normalized vectors and colored by magnitude
+    #     axes.quiver(Xs, Ys, U_norm, V_norm, M, scale=0.1, scale_units='xy', angles='xy',  norm=norm)
 
     def run(self,maxruns:int=1000,stencil:int=5,gamma:float=0.0,abs_tol:float=1e-9,rel_tol:float=1e-6):
         '''Solve the Laplace equation and update the grid and electric field.'''
